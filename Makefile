@@ -71,8 +71,9 @@ all:            $(pro)
 
 
 $(pro):       $(OBJS)
-		$(LD)  $(LDFLAGS) $(OBJS) $(LIBS) -lMathMore $(GLIBS)  -o $(pro)
+		$(LD)  $(LDFLAGS) $(OBJS) $(LIBS) $(GLIBS)  -o $(pro)
 
+#$(pro):       $(OBJS) $(LD)  $(LDFLAGS) $(OBJS) $(LIBS) -lMathMore $(GLIBS)  -o $(pro)
 
 
 clean:

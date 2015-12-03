@@ -74,12 +74,16 @@ main(int argc, char **argv){
 
   int event;
   ushort   b_c[4][9][1024], tc[4]; 
+  ushort channel[36][1024];
+  ushort time[1024];
   int t[36864];
 
   tree->Branch("event", &event, "event/I");
   tree->Branch("tc",   tc, "tc[4]/s");
   tree->Branch("b_c",  b_c, "b_c[36864]/s"); //this is for 9 channels per group
   tree->Branch("t",  t, "t[36864]/I");
+  tree->Branch("channel", channel, "channel[36][1024]/s");
+  tree->Branch("time", time, "time[1024]/s");
   //  tree->Branch("b_c",  b_c, "b_c[32768]/s"); //this is for 8 channels
 
   uint   event_header;
@@ -93,6 +97,7 @@ main(int argc, char **argv){
 
 
   for( int i  = i; i < 36864; i++ ) t[i] = i;
+  for ( int i  = i; i < 1024; i++ ) time[i] = i;
 
   for( int eventn = 0; eventn < atoi(argv[2]); eventn++){
     // printf("---- loop  %5d\n", loop);
@@ -143,10 +148,12 @@ main(int argc, char **argv){
 		{ 
 		  //b_c[group][i][j] = (double)samples[i][j] - off_mean[group][i][(j+tcn)%1024];
 		  b_c[group][i][j] = (double)samples[i][j];
+		  channel[group*9 + i][j] = (double)samples[i][j];
 		}
 	      else
 		{
 		  b_c[group][i][j] = (double)samples[i][j];
+		  channel[group*9 + i][j] = (double)samples[i][j];
 		}
 	    }
 	}
