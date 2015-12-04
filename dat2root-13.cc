@@ -37,6 +37,7 @@
 
 
 int graphic_init();
+int FindMin( int n, ushort *a);
 
 TStyle* style;
 
@@ -75,6 +76,7 @@ main(int argc, char **argv){
   int event;
   ushort   b_c[4][9][1024], tc[4]; 
   ushort channel[36][1024];
+  ushort amp[36];
   ushort time[1024];
   int t[36864];
 
@@ -84,6 +86,7 @@ main(int argc, char **argv){
   tree->Branch("t",  t, "t[36864]/I");
   tree->Branch("channel", channel, "channel[36][1024]/s");
   tree->Branch("time", time, "time[1024]/s");
+  tree->Branch("amp", amp, "amp[36]/s");
   //  tree->Branch("b_c",  b_c, "b_c[32768]/s"); //this is for 8 channels
 
   uint   event_header;
@@ -99,7 +102,8 @@ main(int argc, char **argv){
   for( int i  = i; i < 36864; i++ ) t[i] = i;
   for ( int i  = i; i < 1024; i++ ) time[i] = i;
 
-  for( int eventn = 0; eventn < atoi(argv[2]); eventn++){
+  //  for( int eventn = 0; eventn < atoi(argv[2]); eventn++){
+  for( int eventn = 0; eventn < 35; eventn++){
     // printf("---- loop  %5d\n", loop);
     event = eventn;
 
@@ -139,7 +143,7 @@ main(int argc, char **argv){
 	samples[8][j*8+6] = (temp[2] >>  8) & 0xfff;
 	samples[8][j*8+7] =  temp[2] >> 20;
       }
-      
+
       for(int i = 0; i < 9; i++)
 	{
 	  for(int j = 0; j < 1024; j++)
@@ -158,6 +162,10 @@ main(int argc, char **argv){
 	    }
 	}
       
+      int index_min1 = FindMin (1024, channel[16]);// return index of the min      
+
+      std::cout<<"AAA "<<index_min1<<" "<<eventn<<std::endl;
+
       double amplitude[8][1024];
       for( int i = 0; i < 8; i++)
 	for( int j = 0; j < 1024; j++){
@@ -240,4 +248,24 @@ graphic_init( void){
   style->cd();
 
   return 0;
+}
+
+
+////////////////////////////////////////////
+// find minimum of the pulse
+// aa added protection against pulses with single high bin
+////////////////////////////////////////////
+int FindMin( int n, ushort *a) {
+  
+  if (n <= 0 || !a) return -1;
+  float xmin = a[5];
+  int loc = 0;
+  for  (int i = 5; i < n-5; i++) {
+    if (xmin > a[i] && a[i+1] < 0.5*a[i])  {
+      xmin = a[i];
+      loc = i;
+    }
+  }
+  
+  return loc;
 }
