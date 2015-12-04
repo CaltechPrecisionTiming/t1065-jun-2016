@@ -37,7 +37,7 @@
 
 
 int graphic_init();
-int FindMin( int n, ushort *a);
+int FindMin( int n, short *a);
 
 TStyle* style;
 
@@ -51,8 +51,12 @@ main(int argc, char **argv){
   char stitle[200];
   int dummy;
 
+  std::string boardNumber = "1";
+  if (argc > 3) boardNumber = argv[3];
+  std::cout << "Using Calibration files for board number " << boardNumber << "\n";
+
   for( int i = 0; i < 4; i++){
-    sprintf( stitle, "v1740_bd1_group_%d_offset.txt", i);
+    sprintf( stitle, "v1740_bd%s_group_%d_offset.txt", boardNumber.c_str(), i);
 
     fp1 = fopen( stitle, "r");
     printf("offset data : %s\n", stitle);
@@ -74,19 +78,19 @@ main(int argc, char **argv){
   TTree* tree = new TTree("pulse", "Wave Form");
 
   int event;
-  ushort   b_c[4][9][1024], tc[4]; 
-  ushort channel[36][1024];
-  ushort amp[36];
-  ushort time[1024];
+  short   b_c[4][9][1024], tc[4]; 
+  short channel[36][1024];
+  float amp[36];
+  short time[1024];
   int t[36864];
 
   tree->Branch("event", &event, "event/I");
   tree->Branch("tc",   tc, "tc[4]/s");
   tree->Branch("b_c",  b_c, "b_c[36864]/s"); //this is for 9 channels per group
   tree->Branch("t",  t, "t[36864]/I");
-  tree->Branch("channel", channel, "channel[36][1024]/s");
+  tree->Branch("channel", channel, "channel[36][1024]/S");
   tree->Branch("time", time, "time[1024]/s");
-  tree->Branch("amp", amp, "amp[36]/s");
+  tree->Branch("amp", amp, "amp[36]/F");
   //  tree->Branch("b_c",  b_c, "b_c[32768]/s"); //this is for 8 channels
 
   uint   event_header;
@@ -94,7 +98,7 @@ main(int argc, char **argv){
   ushort samples[9][1024];
 
   // loop over root files
-  sprintf( title, "dataTestBeamDec2/%s.dat", argv[1]);
+  sprintf( title, "data/%s.dat", argv[1]);
 
   FILE* fpin = fopen( title, "r");
 
@@ -102,8 +106,7 @@ main(int argc, char **argv){
   for( int i  = i; i < 36864; i++ ) t[i] = i;
   for ( int i  = i; i < 1024; i++ ) time[i] = i;
 
-  //  for( int eventn = 0; eventn < atoi(argv[2]); eventn++){
-  for( int eventn = 0; eventn < 35; eventn++){
+  for( int eventn = 0; eventn < atoi(argv[2]); eventn++){  
     // printf("---- loop  %5d\n", loop);
     event = eventn;
 
@@ -112,7 +115,7 @@ main(int argc, char **argv){
     dummy = fread( &event_header, sizeof(uint), 1, fpin);  
     dummy = fread( &event_header, sizeof(uint), 1, fpin);  
 
-    for( int group = 0; group < 4; group++){
+    for( int group = 0; group < 2; group++){
       dummy = fread( &event_header, sizeof(uint), 1, fpin);  
 
       ushort tcn = (event_header >> 20) & 0xfff;
@@ -144,23 +147,12 @@ main(int argc, char **argv){
 	samples[8][j*8+7] =  temp[2] >> 20;
       }
 
-      for(int i = 0; i < 9; i++)
-	{
-	  for(int j = 0; j < 1024; j++)
-	    {
-	      if ( i < 8 )
-		{ 
-		  //b_c[group][i][j] = (double)samples[i][j] - off_mean[group][i][(j+tcn)%1024];
-		  b_c[group][i][j] = (double)samples[i][j];
-		  channel[group*9 + i][j] = (double)samples[i][j];
-		}
-	      else
-		{
-		  b_c[group][i][j] = (double)samples[i][j];
-		  channel[group*9 + i][j] = (double)samples[i][j];
-		}
-	    }
-	}
+      for(int i = 0; i < 9; i++) {
+	  for(int j = 0; j < 1024; j++) {
+	    b_c[group][i][j] = (double)samples[i][j];
+	    channel[group*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[group][i][(j+tcn)%1024]));
+	  }
+      }
       
       int index_min1 = FindMin (1024, channel[16]);// return index of the min      
 
@@ -255,7 +247,7 @@ graphic_init( void){
 // find minimum of the pulse
 // aa added protection against pulses with single high bin
 ////////////////////////////////////////////
-int FindMin( int n, ushort *a) {
+int FindMin( int n, short *a) {
   
   if (n <= 0 || !a) return -1;
   float xmin = a[5];
