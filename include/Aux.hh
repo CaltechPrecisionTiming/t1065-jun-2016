@@ -10,4 +10,5 @@ TGraphErrors* GetTGraph( short* channel, float* time );
 double GetGaussTime( TGraphErrors* pulse );
 int FindMin( int n, short *a);
 float GausFit_MeanTime(TGraphErrors * pulse, const float index_first, const float index_last);
+float GetBaseline( int peak, short *a );
 #endif

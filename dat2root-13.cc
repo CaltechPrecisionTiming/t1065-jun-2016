@@ -120,6 +120,7 @@ main(int argc, char **argv){
   short b_c[4][9][1024], tc[4]; 
   float time[4][1024];
   short channel[36][1024];
+  float base[36];
   float amp[36];
   float gauspeak[36];
   int t[36864];
@@ -127,12 +128,13 @@ main(int argc, char **argv){
   tree->Branch("event", &event, "event/I");
   tree->Branch("tc",   tc, "tc[4]/s");
   tree->Branch("b_c",  b_c, "b_c[36864]/s"); //this is for 9 channels per group
+  //tree->Branch("b_ref",  b_ref, "b_pho[4096]/s"); //channel 1 for each group
   tree->Branch("t",  t, "t[36864]/I");
   tree->Branch("channel", channel, "channel[36][1024]/S");
   tree->Branch("time", time, "time[4][1024]/F");
   tree->Branch("amp", amp, "amp[36]/F");
   tree->Branch("gauspeak", gauspeak, "gauspeak[36]/F");
-  //  tree->Branch("b_c",  b_c, "b_c[32768]/s"); //this is for 8 channels
+
 
   uint   event_header;
   uint   temp[3];
@@ -244,35 +246,40 @@ main(int argc, char **argv){
 	  b_c[realGroup[group]][i][j] = (double)samples[i][j];
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
 	}
-      }
-      
-      double amplitude[8][1024];
-      for( int i = 0; i < 8; i++)       
-	for( int j = 0; j < 1024; j++){
-	  amplitude[i][j] = (double)samples[i][j] - off_mean[realGroup[group]][i][(j+tcn)%1024];  
-	  // samples[i][j] -= off_mean[realGroup[group]][i][(j+tcn)%1024];  
-	  //amplitude[i][j] += 235;	  	  
+	
+	//Find Peak Location
+	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
+
+	//Estimate baseline
+	float baseline = GetBaseline( index_min, channel[realGroup[group]*9 + i]);
+	base[realGroup[group]*9 + i] = baseline;
+
+	//Correct pulse shape for baseline offset
+	for(int j = 0; j < 1024; j++) {
+	  channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]) - baseline);
 	}
 
-      dummy = fread( &event_header, sizeof(uint), 1, fpin);
-
-      // time stamping
-      for(int i = 0; i < 9; i++) {
-	
-	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
+	//Make Pulse shape Graph
 	TGraphErrors* pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
-
-	Double_t min =0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.;
-
-	pulse->GetPoint(index_min, min, y);
-	amp[realGroup[group]*9 + i] = y; // get amplitude
 	
+	//Compute Amplitude : use units V
+	Double_t tmpAmp = 0.0;
+	Double_t tmpMin = 0.0;
+	pulse->GetPoint(index_min, tmpMin, tmpAmp);
+	amp[realGroup[group]*9 + i] = tmpAmp* (1.0 / 4096.0); 
+
+
+	//Gauss Time-Stamping 
+	Double_t min =0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.; 
+	pulse->GetPoint(index_min, min, y);	
 	pulse->GetPoint(index_min-4, low_edge, y); // get the time of the low edge of the fit range
-	pulse->GetPoint(index_min+5, high_edge, y);  // get the time of the upper edge of the fit range
-	
+	pulse->GetPoint(index_min+5, high_edge, y);  // get the time of the upper edge of the fit range	
 	float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
 	gauspeak[realGroup[group]*9 + i] = timepeak;
       }
+        
+      dummy = fread( &event_header, sizeof(uint), 1, fpin);
+     
     }
     
     if ( ActiveGroupsN < 4 ) continue;

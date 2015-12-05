@@ -8,10 +8,11 @@ HggRazor = $(Repo)/HggRazor
 CommonTools = $(HggRazor)/CommonTools
 
 CPPFLAGS := $(shell root-config --cflags) -I$(INC)/include -I$(CommonTools)/include -I$(Aux)/include
-LDFLAGS := $(shell root-config --glibs) $(STDLIBDIR) -lRooFit -lRooFitCore
+#LDFLAGS := $(shell root-config --glibs) $(STDLIBDIR) -lRooFit -lRooFitCore
+LDFLAGS := $(shell root-config --glibs) $(STDLIBDIR)
 
-#CPPFLAGS += -g -std=c++11
-CPPFLAGS += -g
+CPPFLAGS += -g -std=c++11
+#CPPFLAGS += -g
 
 TARGET = dat2rootCP
 
