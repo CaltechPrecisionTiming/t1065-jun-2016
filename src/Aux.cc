@@ -67,3 +67,27 @@ double GetGaussTime( TGraphErrors* pulse )
 {
   return 0;
 };
+
+
+float GetBaseline( int peak, short *a ) {
+
+  float tmpsum = 0;
+  float tmpcount = 0;
+  //std::cout << "GGG\n";
+  if (peak < 300) {
+    for  (int i = peak + 200; i < 1000; i++) {
+      // std::cout << i << " : " << a[i] << "\n";
+      tmpsum += a[i];
+      tmpcount += 1.0;
+    }
+  } else {
+    for  (int i = 5; i < peak-200; i++) {
+      // std::cout << i << " : " << a[i] << "\n";
+      tmpsum += a[i];
+      tmpcount += 1.0;
+    }
+  }
+  // std::cout << tmpsum / tmpcount << "\n";
+
+  return tmpsum / tmpcount;
+}
