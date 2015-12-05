@@ -35,6 +35,8 @@
 #include <math.h>
 #include <time.h>
 
+//LOCAL INCLUDES
+#include "Aux.hh"
 
 int graphic_init();
 int FindMin( int n, short *a);
@@ -132,7 +134,7 @@ main(int argc, char **argv){
   ushort samples[9][1024];
 
   // loop over root files
-  sprintf( title, "data/%s.dat", argv[1]);
+  sprintf( title, "%s", argv[1]);
 
   FILE* fpin = fopen( title, "r");
 
@@ -148,7 +150,7 @@ main(int argc, char **argv){
     dummy = fread( &event_header, sizeof(uint), 1, fpin);  
     dummy = fread( &event_header, sizeof(uint), 1, fpin);  
 
-    for( int group = 0; group < 2; group++){
+    for( int group = 0; group < 4; group++){
       dummy = fread( &event_header, sizeof(uint), 1, fpin);  
 
       ushort tcn = (event_header >> 20) & 0xfff;
@@ -201,7 +203,7 @@ main(int argc, char **argv){
       
       int index_min1 = FindMin (1024, channel[16]);// return index of the min      
 
-      std::cout<<"AAA "<<index_min1<<" "<<eventn<<std::endl;
+      //std::cout<<"AAA "<<index_min1<<" "<<eventn<<std::endl;
 
       double amplitude[8][1024];
       for( int i = 0; i < 8; i++)
@@ -220,6 +222,12 @@ main(int argc, char **argv){
       dummy = fread( &event_header, sizeof(uint), 1, fpin);  
     }
 
+    TGraphErrors* pulse0 = GetTGraph( channel[0], time[0] );
+    TCanvas* C = new TCanvas("C", "C", 640, 640);
+    C->cd();
+    pulse0->Draw("AP");
+    C->SaveAs("pulse.pdf");
+    
     tree->Fill();
   }
 
