@@ -172,9 +172,14 @@ main(int argc, char **argv){
     _isGR_On[3] = (grM & 0x08);
     
     int ActiveGroupsN = 0;
+    int realGroup[4] = {-1, -1, -1, -1};
     for ( int l = 0; l < 4; l++ )
       {
-	if ( _isGR_On[l] ) ActiveGroupsN++;
+	if ( _isGR_On[l] ) 
+	  {
+	    realGroup[ActiveGroupsN] = l; 
+	    ActiveGroupsN++;
+	  }
       }
     
     std::cout << "------------------------------" << std::endl;
@@ -183,18 +188,21 @@ main(int argc, char **argv){
     std::cout << "------------------------------" << std::endl;
     
     for( int group = 0; group < ActiveGroupsN; group++){
+      //Reading Group Header
       dummy = fread( &event_header, sizeof(uint), 1, fpin);  
-
+      
       ushort tcn = (event_header >> 20) & 0xfff;
-      tc[group] = tcn;
-
+      tc[realGroup[group]] = tcn;
+      
+      //Checking if all channels were active ( if 8 channels active return 3072)
       int nsample = (event_header & 0xfff)/3;
-      std::cout << "group #"<< group << "; nsample: " << nsample << std::endl;
+      std::cout << "realGroup[group] #"<< realGroup[group] << "; nsample: " << nsample << std::endl;
+      
       //Define Time coordinate
-      time[group][0] = 0.0;
+      time[realGroup[group]][0] = 0.0;
       for( int i = 1; i < 1024; i++){
-	time[group][i] = float(i);
-	time[group][i] = float(tcal[group][(i-1+tcn)%1024] + time[group][i-1]);
+	time[realGroup[group]][i] = float(i);
+	time[realGroup[group]][i] = float(tcal[realGroup[group]][(i-1+tcn)%1024] + time[realGroup[group]][i-1]);
 	//std::cout << i << " " << time[i] << "\n";
       }      
 
@@ -224,16 +232,16 @@ main(int argc, char **argv){
 
       for(int i = 0; i < 9; i++) {
 	for(int j = 0; j < 1024; j++) {
-	  b_c[group][i][j] = (double)samples[i][j];
-	  channel[group*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[group][i][(j+tcn)%1024]));
+	  b_c[realGroup[group]][i][j] = (double)samples[i][j];
+	  channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
 	}
       }
       
       double amplitude[8][1024];
       for( int i = 0; i < 8; i++)       
 	for( int j = 0; j < 1024; j++){
-	  amplitude[i][j] = (double)samples[i][j] - off_mean[group][i][(j+tcn)%1024];  
-	  // samples[i][j] -= off_mean[group][i][(j+tcn)%1024];  
+	  amplitude[i][j] = (double)samples[i][j] - off_mean[realGroup[group]][i][(j+tcn)%1024];  
+	  // samples[i][j] -= off_mean[realGroup[group]][i][(j+tcn)%1024];  
 	  //amplitude[i][j] += 235;	  	  
 	}
 
@@ -242,19 +250,19 @@ main(int argc, char **argv){
       // time stamping
       for(int i = 0; i < 9; i++) {
 	
-	int index_min = FindMin (1024, channel[group*9 + i]); // return index of the min	
-	TGraphErrors* pulse = GetTGraph( channel[group*9 + i], time[group] );
+	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
+	TGraphErrors* pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
 
 	Double_t min =0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.;
 
 	pulse->GetPoint(index_min, min, y);
-	amp[group*9 + i] = y; // get amplitude
+	amp[realGroup[group]*9 + i] = y; // get amplitude
 	
 	pulse->GetPoint(index_min-4, low_edge, y); // get the time of the low edge of the fit range
 	pulse->GetPoint(index_min+5, high_edge, y);  // get the time of the upper edge of the fit range
 	
 	float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
-	gauspeak[group*9 + i] = timepeak;
+	gauspeak[realGroup[group]*9 + i] = timepeak;
       }
     }
     
