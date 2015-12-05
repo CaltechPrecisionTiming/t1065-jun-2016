@@ -148,19 +148,48 @@ main(int argc, char **argv){
     // printf("---- loop  %5d\n", loop);
     event = eventn;
 
+    //Reading First Header Word
+    dummy = fread( &event_header, sizeof(uint), 1, fpin);
+    uint evtSize =  event_header & 0x0fffffff;
+    //Reading Second Header Word
     dummy = fread( &event_header, sizeof(uint), 1, fpin);  
+    uint grM     = event_header & 0x0f;
+    uint pattern = (event_header >> 8) & 0x2fff;
+    uint bID     = (event_header >> 27) & 0x1f;
+    //Reading Third Header Word
     dummy = fread( &event_header, sizeof(uint), 1, fpin);  
-    dummy = fread( &event_header, sizeof(uint), 1, fpin);  
+    //Reading Fourth Header Word
     dummy = fread( &event_header, sizeof(uint), 1, fpin);  
 
-    for( int group = 0; group < 4; group++){
+    
+    //--------------------------------
+    //Parsing group Mask into channels
+    //--------------------------------
+    bool _isGR_On[4];
+    _isGR_On[0] = (grM & 0x01);
+    _isGR_On[1] = (grM & 0x02);
+    _isGR_On[2] = (grM & 0x04);
+    _isGR_On[3] = (grM & 0x08);
+    
+    int ActiveGroupsN = 0;
+    for ( int l = 0; l < 4; l++ )
+      {
+	if ( _isGR_On[l] ) ActiveGroupsN++;
+      }
+    
+    std::cout << "------------------------------" << std::endl;
+    std::cout << "evtSize: " << evtSize << " grM: " << grM << " pattern: " << pattern 
+	      << " bID: " << bID  << " number of Active groups: " << ActiveGroupsN << std::endl;
+    std::cout << "------------------------------" << std::endl;
+    
+    for( int group = 0; group < ActiveGroupsN; group++){
       dummy = fread( &event_header, sizeof(uint), 1, fpin);  
 
       ushort tcn = (event_header >> 20) & 0xfff;
       tc[group] = tcn;
 
       int nsample = (event_header & 0xfff)/3;
-
+      std::cout << "group #"<< group << "; nsample: " << nsample << std::endl;
       //Define Time coordinate
       time[group][0] = 0.0;
       for( int i = 1; i < 1024; i++){
