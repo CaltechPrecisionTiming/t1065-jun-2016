@@ -1,0 +1,9 @@
+#ifndef Aux_HH
+#define Aux_HH 1
+
+#include <TGraphErrors.h>
+#include <TH1F.h>
+
+
+TGraphErrors* GetTGraph(  short* channel );
+double GetGaussTime( TGraphErrors* pulse );

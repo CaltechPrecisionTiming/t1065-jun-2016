@@ -1,0 +1,13 @@
+#include "Aux.hh"
+
+TGraphErrors* GetTGraph(  short* channel, float* time )
+{
+
+  
+  TGraphErrors* tg = new TGraphErrors(1024, time );
+  return tg;
+};
+double GetGaussTime( TGraphErrors* pulse )
+{
+  return 0;
+};
