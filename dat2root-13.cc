@@ -247,6 +247,7 @@ main(int argc, char **argv){
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
 	}
 	
+	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
 	//Find Peak Location
 	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
 
@@ -272,8 +273,9 @@ main(int argc, char **argv){
 	//Gauss Time-Stamping 
 	Double_t min =0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.; 
 	pulse->GetPoint(index_min, min, y);	
-	pulse->GetPoint(index_min-4, low_edge, y); // get the time of the low edge of the fit range
-	pulse->GetPoint(index_min+5, high_edge, y);  // get the time of the upper edge of the fit range	
+	pulse->GetPoint(index_min-3, low_edge, y); // get the time of the low edge of the fit range
+	pulse->GetPoint(index_min+3, high_edge, y);  // get the time of the upper edge of the fit range	
+	//float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
 	float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
 	gauspeak[realGroup[group]*9 + i] = timepeak;
       }
