@@ -256,12 +256,13 @@ main(int argc, char **argv){
 
       dummy = fread( &event_header, sizeof(uint), 1, fpin);
 
+      
       // time stamping
       for(int i = 0; i < 9; i++) {
-	
+	TString plotName = Form("puls_event%d_group%d_ch%d", eventn, realGroup[group], i);
 	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
 	TGraphErrors* pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
-
+	
 	Double_t min =0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.;
 
 	pulse->GetPoint(index_min, min, y);
@@ -270,7 +271,8 @@ main(int argc, char **argv){
 	pulse->GetPoint(index_min-4, low_edge, y); // get the time of the low edge of the fit range
 	pulse->GetPoint(index_min+5, high_edge, y);  // get the time of the upper edge of the fit range
 	
-	float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
+	//float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, plotName); // get the time stamp
+	float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge);
 	gauspeak[realGroup[group]*9 + i] = timepeak;
       }
     }
