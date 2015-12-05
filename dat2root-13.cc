@@ -38,6 +38,24 @@
 //LOCAL INCLUDES
 #include "Aux.hh"
 
+using namespace std;
+
+std::string ParseCommandLine( int argc, char* argv[], std::string opt )
+{
+  for (int i = 1; i < argc; i++ )
+    {
+      std::string tmp( argv[i] );
+      if ( tmp.find( opt ) != std::string::npos )
+        {
+          if ( tmp.find( "=" )  != std::string::npos ) return tmp.substr( tmp.find_last_of("=") + 1 );
+	  if ( tmp.find( "--" ) != std::string::npos ) return "yes";
+	}
+    }
+  
+  return "";
+};
+
+
 int graphic_init();
 //int FindMin( int n, short *a);
 //float GausFit_MeanTime(TGraphErrors * pulse, const float index_first, const float index_last);
@@ -48,19 +66,35 @@ TStyle* style;
 int 
 main(int argc, char **argv){
 
-  double off_mean[4][9][1024];
-
   FILE* fp1;
   char stitle[200];
   int dummy;
+
+  //**************************************
+  //Arguments
+  //**************************************
+  std::string inputFilename = argv[1];
+  std::string outputFilename = (inputFilename + "-full.root").c_str();
+
+  int nEvents = atoi(argv[2]);
 
   std::string boardNumber = "1";
   if (argc > 3) boardNumber = argv[3];
   std::cout << "Using Calibration files for board number " << boardNumber << "\n";
 
+  bool saveRaw = false;
+  std::string _saveRaw = ParseCommandLine( argc, argv, "--saveRaw" );
+  if ( _saveRaw == "yes" ) saveRaw = true;
+  if (saveRaw) std::cout << "Saving Raw Pulses\n";
+
+  std::string _drawDebugPulses = ParseCommandLine( argc, argv, "--debug" );
+  bool drawDebugPulses = false;
+  if ( _drawDebugPulses == "yes" ) drawDebugPulses = true;
+
   //**************************************
   //Load Voltage Calibration
   //**************************************
+  double off_mean[4][9][1024];
   for( int i = 0; i < 4; i++){
     sprintf( stitle, "v1740_bd%s_group_%d_offset.txt", boardNumber.c_str(), i);
 
@@ -108,29 +142,32 @@ main(int argc, char **argv){
       }
 
   
-
-
-  char   title[200];  
-  sprintf( title, "%s-full.root", argv[1]);
-
-  TFile* file = new TFile( title, "RECREATE", "CAEN V1742");
+  //**************************************
+  //Open output file, Define output Tree
+  //**************************************
+  TFile* file = new TFile( outputFilename.c_str(), "RECREATE", "CAEN V1742");
   TTree* tree = new TTree("pulse", "Wave Form");
 
   int event;
   short b_c[4][9][1024], tc[4]; 
   float time[4][1024];
+  short raw[36][1024];
   short channel[36][1024];
   float base[36];
   float amp[36];
   float gauspeak[36];
   int t[36864];
-
+  int t0[1024];
+ 
   tree->Branch("event", &event, "event/I");
   tree->Branch("tc",   tc, "tc[4]/s");
-  tree->Branch("b_c",  b_c, "b_c[36864]/s"); //this is for 9 channels per group
-  //tree->Branch("b_ref",  b_ref, "b_pho[4096]/s"); //channel 1 for each group
-  tree->Branch("t",  t, "t[36864]/I");
+  if (saveRaw) {
+    tree->Branch("b_c",  b_c, "b_c[36864]/s"); //this is for 9 channels per group
+    tree->Branch("raw", raw, "raw[36][1024]/S");   
+    tree->Branch("t",  t, "t[36864]/I");    
+  }
   tree->Branch("channel", channel, "channel[36][1024]/S");
+  tree->Branch("t0",  t0, "t0[1024]/I");
   tree->Branch("time", time, "time[4][1024]/F");
   tree->Branch("amp", amp, "amp[36]/F");
   tree->Branch("gauspeak", gauspeak, "gauspeak[36]/F");
@@ -140,17 +177,23 @@ main(int argc, char **argv){
   uint   temp[3];
   ushort samples[9][1024];
 
-  // loop over root files
-  sprintf( title, "%s", argv[1]);
+  //define time bins
+  for( int i  = 0; i < 36864; i++ ) t[i] = i;
+  for( int i  = 0; i < 1024; i++ ) t0[i] = i;
 
-  FILE* fpin = fopen( title, "r");
 
-
-  for( int i  = i; i < 36864; i++ ) t[i] = i;
+  //*************************
+  // Open Input File
+  //*************************
+  FILE* fpin = fopen( inputFilename.c_str(), "r");
 
   ushort _initVal = 666.0;
   int goodEvents = 0;
-  for( int eventn = 0; eventn < atoi(argv[2]); eventn++){ 
+
+  //*************************
+  //Event Loop
+  //*************************
+  for( int eventn = 0; eventn < nEvents; eventn++){ 
     if ( eventn%100 == 0 ) std::cout << "event: " << eventn << std::endl;
     // printf("---- loop  %5d\n", loop);
     //event = eventn;
@@ -197,6 +240,10 @@ main(int argc, char **argv){
 		  << " bID: " << bID  << " number of Active groups: " << ActiveGroupsN << std::endl;
 	std::cout << "------------------------------" << std::endl;
       }
+
+    //************************************
+    //Loop Over Channel Groups
+    //************************************
     for( int group = 0; group < ActiveGroupsN; group++){
       //Reading Group Header
       dummy = fread( &event_header, sizeof(uint), 1, fpin);  
@@ -217,6 +264,9 @@ main(int argc, char **argv){
 	
       }      
 
+      //************************************
+      //Read Sample Info
+      //************************************      
       for(int i = 0; i < nsample; i++){
 	dummy = fread( &temp, sizeof(uint), 3, fpin);  
 	samples[0][i] =  temp[0] & 0xfff;
@@ -241,13 +291,18 @@ main(int argc, char **argv){
 	samples[8][j*8+7] =  temp[2] >> 20;
       }
 
+      //************************************
+      //Loop Over Channels 0 - 8
+      //************************************      
       for(int i = 0; i < 9; i++) {
+
+	//Fill pulses
 	for(int j = 0; j < 1024; j++) {
-	  b_c[realGroup[group]][i][j] = (double)samples[i][j];
+	  b_c[realGroup[group]][i][j] = (short)(samples[i][j]);
+	  raw[realGroup[group]*9 + i][j] = (short)(samples[i][j]);
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
 	}
 	
-	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
 	//Find Peak Location
 	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
 
@@ -275,8 +330,14 @@ main(int argc, char **argv){
 	pulse->GetPoint(index_min, min, y);	
 	pulse->GetPoint(index_min-3, low_edge, y); // get the time of the low edge of the fit range
 	pulse->GetPoint(index_min+3, high_edge, y);  // get the time of the upper edge of the fit range	
-	//float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
-	float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
+
+	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
+	float timepeak = 0;
+	if( drawDebugPulses) {
+	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
+	} else {
+	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
+	}
 	gauspeak[realGroup[group]*9 + i] = timepeak;
       }
         
