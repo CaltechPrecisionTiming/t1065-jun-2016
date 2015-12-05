@@ -40,6 +40,7 @@
 
 int graphic_init();
 int FindMin( int n, short *a);
+float GausFit_MeanTime(TGraphErrors * pulse, const float index_first, const float index_last);
 
 TStyle* style;
 
@@ -118,6 +119,7 @@ main(int argc, char **argv){
   float time[4][1024];
   short channel[36][1024];
   float amp[36];
+  float gauspeak[36];
   int t[36864];
 
   tree->Branch("event", &event, "event/I");
@@ -127,6 +129,7 @@ main(int argc, char **argv){
   tree->Branch("channel", channel, "channel[36][1024]/S");
   tree->Branch("time", time, "time[4][1024]/F");
   tree->Branch("amp", amp, "amp[36]/F");
+  tree->Branch("gauspeak", gauspeak, "gauspeak[36]/F");
   //  tree->Branch("b_c",  b_c, "b_c[32768]/s"); //this is for 8 channels
 
   uint   event_header;
@@ -164,9 +167,7 @@ main(int argc, char **argv){
 	time[group][i] = float(i);
 	time[group][i] = float(tcal[group][(i-1+tcn)%1024] + time[group][i-1]);
 	//std::cout << i << " " << time[i] << "\n";
-      }
-
-      
+      }      
 
       for(int i = 0; i < nsample; i++){
 	dummy = fread( &temp, sizeof(uint), 3, fpin);  
@@ -193,40 +194,40 @@ main(int argc, char **argv){
       }
 
       for(int i = 0; i < 9; i++) {
-
-
 	for(int j = 0; j < 1024; j++) {
 	  b_c[group][i][j] = (double)samples[i][j];
 	  channel[group*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[group][i][(j+tcn)%1024]));
 	}
       }
       
-      int index_min1 = FindMin (1024, channel[16]);// return index of the min      
-
-      //std::cout<<"AAA "<<index_min1<<" "<<eventn<<std::endl;
-
       double amplitude[8][1024];
-      for( int i = 0; i < 8; i++)
-
-	
-
+      for( int i = 0; i < 8; i++)       
 	for( int j = 0; j < 1024; j++){
 	  amplitude[i][j] = (double)samples[i][j] - off_mean[group][i][(j+tcn)%1024];  
 	  // samples[i][j] -= off_mean[group][i][(j+tcn)%1024];  
-	  //amplitude[i][j] += 235;
-	  
-	  
-
+	  //amplitude[i][j] += 235;	  	  
 	}
 
-      dummy = fread( &event_header, sizeof(uint), 1, fpin);  
-    }
+      dummy = fread( &event_header, sizeof(uint), 1, fpin);
 
-    TGraphErrors* pulse0 = GetTGraph( channel[0], time[0] );
-    TCanvas* C = new TCanvas("C", "C", 640, 640);
-    C->cd();
-    pulse0->Draw("AP");
-    C->SaveAs("pulse.pdf");
+      // time stamping
+      for(int i = 0; i < 9; i++) {
+	
+	int index_min = FindMin (1024, channel[group*9 + i]); // return index of the min	
+	TGraphErrors* pulse = GetTGraph( channel[group*9 + i], time[group] );
+
+	Double_t min =0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.;
+
+	pulse->GetPoint(index_min, min, y);
+	amp[group*9 + i] = y; // get amplitude
+	
+	pulse->GetPoint(index_min-4, low_edge, y); // get the time of the low edge of the fit range
+	pulse->GetPoint(index_min+5, high_edge, y);  // get the time of the upper edge of the fit range
+	
+	float timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
+	gauspeak[group*9 + i] = timepeak;
+      }
+    }
     
     tree->Fill();
   }
@@ -319,4 +320,16 @@ int FindMin( int n, short *a) {
   }
   
   return loc;
+}
+
+// find the mean time from gaus fit
+float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last)
+{
+  TF1* fpeak = new TF1("fpeak","gaus", index_first, index_last);
+  pulse->Fit("fpeak","Q","", index_first, index_last);
+  
+  float timepeak = fpeak->GetParameter(1);
+  delete fpeak;
+  
+  return timepeak;
 }
