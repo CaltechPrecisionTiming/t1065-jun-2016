@@ -14,6 +14,38 @@ TGraphErrors* GetTGraph(  short* channel, float* time )
   TGraphErrors* tg = new TGraphErrors( 1024, time, channelFloat, errorX, errorY );
   return tg;
 };
+
+////////////////////////////////////////////
+// find minimum of the pulse
+// aa added protection against pulses with single high bin
+////////////////////////////////////////////
+int FindMin( int n, short *a) {
+  
+  if (n <= 0 || !a) return -1;
+  float xmin = a[5];
+  int loc = 0;
+  for  (int i = 5; i < n-5; i++) {
+    if (xmin > a[i] && a[i+1] < 0.5*a[i])  {
+      xmin = a[i];
+      loc = i;
+    }
+  }
+  
+  return loc;
+}
+
+// find the mean time from gaus fit
+float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last)
+{
+  TF1* fpeak = new TF1("fpeak","gaus", index_first, index_last);
+  pulse->Fit("fpeak","Q","", index_first, index_last);
+  
+  float timepeak = fpeak->GetParameter(1);
+  delete fpeak;
+  
+  return timepeak;
+}
+
 double GetGaussTime( TGraphErrors* pulse )
 {
   return 0;

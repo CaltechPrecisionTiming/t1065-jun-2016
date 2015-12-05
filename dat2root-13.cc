@@ -39,8 +39,8 @@
 #include "Aux.hh"
 
 int graphic_init();
-int FindMin( int n, short *a);
-float GausFit_MeanTime(TGraphErrors * pulse, const float index_first, const float index_last);
+//int FindMin( int n, short *a);
+//float GausFit_MeanTime(TGraphErrors * pulse, const float index_first, const float index_last);
 
 TStyle* style;
 
@@ -105,7 +105,6 @@ main(int argc, char **argv){
     for( int j = 0; j < 1024; j++)
       {
 	tcal[i][j] = tcal_dV[i][j]/dV_sum[i]*200.0;
-	std::cout << "tcal: " << tcal[i][j] << std::endl;
       }
 
   
@@ -148,47 +147,12 @@ main(int argc, char **argv){
   for( int i  = i; i < 36864; i++ ) t[i] = i;
 
   ushort _initVal = 666.0;
-  for( int eventn = 0; eventn < atoi(argv[2]); eventn++){  
-    //Reset Arrays
-    for ( int l = 0; l < 36864; l++ )
-      {
-	t[l]   = _initVal;
-      }
-    for ( int l = 0; l < 4; l++ )
-      {
-	for ( int m = 0; m < 9; m++ )
-	  {
-	    for ( int n = 0; n < 1024; n++ )
-	      {
-		b_c[l][m][n] = _initVal;
-	      }
-	  }
-      }
-    for ( int l = 0; l < 36; l++ )
-      {
-	for ( int k = 0; k < 1024; k++ )
-	  {
-	    channel[l][k] = _initVal;
-	    time[l][k]    = _initVal;
-	  }
-      }
-    for ( int l = 0; l < 9; l++ )
-      {
-	for ( int k = 0; k < 1024; k++ )
-	  {
-	    samples[l][k] = _initVal;
-	  }
-      }
-
-
-    for( int i = 0; i < 4; i++)
-      for( int j = 0; j < 1024; j++)
-	{
-	  std::cout << "tcal: " << tcal[i][j] << std::endl;
-	}
-     
+  int goodEvents = 0;
+  for( int eventn = 0; eventn < atoi(argv[2]); eventn++){ 
+    if ( eventn%100 == 0 ) std::cout << "event: " << eventn << std::endl;
     // printf("---- loop  %5d\n", loop);
-    event = eventn;
+    //event = eventn;
+    event = goodEvents;
 
     //Reading First Header Word
     dummy = fread( &event_header, sizeof(uint), 1, fpin);
@@ -224,11 +188,13 @@ main(int argc, char **argv){
 	  }
       }
     
-    std::cout << "------------------------------" << std::endl;
-    std::cout << "evtSize: " << evtSize << " grM: " << grM << " pattern: " << pattern 
-	      << " bID: " << bID  << " number of Active groups: " << ActiveGroupsN << std::endl;
-    std::cout << "------------------------------" << std::endl;
-    
+    if ( ActiveGroupsN < 4 )
+      {
+	std::cout << "----------------WARNING--------------" << std::endl;
+	std::cout << "evtSize: " << evtSize << " grM: " << grM << " pattern: " << pattern 
+		  << " bID: " << bID  << " number of Active groups: " << ActiveGroupsN << std::endl;
+	std::cout << "------------------------------" << std::endl;
+      }
     for( int group = 0; group < ActiveGroupsN; group++){
       //Reading Group Header
       dummy = fread( &event_header, sizeof(uint), 1, fpin);  
@@ -238,13 +204,13 @@ main(int argc, char **argv){
       
       //Checking if all channels were active ( if 8 channels active return 3072)
       int nsample = (event_header & 0xfff)/3;
-      std::cout << "realGroup[group] #"<< realGroup[group] << "; nsample: " << nsample << std::endl;
+      //std::cout << "realGroup[group] #"<< realGroup[group] << "; nsample: " << nsample << std::endl;
       
       //Define Time coordinate
       time[realGroup[group]][0] = 0.0;
       for( int i = 1; i < 1024; i++){
 	time[realGroup[group]][i] = float(i);
-	std::cout << "realGroup " << realGroup[group] << " " << i << " tcal --> " << tcal[0][i] << " " << time[realGroup[group]][i]  << " :::" << (i-1+tcn)%1024 << "\n";
+	//std::cout << "realGroup " << realGroup[group] << " " << i << " tcal --> " << tcal[0][i] << " " << time[realGroup[group]][i]  << " :::" << (i-1+tcn)%1024 << "\n";
 	time[realGroup[group]][i] = float(tcal[realGroup[group]][(i-1+tcn)%1024] + time[realGroup[group]][i-1]);
 	
       }      
@@ -309,7 +275,10 @@ main(int argc, char **argv){
       }
     }
     
+    if ( ActiveGroupsN < 4 ) continue;
     tree->Fill();
+    goodEvents++;
+    
   }
 
   fclose(fpin);
@@ -382,7 +351,7 @@ graphic_init( void){
   return 0;
 }
 
-
+/*
 ////////////////////////////////////////////
 // find minimum of the pulse
 // aa added protection against pulses with single high bin
@@ -413,3 +382,4 @@ float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float
   
   return timepeak;
 }
+*/
