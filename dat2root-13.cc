@@ -103,7 +103,10 @@ main(int argc, char **argv){
   double tcal[4][1024];
   for( int i = 0; i < 4; i++)
     for( int j = 0; j < 1024; j++)
-      tcal[i][j] = tcal_dV[i][j]/dV_sum[i]*200.0;
+      {
+	tcal[i][j] = tcal_dV[i][j]/dV_sum[i]*200.0;
+	std::cout << "tcal: " << tcal[i][j] << std::endl;
+      }
 
   
 
@@ -115,7 +118,7 @@ main(int argc, char **argv){
   TTree* tree = new TTree("pulse", "Wave Form");
 
   int event;
-  short   b_c[4][9][1024], tc[4]; 
+  short b_c[4][9][1024], tc[4]; 
   float time[4][1024];
   short channel[36][1024];
   float amp[36];
@@ -144,7 +147,46 @@ main(int argc, char **argv){
 
   for( int i  = i; i < 36864; i++ ) t[i] = i;
 
+  ushort _initVal = 666.0;
   for( int eventn = 0; eventn < atoi(argv[2]); eventn++){  
+    //Reset Arrays
+    for ( int l = 0; l < 36864; l++ )
+      {
+	t[l]   = _initVal;
+      }
+    for ( int l = 0; l < 4; l++ )
+      {
+	for ( int m = 0; m < 9; m++ )
+	  {
+	    for ( int n = 0; n < 1024; n++ )
+	      {
+		b_c[l][m][n] = _initVal;
+	      }
+	  }
+      }
+    for ( int l = 0; l < 36; l++ )
+      {
+	for ( int k = 0; k < 1024; k++ )
+	  {
+	    channel[l][k] = _initVal;
+	    time[l][k]    = _initVal;
+	  }
+      }
+    for ( int l = 0; l < 9; l++ )
+      {
+	for ( int k = 0; k < 1024; k++ )
+	  {
+	    samples[l][k] = _initVal;
+	  }
+      }
+
+
+    for( int i = 0; i < 4; i++)
+      for( int j = 0; j < 1024; j++)
+	{
+	  std::cout << "tcal: " << tcal[i][j] << std::endl;
+	}
+     
     // printf("---- loop  %5d\n", loop);
     event = eventn;
 
@@ -202,8 +244,9 @@ main(int argc, char **argv){
       time[realGroup[group]][0] = 0.0;
       for( int i = 1; i < 1024; i++){
 	time[realGroup[group]][i] = float(i);
+	std::cout << "realGroup " << realGroup[group] << " " << i << " tcal --> " << tcal[0][i] << " " << time[realGroup[group]][i]  << " :::" << (i-1+tcn)%1024 << "\n";
 	time[realGroup[group]][i] = float(tcal[realGroup[group]][(i-1+tcn)%1024] + time[realGroup[group]][i-1]);
-	//std::cout << i << " " << time[i] << "\n";
+	
       }      
 
       for(int i = 0; i < nsample; i++){
