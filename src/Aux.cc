@@ -44,7 +44,7 @@ float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float
   delete fpeak;
   
   return timepeak;
-}
+};
 
 float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last, TString fname)
 {
@@ -61,7 +61,32 @@ float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float
   delete fpeak;
   
   return timepeak;
-}
+};
+
+float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, TString fname)
+{
+  double x_low, x_high, y, dummy;
+  pulse->GetPoint(index_min-7, x_low, y);
+  pulse->GetPoint(index_min-2, x_high, y);  
+  pulse->GetPoint(index_min, dummy, y);  
+  TF1* flinear = new TF1("flinear","[0]*x+[1]", x_low, x_high );
+  
+  pulse->Fit("flinear","Q","", x_low, x_high );
+  double slope = flinear->GetParameter(0);
+  double b     = flinear->GetParameter(1);
+  
+  //TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
+  pulse->GetXaxis()->SetLimits(x_low-3, x_high+3);
+  pulse->SetMarkerSize(1);
+  pulse->SetMarkerStyle(20);
+  //pulse->Draw("AP");
+  //c->SaveAs(fname+"LinearFit.pdf");
+  delete flinear;
+  
+  return (0.3*y-b)/slope;
+};
+
+
 
 double GetGaussTime( TGraphErrors* pulse )
 {
@@ -90,4 +115,75 @@ float GetBaseline( int peak, short *a ) {
   // std::cout << tmpsum / tmpcount << "\n";
 
   return tmpsum / tmpcount;
-}
+};
+
+TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName )
+{
+  float Gauss[1024];
+  //Setting Errors
+  float errorX[1024], errorY[1024], channelFloat[1024];
+  float _errorY = 0.00; //5%error on Y
+  
+  for ( int i = 0; i < 1024; i++ )
+    {
+      
+      errorX[i]       = .0;
+      errorY[i]       = _errorY*channel[i];
+      channelFloat[i] = -channel[i];
+    }
+  
+  TF1 *fb = new TF1("fb","gaus(0)", 0.0, 204.6);
+  fb->SetParameter(1, 100);
+  float sigma = .2;
+  fb->SetParameter(2, sigma);
+  fb->SetParameter(0, 1/sqrt(3.1415*16.0*sigma));
+  //eval Gaussian
+  float step = 0.2;//200ps
+  for ( int i = 0; i < 1024; i++ )
+    {
+      Gauss[i] = fb->Eval( float(i)*step );
+    }
+  
+  float channelFloatFiltered[2048];
+  for ( int i = 0; i < 2048; i++ )
+    {
+      float convolvedPoint = 0;
+      for ( int j = 0; j <= i; j++ )
+	{
+	  if ( i < 1024 )
+	    {
+	      convolvedPoint += channelFloat[i-j]*Gauss[1023-j];
+	    }
+	  else
+	    {
+	      if ( 1023-(i-1023)-j >= 0 ) convolvedPoint += channelFloat[1023-j]*Gauss[1023-(i-1023)-j];
+	    }
+	}
+      //if ( i < 1024 ) channelFloatFiltered[i] = convolvedPoint;
+      channelFloatFiltered[i] = convolvedPoint;
+    }
+  
+  float channelFloatFilteredFix[1024];
+    for ( int i = 0; i < 1024; i++ )
+    {
+      channelFloatFilteredFix[i] = channelFloatFiltered[i+523];
+    }
+  
+  TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
+  //TGraphErrors* tg = new TGraphErrors( 1024, time, channelFloat, errorX, errorY );
+  TGraphErrors* tg = new TGraphErrors( 1024, time, channelFloat, errorX, errorY );
+  TGraphErrors* tg2 = new TGraphErrors( 1024, time, channelFloatFilteredFix, errorX, errorY );
+  
+  tg2->GetXaxis()->SetLimits(50, 70);
+  tg->GetXaxis()->SetLimits(50, 70);
+  //tg2->Fit("fb","","", 0.0, 204.6 );
+  tg2->SetMarkerSize(1);
+  tg->SetMarkerSize(1);
+  tg2->SetMarkerStyle(20);
+  tg->SetMarkerStyle(20);
+  tg2->Draw("AP");
+  tg2->SetMarkerColor(kBlue);
+  tg->Draw("sameP");
+  c->SaveAs(pulseName + "GausPulse.pdf");
+  return tg;
+};
