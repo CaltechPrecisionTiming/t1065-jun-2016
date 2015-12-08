@@ -134,9 +134,9 @@ TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName )
   
   TF1 *fb = new TF1("fb","gaus(0)", 0.0, 204.6);
   fb->SetParameter(1, 100);
-  float sigma = .2;
+  float sigma =1.0;
   fb->SetParameter(2, sigma);
-  fb->SetParameter(0, 1/sqrt(3.1415*16.0*sigma));
+  fb->SetParameter(0, 1/(sqrt(3.1415*2.0)*sigma) );
   //eval Gaussian
   float step = 0.2;//200ps
   for ( int i = 0; i < 1024; i++ )
@@ -166,7 +166,7 @@ TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName )
   float channelFloatFilteredFix[1024];
     for ( int i = 0; i < 1024; i++ )
     {
-      channelFloatFilteredFix[i] = channelFloatFiltered[i+523];
+      channelFloatFilteredFix[i] = 0.2*channelFloatFiltered[i+523];
     }
   
   TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
@@ -177,8 +177,8 @@ TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName )
   tg2->GetXaxis()->SetLimits(50, 70);
   tg->GetXaxis()->SetLimits(50, 70);
   //tg2->Fit("fb","","", 0.0, 204.6 );
-  tg2->SetMarkerSize(1);
-  tg->SetMarkerSize(1);
+  tg2->SetMarkerSize(0.5);
+  tg->SetMarkerSize(0.5);
   tg2->SetMarkerStyle(20);
   tg->SetMarkerStyle(20);
   tg2->Draw("AP");
