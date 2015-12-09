@@ -13,5 +13,6 @@ int FindMin( int n, short *a);
 float GausFit_MeanTime(TGraphErrors * pulse, const float index_first, const float index_last);
 float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last, TString fname);
 float GetBaseline( int peak, short *a );
+float GetPulseIntegral(int peak, short *a);
 
 #endif

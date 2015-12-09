@@ -155,6 +155,7 @@ main(int argc, char **argv){
   short channel[36][1024];
   float base[36];
   float amp[36];
+  float integral[36];
   float gauspeak[36];
   int t[36864];
   int t0[1024];
@@ -170,6 +171,7 @@ main(int argc, char **argv){
   tree->Branch("t0",  t0, "t0[1024]/I");
   tree->Branch("time", time, "time[4][1024]/F");
   tree->Branch("amp", amp, "amp[36]/F");
+  tree->Branch("int", integral, "int[36]/F");
   tree->Branch("gauspeak", gauspeak, "gauspeak[36]/F");
 
 
@@ -324,6 +326,8 @@ main(int argc, char **argv){
 	pulse->GetPoint(index_min, tmpMin, tmpAmp);
 	amp[realGroup[group]*9 + i] = tmpAmp* (1.0 / 4096.0); 
 
+	//Get Pulse Integral
+	integral[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i]);
 
 	//Gauss Time-Stamping 
 	Double_t min =0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.; 
