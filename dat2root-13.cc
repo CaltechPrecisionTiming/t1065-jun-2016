@@ -157,6 +157,7 @@ main(int argc, char **argv){
   float amp[36];
   float integral[36];
   float gauspeak[36];
+  float linearTime[36];
   int t[36864];
   int t0[1024];
  
@@ -173,6 +174,8 @@ main(int argc, char **argv){
   tree->Branch("amp", amp, "amp[36]/F");
   tree->Branch("int", integral, "int[36]/F");
   tree->Branch("gauspeak", gauspeak, "gauspeak[36]/F");
+  tree->Branch("linearTime", linearTime, "linearTime[36]/F");
+  
 
 
   uint   event_header;
@@ -319,6 +322,7 @@ main(int argc, char **argv){
 
 	//Make Pulse shape Graph
 	TGraphErrors* pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
+	GetTGraphFilter( channel[realGroup[group]*9 + i], time[realGroup[group]], pulseName );
 	
 	//Compute Amplitude : use units V
 	Double_t tmpAmp = 0.0;
@@ -330,7 +334,7 @@ main(int argc, char **argv){
 	integral[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i]);
 
 	//Gauss Time-Stamping 
-	Double_t min =0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.; 
+	Double_t min = 0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.; 
 	pulse->GetPoint(index_min, min, y);	
 	pulse->GetPoint(index_min-3, low_edge, y); // get the time of the low edge of the fit range
 	pulse->GetPoint(index_min+3, high_edge, y);  // get the time of the upper edge of the fit range	
