@@ -97,9 +97,8 @@ float GetPulseIntegral(int peak, short *a)
 {
   float integral = 0.;
 
-  //for sharp gaussian peak type pulses
   for (int i=245; i < 295; i++) {
-    integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of fC, for 50Ohm termination
+    integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
   }
 
   return -1.0 * integral;
