@@ -6,7 +6,7 @@
 #include <TF1.h>
 #include <TCanvas.h>
 
-
+TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName, bool makePlot = false );
 TGraphErrors* GetTGraph( short* channel, float* time );
 double GetGaussTime( TGraphErrors* pulse );
 int FindMin( int n, short *a);
@@ -15,7 +15,5 @@ float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, TString fna
 float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last, TString fname);
 float GetBaseline( int peak, short *a );
 float GetPulseIntegral(int peak, short *a);
-
-TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName );
 
 #endif

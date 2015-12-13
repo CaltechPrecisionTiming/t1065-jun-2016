@@ -129,7 +129,7 @@ float GetPulseIntegral(int peak, short *a)
   return -1.0 * integral;
 }
 
-TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName )
+TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName, bool makePlot )
 {
   float Gauss[1024];
   //Setting Errors
@@ -176,27 +176,28 @@ TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName )
     }
   
   float channelFloatFilteredFix[1024];
-    for ( int i = 0; i < 1024; i++ )
+  for ( int i = 0; i < 1024; i++ )
     {
       channelFloatFilteredFix[i] = 0.2*channelFloatFiltered[i+523];
     }
   
-  TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
-  //TGraphErrors* tg = new TGraphErrors( 1024, time, channelFloat, errorX, errorY );
   TGraphErrors* tg = new TGraphErrors( 1024, time, channelFloat, errorX, errorY );
   TGraphErrors* tg2 = new TGraphErrors( 1024, time, channelFloatFilteredFix, errorX, errorY );
-  
-  tg2->GetXaxis()->SetLimits(50, 70);
-  tg->GetXaxis()->SetLimits(50, 70);
-  //tg2->Fit("fb","","", 0.0, 204.6 );
-  tg2->SetMarkerSize(0.5);
-  tg->SetMarkerSize(0.5);
-  tg2->SetMarkerStyle(20);
-  tg->SetMarkerStyle(20);
-  tg2->Draw("AP");
-  tg2->SetMarkerColor(kBlue);
-  tg->Draw("sameP");
-  c->SaveAs(pulseName + "GausPulse.pdf");
+
+  if (makePlot) {
+    TCanvas* c = new TCanvas("canvas","canvas",800,400) ;         
+    tg2->GetXaxis()->SetLimits(50, 70);
+    tg->GetXaxis()->SetLimits(50, 70);
+    //tg2->Fit("fb","","", 0.0, 204.6 );
+    tg2->SetMarkerSize(0.5);
+    tg->SetMarkerSize(0.5);
+    tg2->SetMarkerStyle(20);
+    tg->SetMarkerStyle(20);
+    tg2->Draw("AP");
+    tg2->SetMarkerColor(kBlue);
+    tg->Draw("sameP");
+    c->SaveAs(pulseName + "GausPulse.pdf");
+  }
   return tg;
 };
 

@@ -91,6 +91,11 @@ main(int argc, char **argv){
   bool drawDebugPulses = false;
   if ( _drawDebugPulses == "yes" ) drawDebugPulses = true;
 
+  bool doFilter = false;
+  std::string _doFilter = ParseCommandLine( argc, argv, "--doFilter" );
+  if ( _doFilter == "yes" ) saveRaw = true;
+  if (doFilter) std::cout << "Using Algorithmic Frequency Filtering\n";
+
   //**************************************
   //Load Voltage Calibration
   //**************************************
@@ -199,9 +204,12 @@ main(int argc, char **argv){
   //Event Loop
   //*************************
   for( int eventn = 0; eventn < nEvents; eventn++){ 
+
+    //if reached end of file, then quit
+    if (feof(fpin)) break;
+      
     if ( eventn%100 == 0 ) std::cout << "event: " << eventn << std::endl;
     // printf("---- loop  %5d\n", loop);
-    //event = eventn;
     event = goodEvents;
 
     //Reading First Header Word
@@ -321,8 +329,12 @@ main(int argc, char **argv){
 	}
 
 	//Make Pulse shape Graph
-	TGraphErrors* pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
-	GetTGraphFilter( channel[realGroup[group]*9 + i], time[realGroup[group]], pulseName );
+	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
+	TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
+	TGraphErrors* pulse = originalPulse;
+	if (doFilter) {
+	  pulse = GetTGraphFilter( channel[realGroup[group]*9 + i], time[realGroup[group]], pulseName , false);
+	}
 	
 	//Compute Amplitude : use units V
 	Double_t tmpAmp = 0.0;
@@ -339,7 +351,6 @@ main(int argc, char **argv){
 	pulse->GetPoint(index_min-3, low_edge, y); // get the time of the low edge of the fit range
 	pulse->GetPoint(index_min+3, high_edge, y);  // get the time of the upper edge of the fit range	
 
-	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
 	float timepeak = 0;
 	if( drawDebugPulses) {
 	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
@@ -360,6 +371,7 @@ main(int argc, char **argv){
   }
 
   fclose(fpin);
+  cout << "Processed total of " << goodEvents << " events\n";
 
   file->Write();
   file->Close();
