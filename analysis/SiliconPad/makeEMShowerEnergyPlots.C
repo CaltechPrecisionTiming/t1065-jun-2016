@@ -23,7 +23,9 @@
 #include "TLatex.h"
 #include <math.h> 
 
-void MakeChargePlot(string filename, string plotname, double scalefactor, double fitmin, double fitmax) {
+void MakeChargePlot(string filename, string plotname, bool selectElectron, double attenuationFactor, 
+		    double xmin, double xmax, 
+		    double fitmin, double fitmax) {
   // Get the tree
 
   TFile *inputfile = TFile::Open(filename.c_str(),"READ");
@@ -44,14 +46,14 @@ void MakeChargePlot(string filename, string plotname, double scalefactor, double
 
   //create histograms
   TH1F *histIntCharge;
-  histIntCharge = new TH1F("histIntCharge","; Integrated Charge [pC];Number of Events",50,0,30);
+  histIntCharge = new TH1F("histIntCharge","; Integrated Charge [pC];Number of Events",100, xmin,xmax);
   
   //read all entries and fill the histograms
   Long64_t nentries = tree->GetEntries();
 
   std::cout<<"Number of events in Sample: "<<nentries<<std::endl;  
   for (Long64_t iEntry=0;iEntry<nentries;iEntry++) {
-    if (iEntry %100 == 0) cout << "Processing Event " << iEntry << "\n";
+    if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
     tree->GetEntry(iEntry);    
   
     float photekTimeGauss = gauspeak[18];
@@ -63,10 +65,13 @@ void MakeChargePlot(string filename, string plotname, double scalefactor, double
        
     //use photek amplitude cut for electron ID
     //cout << "test: " << photekAmp << " " << siliconIntegral << "\n";
-    if (photekAmp > 0.05) {      
-      cout << "fill " << siliconIntegral << "\n";
-      histIntCharge->Fill(siliconIntegral);
+    if (selectElectron) {
+      if( !(photekAmp > 0.05)) continue;
     }
+    
+    //Fill histogram
+    histIntCharge->Fill(siliconIntegral * attenuationFactor);
+
   }
 
 
@@ -75,7 +80,7 @@ void MakeChargePlot(string filename, string plotname, double scalefactor, double
 
   //Energy plot
   c = new TCanvas("c","c",600,600);  
-  histIntCharge->SetAxisRange(0,30,"X");
+  histIntCharge->SetAxisRange(xmin,xmax,"X");
   histIntCharge->SetTitle("");
   histIntCharge->GetXaxis()->SetTitle("Integrated Charge [pC]");
   histIntCharge->GetYaxis()->SetTitle("Number of Events");
@@ -91,8 +96,9 @@ void MakeChargePlot(string filename, string plotname, double scalefactor, double
   tex->SetTextSize(0.040);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
-  tex->DrawLatex(0.55, 0.85, Form("Mean = %.2f #pm %.2f %s",fitter->GetParameter(1),TMath::Max(0.01,fitter->GetParError(1)),"pC"));
-  //tex->DrawLatex(0.15, 0.92, Form("Attenuation Factor = %.3f",scalefactor));
+  tex->DrawLatex(0.45, 0.85, Form("Mean = %.2f #pm %.2f %s",fitter->GetParameter(1),TMath::Max(0.01,fitter->GetParError(1)),"pC"));
+  tex->DrawLatex(0.45, 0.80, Form("#sigma = %.2f #pm %.2f %s",fitter->GetParameter(2),TMath::Max(0.01,fitter->GetParError(2)),"pC"));
+  //tex->DrawLatex(0.15, 0.92, Form("Attenuation Factor = %.3f",attenuationFactor));
   
   c->SaveAs( Form("%s_charge.gif", plotname.c_str()) );
   c->SaveAs( Form("%s_charge.pdf", plotname.c_str()) );
@@ -421,8 +427,23 @@ void makeEMShowerEnergyPlots() {
   //*************************************
   // Charge Vs Energy
   //*************************************
-  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run109.root","Electron_6X0_8GeV", 1.0, 2, 20);
-  MakeChargePlot("/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run110.root","Electron_6X0_16GeV", 1.0, 4, 13);
+
+  //Noise Runs
+  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run120-0.dat-full.root", "NoiseNoBeam", false, sqrt(10.0), -10, 10, -2,2 );
+  // MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run121-0.dat-full.root", "NoiseNoBeam", false, 1, -10, 10, -2,2 );
+
+
+  //Protons
+  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run125.root", "Proton", false, 1, -2, 8, 0,3 );
+
+
+  //Electrons
+  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run123-124.root", "Electron_0X0", false, 1, -2, 8, 0,3 );
+
+
+
+  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run109.root","Electron_6X0_8GeV", true, 10.0, 0, 300, 10, 60);
+  MakeChargePlot("/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run110.root","Electron_6X0_16GeV", true, 10.0, 0, 300, 40, 130);
  
 
 
