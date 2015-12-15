@@ -15,12 +15,18 @@ CPPFLAGS += -g -std=c++11
 #CPPFLAGS += -g
 
 TARGET = dat2rootCP
+TARGET1 = makeAmp
+TARGET2 = makeSigma
 
 SRC = dat2root-13.cc src/Aux.cc
+SRC1 = src/makeAmplitude.cc
+SRC2 = analysis/SiliconPad/makeSigmaT.cc
 
 OBJ = $(SRC:.cc=.o)
+OBJ1 = $(SRC1:.cc=.o)
+OBJ2 = $(SRC2:.cc=.o)
 
-all : $(TARGET)
+all : $(TARGET) $(TARGET1) $(TARGET2) 
 
 $(TARGET) : $(OBJ)
 	$(LD) $(CPPFLAGS) -o $(TARGET) $(OBJ) $(LDFLAGS)
@@ -28,6 +34,17 @@ $(TARGET) : $(OBJ)
 	@echo $<
 	@echo $^
 
+$(TARGET1) : $(OBJ1)
+	$(LD) $(CPPFLAGS) -o $(TARGET1) $(OBJ1) $(LDFLAGS)
+	@echo $@
+	@echo $<
+	@echo $^
+
+$(TARGET2) : $(OBJ2)
+	$(LD) $(CPPFLAGS) -o $(TARGET2) $(OBJ2) $(LDFLAGS)
+	@echo $@
+	@echo $<
+	@echo $^
 
 %.o : %.cc
 	$(CXX) $(CPPFLAGS) -o $@ -c $<
