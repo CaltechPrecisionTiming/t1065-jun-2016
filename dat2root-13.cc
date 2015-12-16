@@ -90,6 +90,7 @@ main(int argc, char **argv){
   std::string _drawDebugPulses = ParseCommandLine( argc, argv, "--debug" );
   bool drawDebugPulses = false;
   if ( _drawDebugPulses == "yes" ) drawDebugPulses = true;
+  std::cout << "draw: " << drawDebugPulses << std::endl;
 
   bool doFilter = false;
   std::string _doFilter = ParseCommandLine( argc, argv, "--doFilter" );
@@ -352,12 +353,18 @@ main(int argc, char **argv){
 	pulse->GetPoint(index_min+3, high_edge, y);  // get the time of the upper edge of the fit range	
 
 	float timepeak = 0;
+	float timecf   = 0;
 	if( drawDebugPulses) {
+	  std::cout << "draw" << std::endl;
 	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
+	  timecf   = RisingEdgeFitTime( pulse, index_min, "linearFit_" + pulseName, true );
 	} else {
 	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
+	  timecf   = RisingEdgeFitTime( pulse, index_min, "" );
+	  //timecf   = RisingEdgeFitTime( pulse, index_min, "linearFit_" + pulseName, true );
 	}
-	gauspeak[realGroup[group]*9 + i] = timepeak;
+	gauspeak[realGroup[group]*9 + i]   = timepeak;
+	linearTime[realGroup[group]*9 + i] = timecf;
       }
         
       dummy = fread( &event_header, sizeof(uint), 1, fpin);
