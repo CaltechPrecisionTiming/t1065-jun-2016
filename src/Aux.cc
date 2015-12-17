@@ -63,7 +63,7 @@ float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float
   return timepeak;
 };
 
-float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, TString fname, bool makePlot )
+float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, const float constantFraction, TString fname, bool makePlot )
 {
   double x_low, x_high, y, dummy;
   pulse->GetPoint(index_min-7, x_low, y);
@@ -88,7 +88,7 @@ float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, TString fna
     }
   delete flinear;
   
-  return (0.3*y-b)/slope;
+  return (constantFraction*y-b)/slope;
 };
 
 

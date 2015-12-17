@@ -89,8 +89,10 @@ main(int argc, char **argv){
 
   std::string _drawDebugPulses = ParseCommandLine( argc, argv, "--debug" );
   bool drawDebugPulses = false;
-  if ( _drawDebugPulses == "yes" ) drawDebugPulses = true;
-  std::cout << "draw: " << drawDebugPulses << std::endl;
+  if ( _drawDebugPulses == "yes" ) {
+    drawDebugPulses = true;
+    std::cout << "draw: " << drawDebugPulses << std::endl;
+  }
 
   bool doFilter = false;
   std::string _doFilter = ParseCommandLine( argc, argv, "--doFilter" );
@@ -163,7 +165,11 @@ main(int argc, char **argv){
   float amp[36];
   float integral[36];
   float gauspeak[36];
-  float linearTime[36];
+  float linearTime0[36];
+  float linearTime15[36];
+  float linearTime30[36];
+  float linearTime45[36];
+  float linearTime60[36];
   int t[36864];
   int t0[1024];
  
@@ -180,9 +186,11 @@ main(int argc, char **argv){
   tree->Branch("amp", amp, "amp[36]/F");
   tree->Branch("int", integral, "int[36]/F");
   tree->Branch("gauspeak", gauspeak, "gauspeak[36]/F");
-  tree->Branch("linearTime", linearTime, "linearTime[36]/F");
-  
-
+  tree->Branch("linearTime0", linearTime0, "linearTime0[36]/F");
+  tree->Branch("linearTime15", linearTime15, "linearTime15[36]/F");
+  tree->Branch("linearTime30", linearTime30, "linearTime30[36]/F");
+  tree->Branch("linearTime45", linearTime45, "linearTime45[36]/F");
+  tree->Branch("linearTime60", linearTime60, "linearTime60[36]/F");
 
   uint   event_header;
   uint   temp[3];
@@ -353,20 +361,35 @@ main(int argc, char **argv){
 	pulse->GetPoint(index_min+3, high_edge, y);  // get the time of the upper edge of the fit range	
 
 	float timepeak = 0;
-	float timecf   = 0;
+	float timecf0   = 0;
+	float timecf15   = 0;
+	float timecf30   = 0;
+	float timecf45   = 0;
+	float timecf60   = 0;
 	if( drawDebugPulses) {
 	  std::cout << "draw" << std::endl;
 	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
-	  timecf   = RisingEdgeFitTime( pulse, index_min, "linearFit_" + pulseName, true );
+	  timecf0   = RisingEdgeFitTime( pulse, index_min, 0.0, "linearFit_" + pulseName, true );
+	  timecf15   = RisingEdgeFitTime( pulse, index_min, 0.15, "linearFit_" + pulseName, true );
+	  timecf30   = RisingEdgeFitTime( pulse, index_min, 0.3, "linearFit_" + pulseName, true );
+	  timecf45   = RisingEdgeFitTime( pulse, index_min, 0.45, "linearFit_" + pulseName, true );
+	  timecf60   = RisingEdgeFitTime( pulse, index_min, 0.60, "linearFit_" + pulseName, true );
 	} else {
 	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
-	  timecf   = RisingEdgeFitTime( pulse, index_min, "" );
-	  //timecf   = RisingEdgeFitTime( pulse, index_min, "linearFit_" + pulseName, true );
+	  timecf0   = RisingEdgeFitTime( pulse, index_min, 0.0, "" );
+	  timecf15   = RisingEdgeFitTime( pulse, index_min, 0.15, "" );
+	  timecf30   = RisingEdgeFitTime( pulse, index_min, 0.30, "" );
+	  timecf45   = RisingEdgeFitTime( pulse, index_min, 0.45, "" );
+	  timecf60   = RisingEdgeFitTime( pulse, index_min, 0.60, "" );
 	}
 	gauspeak[realGroup[group]*9 + i]   = timepeak;
-	linearTime[realGroup[group]*9 + i] = timecf;
+	linearTime0[realGroup[group]*9 + i] = timecf0;
+	linearTime15[realGroup[group]*9 + i] = timecf15;
+	linearTime30[realGroup[group]*9 + i] = timecf30;
+	linearTime45[realGroup[group]*9 + i] = timecf45;
+	linearTime60[realGroup[group]*9 + i] = timecf60;
       }
-        
+      
       dummy = fread( &event_header, sizeof(uint), 1, fpin);
      
     }
