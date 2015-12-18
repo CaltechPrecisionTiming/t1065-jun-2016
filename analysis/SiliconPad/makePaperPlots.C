@@ -309,7 +309,7 @@ void makeTimeResolutionVsVoltage(){
 
   gr -> Draw("APL");
 
-  gr->GetXaxis()->SetTitle("Voltage ");
+  gr->GetXaxis()->SetTitle("Bias Voltage [V] ");
   gr->GetYaxis()->SetTitle("Time Resolution [ps]");
   gr->GetXaxis()->SetTitleSize(0.045);
   gr->GetXaxis()->SetLabelSize(0.045);
@@ -325,7 +325,8 @@ void makeTimeResolutionVsVoltage(){
 
 void makePaperPlots() {
 
-  makeTimeResolutionVsBeamEnergy();
-
+  //makeTimeResolutionVsBeamEnergy();
+  //makeTimeResolutionVsAbsorber();
+  makeTimeResolutionVsVoltage();
 
 }
