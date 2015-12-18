@@ -27,7 +27,7 @@
 #include "TPad.h"
 #include <math.h> 
 
-void MakeAmplitudePlot(std::string filename, std::string outname, float electronIDcut) {
+void MakeAmplitudePlot(std::string filename, std::string outname, float electronIDcut, std::string siliconAlgo) {
   // Get the tree
 
 
@@ -38,21 +38,36 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
   Float_t amp[36];
   Float_t integral[36];
   Float_t gauspeak[36];
+  Float_t linearTime0[36];
+  Float_t linearTime15[36];
+  Float_t linearTime30[36];
+  Float_t linearTime45[36];
+  Float_t linearTime60[36];
 
   tree->SetBranchStatus("*",0);
   tree->SetBranchStatus("amp",1);
   tree->SetBranchStatus("int",1);
   tree->SetBranchStatus("gauspeak",1);
+  tree->SetBranchStatus("linearTime0",1);
+  tree->SetBranchStatus("linearTime15",1);
+  tree->SetBranchStatus("linearTime30",1);
+  tree->SetBranchStatus("linearTime45",1);
+  tree->SetBranchStatus("linearTime60",1);
 
   tree->SetBranchAddress("amp",&amp);
   tree->SetBranchAddress("int",&integral);
   tree->SetBranchAddress("gauspeak",&gauspeak);
+  tree->SetBranchAddress("linearTime0",&linearTime0);
+  tree->SetBranchAddress("linearTime15",&linearTime15);
+  tree->SetBranchAddress("linearTime30",&linearTime30);
+  tree->SetBranchAddress("linearTime45",&linearTime45);
+  tree->SetBranchAddress("linearTime60",&linearTime60);
 
   //create histograms
   const int nBinsX = 25;
   const float Xrange = 20*nBinsX;
 
-  TProfile * DeltaT_vs_Charge = new TProfile("DeltaT_vs_Charge", "DeltaT_vs_Charge", nBinsX, 0, Xrange, 2, 4);
+  TProfile * DeltaT_vs_Charge = new TProfile("DeltaT_vs_Charge", "DeltaT_vs_Charge", nBinsX, 0, Xrange, 2, 6);
   TH2F *DeltaT_vs_Charge_Corrected = new TH2F("DeltaT_vs_Charge_Corrected","; X; Y", nBinsX, 0, Xrange, 120, -2, 2);
   TH1F *Charge = new TH1F("Charge","Charge", nBinsX, 0, Xrange);
   TH1F *DeltaT = new TH1F("DeltaT","DeltaT", 200, -1.,1.);
@@ -61,19 +76,40 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
   Long64_t nentries = tree->GetEntries();
   std::cout<<"Number of events in Physics Sample: "<<nentries<<std::endl;  
 
+  float timeSilicon = 0.;
+
+  std::cout<<"Using algorithm for silicon: "<<siliconAlgo<<std::endl;
+
   for (Long64_t iEntry=0;iEntry<nentries;iEntry++) {
     
     tree->GetEntry(iEntry);    
 
-    if ( iEntry%1000 == 0 ) std::cout << "event: " << iEntry << std::endl;
+    if(strstr(siliconAlgo.c_str(), "gaus")!=NULL) 
+      timeSilicon = gauspeak[21];
+    if(strstr(siliconAlgo.c_str(), "lin0")!=NULL) 
+      timeSilicon = linearTime0[21];
+    if(strstr(siliconAlgo.c_str(), "lin15")!=NULL) 
+      timeSilicon = linearTime15[21];
+    if(strstr(siliconAlgo.c_str(), "lin30")!=NULL) 
+      timeSilicon = linearTime30[21];
+    if(strstr(siliconAlgo.c_str(), "lin45")!=NULL) 
+      timeSilicon = linearTime45[21];
+    if(strstr(siliconAlgo.c_str(), "lin60")!=NULL) 
+      timeSilicon = linearTime60[21];
+
+    if ( iEntry%1000 == 0 ) std::cout << "First loop, event: " << iEntry << std::endl;
     
     // select electron showers and reject saturated events
     if(amp[18] > electronIDcut && amp[21]<0.48 && amp[18]<0.48 )
       {
-	DeltaT_vs_Charge->Fill(10*integral[21], gauspeak[18]-gauspeak[21]);
+	DeltaT_vs_Charge->Fill(10*integral[21], gauspeak[18]-timeSilicon);
 	Charge->Fill(10*integral[21]);
+	// std::cout<<gauspeak[18]-timeSilicon<<std::endl;
+	
       }
-  }
+  }  
+
+  timeSilicon = 0.;
 
   // select maximum range in charge where the time walk correction is extracted
   float maxX = 0;
@@ -99,14 +135,27 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
     {      
       tree->GetEntry(iEntry);  
       
+     if(strstr(siliconAlgo.c_str(), "gaus")!=NULL) 
+      timeSilicon = gauspeak[21];
+    if(strstr(siliconAlgo.c_str(), "lin0")!=NULL) 
+      timeSilicon = linearTime0[21];
+    if(strstr(siliconAlgo.c_str(), "lin15")!=NULL) 
+      timeSilicon = linearTime15[21];
+    if(strstr(siliconAlgo.c_str(), "lin30")!=NULL) 
+      timeSilicon = linearTime30[21];
+    if(strstr(siliconAlgo.c_str(), "lin45")!=NULL) 
+      timeSilicon = linearTime45[21];
+    if(strstr(siliconAlgo.c_str(), "lin60")!=NULL) 
+      timeSilicon = linearTime60[21];
+
       if ( iEntry%1000 == 0 ) std::cout << "event: " << iEntry << std::endl;
 
       // select electron showers and reject saturated events, applying the slope correction      
       if(amp[18] > electronIDcut && amp[21]<0.48 && amp[18]<0.48 )
 	{
 	  float x = 10*integral[21];
-	  DeltaT_vs_Charge_Corrected->Fill(10*integral[21], gauspeak[18]-gauspeak[21] - (a + b*x + c*x*x));
-	  DeltaT->Fill(gauspeak[18]-gauspeak[21] - (a + b*x + c*x*x));
+	  DeltaT_vs_Charge_Corrected->Fill(10*integral[21], gauspeak[18]-timeSilicon - (a + b*x + c*x*x));
+	  DeltaT->Fill(gauspeak[18]-timeSilicon - (a + b*x + c*x*x));
 	}
    }
   
@@ -158,14 +207,14 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
 
   gr->Draw("ACP");
 
-  DeltaT_vs_Charge->SaveAs(Form("%s_DeltaT_vs_Charge.root", outname.c_str()));
-  DeltaT_vs_Charge_Corrected->SaveAs(Form("%s_DeltaT_vs_Charge_Corrected.root", outname.c_str()));
-  gr->SaveAs(Form("%s_SigmaT_vs_Charge.root", outname.c_str()));
-  DeltaT->SaveAs(Form("%s_DeltaT.root", outname.c_str()));
+  DeltaT_vs_Charge->SaveAs(Form("%s_%s_DeltaT_vs_Charge.root", outname.c_str(), siliconAlgo.c_str()));
+  DeltaT_vs_Charge_Corrected->SaveAs(Form("%s_%s_DeltaT_vs_Charge_Corrected.root", outname.c_str(), siliconAlgo.c_str()));
+  gr->SaveAs(Form("%s_%s_SigmaT_vs_Charge.root", outname.c_str(), siliconAlgo.c_str()));
+  DeltaT->SaveAs(Form("%s_%s_DeltaT.root", outname.c_str(), siliconAlgo.c_str()));
 }
 
 int main(int argc, char **argv)
 {
   
-  MakeAmplitudePlot(argv[1], argv[2], atof(argv[3]));
+  MakeAmplitudePlot(argv[1], argv[2], atof(argv[3]), argv[4]);
 }
