@@ -106,14 +106,22 @@ void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, dou
     //use photek amplitude cut for electron ID
     //cout << "test: " << photekAmp << " " << siliconIntegral << "\n";
     if( !(photekAmp > ampCutOnPhotek)) continue;
-
     
     //Fill histogram
     double amplificationFactor = GetAmplificationFactor( 1000 * amp[21] * (attenuationFactor/10) );
     if (forMIP) {
+
+      //don't fill overflow bins
+      if (1000* siliconIntegral * attenuationFactor / amplificationFactor / 1.37 > xmax) continue;
+
+      //for MIPs only, we use the amplification factor without the 1.37 correction factor
       histIntCharge->Fill(1000* siliconIntegral * attenuationFactor / amplificationFactor / 1.37 ); 
       histIntMIP->Fill(1000* siliconIntegral * attenuationFactor / amplificationFactor / 6.5 / 1.37); 
     } else {
+
+      //don't fill overflow bins
+      if (1000* siliconIntegral * attenuationFactor / amplificationFactor > xmax) continue;
+
       histIntCharge->Fill(1000* siliconIntegral * attenuationFactor / amplificationFactor );
       histIntMIP->Fill(1000* siliconIntegral * attenuationFactor / amplificationFactor / 6.5);
       //cout << 1000* amp[21] << " : " << amplificationFactor << " : " << siliconIntegral * attenuationFactor / amplificationFactor << "\n";
@@ -127,11 +135,19 @@ void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, dou
 
   //Energy plot
   c = new TCanvas("c","c",600,600);  
+  c->SetRightMargin(0.05);
+  c->SetLeftMargin(0.17);
   histIntCharge->SetAxisRange(xmin,xmax,"X");
   histIntCharge->SetTitle("");
   histIntCharge->GetXaxis()->SetTitle("Integrated Charge [fC]");
+  histIntCharge->GetXaxis()->SetTitleSize(0.045);
+  histIntCharge->GetXaxis()->SetLabelSize(0.045);
   histIntCharge->GetYaxis()->SetTitle("Number of Events");
   histIntCharge->GetYaxis()->SetTitleOffset(1.3);
+  histIntCharge->GetYaxis()->SetTitleSize(0.05);
+  histIntCharge->GetYaxis()->SetLabelSize(0.045);
+  histIntCharge->GetYaxis()->SetLabelOffset(0.015);
+  histIntCharge->GetYaxis()->SetTitleOffset(1.7);
   histIntCharge->SetMaximum(1.2*histIntCharge->GetMaximum());
   histIntCharge->Draw();
   histIntCharge->SetStats(0);
@@ -140,7 +156,7 @@ void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, dou
   
   TLatex *tex = new TLatex();
   tex->SetNDC();
-  tex->SetTextSize(0.040);
+  tex->SetTextSize(0.050);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
   /* tex->DrawLatex(0.45, 0.85, Form("Mean = %.1f #pm %.1f %s",fitter->GetParameter(1),TMath::Max(0.01,fitter->GetParError(1)),"fC")); */
@@ -155,11 +171,19 @@ void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, dou
   if (!forMIP) {
     //Energy plot
     c = new TCanvas("c","c",600,600);  
+    c->SetRightMargin(0.05);
+    c->SetLeftMargin(0.15);
     histIntMIP->SetAxisRange(xmin/6.5,xmax/6.5,"X");
     histIntMIP->SetTitle("");
     histIntMIP->GetXaxis()->SetTitle("Integrated Charge / Charge for MIP");
+    histIntMIP->GetXaxis()->SetTitleSize(0.045);
+    histIntMIP->GetXaxis()->SetLabelSize(0.045);
     histIntMIP->GetYaxis()->SetTitle("Number of Events");
     histIntMIP->GetYaxis()->SetTitleOffset(1.3);
+    histIntMIP->GetYaxis()->SetTitleSize(0.05);
+    histIntMIP->GetYaxis()->SetLabelSize(0.045);
+    histIntMIP->GetYaxis()->SetLabelOffset(0.015);
+    histIntMIP->GetYaxis()->SetTitleOffset(1.5);
     histIntMIP->SetMaximum(1.2*histIntMIP->GetMaximum());
     histIntMIP->Draw();
     histIntMIP->SetStats(0);

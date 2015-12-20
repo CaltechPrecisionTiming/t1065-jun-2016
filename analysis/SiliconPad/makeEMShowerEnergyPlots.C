@@ -60,8 +60,8 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   graphChargeVsEnergy->GetXaxis()->SetLabelSize(0.045);
   graphChargeVsEnergy->GetXaxis()->SetTitleOffset(1.0);
   graphChargeVsEnergy->GetYaxis()->SetTitle("Integrated Charge [pC]");
-  graphChargeVsEnergy->GetYaxis()->SetTitleOffset(1.02);
-  graphChargeVsEnergy->GetYaxis()->SetTitleSize(0.045);
+  graphChargeVsEnergy->GetYaxis()->SetTitleOffset(1.0);
+  graphChargeVsEnergy->GetYaxis()->SetTitleSize(0.05);
   graphChargeVsEnergy->GetYaxis()->SetLabelSize(0.045);
   graphChargeVsEnergy->GetXaxis()->SetRangeUser(0,40);
   graphChargeVsEnergy->GetYaxis()->SetRangeUser(0,500);
@@ -81,8 +81,8 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   graphMIPVsEnergy->GetXaxis()->SetLabelSize(0.045);
   graphMIPVsEnergy->GetXaxis()->SetTitleOffset(1.0);
   graphMIPVsEnergy->GetYaxis()->SetTitle("Charge / Charge per MIP");
-  graphMIPVsEnergy->GetYaxis()->SetTitleOffset(1.02);
-  graphMIPVsEnergy->GetYaxis()->SetTitleSize(0.045);
+  graphMIPVsEnergy->GetYaxis()->SetTitleOffset(0.9);
+  graphMIPVsEnergy->GetYaxis()->SetTitleSize(0.05);
   graphMIPVsEnergy->GetYaxis()->SetLabelSize(0.045);
   graphMIPVsEnergy->GetXaxis()->SetRangeUser(0,40);
   graphMIPVsEnergy->GetYaxis()->SetRangeUser(0,80);
@@ -122,15 +122,16 @@ void MakeAmplitudeVsAbsorberThicknessGraph() {
   TVirtualFitter *fitter = 0;
 
   c = new TCanvas("c","c",800,600);
+  c->SetBottomMargin(0.12);
   graphChargeVsAbsorber->Draw("AP");
   graphChargeVsAbsorber->SetTitle("");
   graphChargeVsAbsorber->GetXaxis()->SetTitle("Tungsten Absorber Thickness [X_{0}]");
   graphChargeVsAbsorber->GetXaxis()->SetTitleSize(0.045);
   graphChargeVsAbsorber->GetXaxis()->SetLabelSize(0.045);
-  graphChargeVsAbsorber->GetXaxis()->SetTitleOffset(1.0);
+  graphChargeVsAbsorber->GetXaxis()->SetTitleOffset(1.2);
   graphChargeVsAbsorber->GetYaxis()->SetTitle("Integrated Charge [pC]");
-  graphChargeVsAbsorber->GetYaxis()->SetTitleOffset(1.02);
-  graphChargeVsAbsorber->GetYaxis()->SetTitleSize(0.045);
+  graphChargeVsAbsorber->GetYaxis()->SetTitleOffset(1.0);
+  graphChargeVsAbsorber->GetYaxis()->SetTitleSize(0.05);
   graphChargeVsAbsorber->GetYaxis()->SetLabelSize(0.045);
   graphChargeVsAbsorber->GetXaxis()->SetRangeUser(0.0,8.0);
   graphChargeVsAbsorber->GetYaxis()->SetRangeUser(0,200);
@@ -143,15 +144,17 @@ void MakeAmplitudeVsAbsorberThicknessGraph() {
 
 
   c = new TCanvas("c","c",800,600);
+  c->SetBottomMargin(0.12);
+
   graphMIPVsAbsorber->Draw("AP");
   graphMIPVsAbsorber->SetTitle("");
   graphMIPVsAbsorber->GetXaxis()->SetTitle("Tungsten Absorber Thickness [X_{0}]");
   graphMIPVsAbsorber->GetXaxis()->SetTitleSize(0.045);
   graphMIPVsAbsorber->GetXaxis()->SetLabelSize(0.045);
-  graphMIPVsAbsorber->GetXaxis()->SetTitleOffset(1.0);
+  graphMIPVsAbsorber->GetXaxis()->SetTitleOffset(1.2);
   graphMIPVsAbsorber->GetYaxis()->SetTitle("Charge / Charge per MIP");
-  graphMIPVsAbsorber->GetYaxis()->SetTitleOffset(1.02);
-  graphMIPVsAbsorber->GetYaxis()->SetTitleSize(0.045);
+  graphMIPVsAbsorber->GetYaxis()->SetTitleOffset(0.9);
+  graphMIPVsAbsorber->GetYaxis()->SetTitleSize(0.05);
   graphMIPVsAbsorber->GetYaxis()->SetLabelSize(0.045);
   graphMIPVsAbsorber->GetXaxis()->SetRangeUser(0.0, 8.0);
   graphMIPVsAbsorber->GetYaxis()->SetRangeUser(0, 30);
@@ -260,7 +263,7 @@ void makeEMShowerEnergyPlots() {
 
 
   //Protons
-  // MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run125.root", "Proton", -99, 1, -5, 50, 0,10, true );
+  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run125.root", "Proton", -99, 1, -5, 50, 0,10, true );
 
 
   //Electrons
@@ -271,7 +274,7 @@ void makeEMShowerEnergyPlots() {
   //MakeChargePlot("root://eoscms://eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run110.root","Electron_6X0_16GeV", 0.1, 10.0, 0, 500, 150, 300);
   //MakeChargePlot("root://eoscms://eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run113-114.root","Electron_6X0_32GeV", 0.1, 10.0, 0, 700, 250, 450);
  
-  // MakeAmplitudeVsBeamEnergyGraph();
+  //MakeAmplitudeVsBeamEnergyGraph();
   
 
   //*************************************
