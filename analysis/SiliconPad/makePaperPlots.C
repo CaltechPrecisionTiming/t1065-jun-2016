@@ -243,6 +243,10 @@ void makeTimeResolutionVsAbsorber(){
   tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus3->GetParameter(2), 1000*fgaus3->GetParError(2)));
   c->SaveAs("deltaT_6X0.pdf");
 
+
+  c = new TCanvas ("c","c",800, 600);
+  c->SetBottomMargin(0.12);
+
   float res[4]    = {1000*res0, 1000*res1, 1000*res2, 1000*res3}; 
   float charge[4] = {1., 2, 4, 6};
   float errorX[4] = {0.}; 
@@ -259,11 +263,11 @@ void makeTimeResolutionVsAbsorber(){
 
   gr -> Draw("APL");
 
-  gr->GetXaxis()->SetTitle("Tungsten Absober Thickness [X0]");
+  gr->GetXaxis()->SetTitle("Tungsten Absober Thickness [X_{0}]");
   gr->GetYaxis()->SetTitle("Time Resolution [ps]");
   gr->GetXaxis()->SetTitleSize(0.045);
   gr->GetXaxis()->SetLabelSize(0.045);
-  gr->GetXaxis()->SetTitleOffset(1.0);
+  gr->GetXaxis()->SetTitleOffset(1.2);
   gr->GetYaxis()->SetTitleOffset(0.95);
   gr->GetYaxis()->SetTitleSize(0.05);
   gr->GetYaxis()->SetLabelSize(0.045);
@@ -339,6 +343,7 @@ void makeTimeResolutionVsVoltage(){
   tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus3->GetParameter(2), 1000*fgaus3->GetParError(2)));
   c->SaveAs("deltaT_500V.pdf");
 
+
   float res[4]    = {1000*res0, 1000*res1, 1000*res2, 1000*res3}; 
   float charge[4] = {200., 300., 400., 500.};
   float errorX[4] = {0.}; 
@@ -371,8 +376,8 @@ void makeTimeResolutionVsVoltage(){
 
 void makePaperPlots() {
 
-  makeTimeResolutionVsBeamEnergy();
-  //makeTimeResolutionVsAbsorber();
+  //makeTimeResolutionVsBeamEnergy();
+  makeTimeResolutionVsAbsorber();
   //makeTimeResolutionVsVoltage();
 
 }
