@@ -255,16 +255,16 @@ void makeEMShowerEnergyPlots() {
   //*************************************
 
   //Noise Runs
-  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run120-0.dat-full.root", "NoiseNoBeam", -99, sqrt(10.0), -10, 10, -2,2 );
-  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run121-0.dat-full.root", "NoiseNoBeamNoAttenuator", -99, 1, -10, 10, -2,2 );
+  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run120-0.dat-full.root", "NoiseNoBeam", -99, sqrt(10.0), -10, 10, -4,4 , true);
+  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run121-0.dat-full.root", "NoiseNoBeamNoAttenuator", -99, 1, -10, 10, -4,4 , true);
 
 
   //Protons
-  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run125.root", "Proton", -99, 1, -2, 8, 0,3 );
+  // MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run125.root", "Proton", -99, 1, -5, 50, 0,10, true );
 
 
   //Electrons
-  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run123-124.root", "Electron_0X0", -99, 1, -2, 8, 0,3 );
+  //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run123-124.root", "Electron_0X0", -99, 1, -5, 50, 0,10, true );
   
   //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run112-500V_123.root", "Electron_6X0_4GeV", 0.02, 10.0, 0, 200, 20, 80 );
   //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run109.root","Electron_6X0_8GeV", 0.05, 10.0, 0, 300, 50, 175);

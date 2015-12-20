@@ -63,7 +63,7 @@ double GetAmplificationFactor ( double measuredAmplitude ) {
 
 void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, double attenuationFactor, 
 		    double xmin, double xmax, 
-		    double fitmin, double fitmax) {
+		    double fitmin, double fitmax, bool forMIP = false) {
   // Get the tree
 
   TFile *inputfile = TFile::Open(filename.c_str(),"READ");
@@ -85,6 +85,8 @@ void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, dou
   //create histograms
   TH1F *histIntCharge;
   histIntCharge = new TH1F("histIntCharge","; Integrated Charge [fC];Number of Events", 50, xmin,xmax);
+  TH1F *histIntMIP;
+  histIntMIP = new TH1F("histIntMIP","; Integrated Charge / Charge for MIP ; Number of Events", 50, xmin/6.5,xmax/6.5);
   
   //read all entries and fill the histograms
   Long64_t nentries = tree->GetEntries();
@@ -108,8 +110,14 @@ void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, dou
     
     //Fill histogram
     double amplificationFactor = GetAmplificationFactor( 1000 * amp[21] * (attenuationFactor/10) );
-    histIntCharge->Fill(1000* siliconIntegral * attenuationFactor / amplificationFactor);
-    //cout << 1000* amp[21] << " : " << amplificationFactor << " : " << siliconIntegral * attenuationFactor / amplificationFactor << "\n";
+    if (forMIP) {
+      histIntCharge->Fill(1000* siliconIntegral * attenuationFactor / amplificationFactor / 1.37 ); 
+      histIntMIP->Fill(1000* siliconIntegral * attenuationFactor / amplificationFactor / 6.5 / 1.37); 
+    } else {
+      histIntCharge->Fill(1000* siliconIntegral * attenuationFactor / amplificationFactor );
+      histIntMIP->Fill(1000* siliconIntegral * attenuationFactor / amplificationFactor / 6.5);
+      //cout << 1000* amp[21] << " : " << amplificationFactor << " : " << siliconIntegral * attenuationFactor / amplificationFactor << "\n";
+    }
 
   }
 
@@ -135,13 +143,42 @@ void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, dou
   tex->SetTextSize(0.040);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
-  tex->DrawLatex(0.45, 0.85, Form("Mean = %.1f #pm %.1f %s",fitter->GetParameter(1),TMath::Max(0.01,fitter->GetParError(1)),"fC"));
-  tex->DrawLatex(0.45, 0.80, Form("#sigma = %.1f #pm %.1f %s",fitter->GetParameter(2),TMath::Max(0.01,fitter->GetParError(2)),"fC"));
+  /* tex->DrawLatex(0.45, 0.85, Form("Mean = %.1f #pm %.1f %s",fitter->GetParameter(1),TMath::Max(0.01,fitter->GetParError(1)),"fC")); */
+  /* tex->DrawLatex(0.45, 0.80, Form("#sigma = %.1f #pm %.1f %s",fitter->GetParameter(2),TMath::Max(0.01,fitter->GetParError(2)),"fC")); */
+  tex->DrawLatex(0.45, 0.85, Form("Mean = %.1f %s",fitter->GetParameter(1),"fC"));
+  tex->DrawLatex(0.45, 0.80, Form("#sigma = %.1f %s",fitter->GetParameter(2),"fC"));
   //tex->DrawLatex(0.15, 0.92, Form("Attenuation Factor = %.3f",attenuationFactor));
   
   c->SaveAs( Form("%s_charge.gif", plotname.c_str()) );
   c->SaveAs( Form("%s_charge.pdf", plotname.c_str()) );
  
+  if (!forMIP) {
+    //Energy plot
+    c = new TCanvas("c","c",600,600);  
+    histIntMIP->SetAxisRange(xmin/6.5,xmax/6.5,"X");
+    histIntMIP->SetTitle("");
+    histIntMIP->GetXaxis()->SetTitle("Integrated Charge / Charge for MIP");
+    histIntMIP->GetYaxis()->SetTitle("Number of Events");
+    histIntMIP->GetYaxis()->SetTitleOffset(1.3);
+    histIntMIP->SetMaximum(1.2*histIntMIP->GetMaximum());
+    histIntMIP->Draw();
+    histIntMIP->SetStats(0);
+    histIntMIP->Fit("gaus","","",fitmin/6.5,fitmax/6.5);
+    fitter = TVirtualFitter::GetFitter();
+  
+    tex = new TLatex();
+    tex->SetNDC();
+    tex->SetTextSize(0.040);
+    tex->SetTextFont(42);
+    tex->SetTextColor(kBlack);
+    tex->DrawLatex(0.45, 0.85, Form("Mean = %.0f %s",fitter->GetParameter(1),"MIPs"));
+    tex->DrawLatex(0.45, 0.80, Form("#sigma = %.0f %s",fitter->GetParameter(2),"MIPs"));
+    //tex->DrawLatex(0.15, 0.92, Form("Attenuation Factor = %.3f",attenuationFactor));
+  
+    c->SaveAs( Form("%s_chargeMIP.gif", plotname.c_str()) );
+    c->SaveAs( Form("%s_chargeMIP.pdf", plotname.c_str()) );
+  }
+
 }
 
 

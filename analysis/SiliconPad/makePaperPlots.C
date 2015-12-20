@@ -28,71 +28,117 @@ void makeTimeResolutionVsBeamEnergy(){
 
   
 
-  c = new TCanvas ("c","c",800, 600);
+  c = new TCanvas ("c","c",800, 800);
+  c->SetRightMargin(0.05);
+  c->SetLeftMargin(0.15);
   deltaT0->Draw();
+  deltaT0->GetXaxis()->SetRangeUser(-0.5,0.5);
   TF1* fgaus0 = new TF1("fgaus0","gaus", deltaT0->GetMean() - 1.5*deltaT0->GetRMS(), deltaT0->GetMean() + 1.5*deltaT0->GetRMS());
   deltaT0->Fit("fgaus0","Q","", deltaT0->GetMean() - 1.5*deltaT0->GetRMS(), deltaT0->GetMean() + 1.5*deltaT0->GetRMS());
   float res0 = fgaus0->GetParameter(2);
   float error0 = fgaus0->GetParError(2);
+  deltaT0->GetYaxis()->SetTitle("Number of Events");
+  deltaT0->GetYaxis()->SetTitleSize(0.045);
+  deltaT0->GetYaxis()->SetTitleOffset(1.7);
+  deltaT0->GetYaxis()->SetLabelSize(0.045);
+  deltaT0->GetYaxis()->SetLabelOffset(0.015);
+  deltaT0->GetYaxis()->SetTitle("Number of Events");
   deltaT0->GetXaxis()->SetTitle("#Delta t [ns]");
+  deltaT0->GetXaxis()->SetTitleSize(0.045);
+  deltaT0->GetXaxis()->SetLabelSize(0.045);
   deltaT0->SetTitle("");
   tex = new TLatex();
   tex->SetNDC();
-  tex->SetTextSize(0.060);
+  tex->SetTextSize(0.050);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.1f ps", 1000*fgaus0->GetParameter(2), 1000*fgaus0->GetParError(2)));
+  tex->DrawLatex(0.62, 0.80, Form("#sigma = %.0f #pm %.1f ps", 1000*fgaus0->GetParameter(2), 1000*fgaus0->GetParError(2)));
   tex->DrawLatex(0.15, 0.93, "4 GeV Electron Beam, 6 X_{0} Absorber");
   c->SaveAs("deltaT_4GeV_6X0.pdf");
 
-  c = new TCanvas ("c","c",800, 600);
+  c = new TCanvas ("c","c",800, 800);
+  c->SetRightMargin(0.05);
+  c->SetLeftMargin(0.15);
   deltaT1->Draw();
+  deltaT1->GetXaxis()->SetRangeUser(-0.2,0.2);
   TF1* fgaus1 = new TF1("fgaus1","gaus", deltaT1->GetMean() - 1.5*deltaT1->GetRMS(), deltaT1->GetMean() + 1.5*deltaT1->GetRMS());
   deltaT1->Fit("fgaus1","Q","", deltaT1->GetMean() - 1.5*deltaT1->GetRMS(), deltaT1->GetMean() + 1.5*deltaT1->GetRMS());
   float res1 = fgaus1->GetParameter(2);
   float error1 = fgaus1->GetParError(2);
+  deltaT1->GetYaxis()->SetTitle("Number of Events");
+  deltaT1->GetYaxis()->SetTitleSize(0.045);
+  deltaT1->GetYaxis()->SetTitleOffset(1.7);
+  deltaT1->GetYaxis()->SetLabelSize(0.045);
+  deltaT1->GetYaxis()->SetLabelOffset(0.015);
+  deltaT1->GetYaxis()->SetTitle("Number of Events");
   deltaT1->GetXaxis()->SetTitle("#Delta t [ns]");
+  deltaT1->GetXaxis()->SetTitleSize(0.045);
+  deltaT1->GetXaxis()->SetLabelSize(0.045);
   deltaT1->SetTitle("");
   tex = new TLatex();
   tex->SetNDC();
-  tex->SetTextSize(0.060);
+  tex->SetTextSize(0.050);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.1f ps", 1000*fgaus1->GetParameter(2), 1000*fgaus1->GetParError(2)));
+  tex->DrawLatex(0.62, 0.80, Form("#sigma = %.0f #pm %.1f ps", 1000*fgaus1->GetParameter(2), 1000*fgaus1->GetParError(2)));
   tex->DrawLatex(0.15, 0.93, "8 GeV Electron Beam, 6 X_{0} Absorber");
   c->SaveAs("deltaT_8GeV_6X0.pdf");
 
-  c = new TCanvas ("c","c",800, 600);
+
+  c = new TCanvas ("c","c",800, 800);
+  c->SetRightMargin(0.05);
+  c->SetLeftMargin(0.15);
   deltaT2->Draw();
+  deltaT2->GetXaxis()->SetRangeUser(-0.2,0.2);
   TF1* fgaus2 = new TF1("fgaus2","gaus", deltaT2->GetMean() - 1.5*deltaT2->GetRMS(), deltaT2->GetMean() + 1.5*deltaT2->GetRMS());
   deltaT2->Fit("fgaus2","Q","", deltaT2->GetMean() - 1.5*deltaT2->GetRMS(), deltaT2->GetMean() + 1.5*deltaT2->GetRMS());
   float res2 = fgaus2->GetParameter(2);
   float error2 = fgaus2->GetParError(2);
+  deltaT2->GetYaxis()->SetTitle("Number of Events");
+  deltaT2->GetYaxis()->SetTitleSize(0.045);
+  deltaT2->GetYaxis()->SetTitleOffset(1.7);
+  deltaT2->GetYaxis()->SetLabelSize(0.045);
+  deltaT2->GetYaxis()->SetLabelOffset(0.015);
+  deltaT2->GetYaxis()->SetTitle("Number of Events");
   deltaT2->GetXaxis()->SetTitle("#Delta t [ns]");
+  deltaT2->GetXaxis()->SetTitleSize(0.045);
+  deltaT2->GetXaxis()->SetLabelSize(0.045);
   deltaT2->SetTitle("");
   tex = new TLatex();
   tex->SetNDC();
-  tex->SetTextSize(0.060);
+  tex->SetTextSize(0.050);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.1f ps", 1000*fgaus2->GetParameter(2), 1000*fgaus2->GetParError(2)));
+  tex->DrawLatex(0.62, 0.80, Form("#sigma = %.0f #pm %.1f ps", 1000*fgaus2->GetParameter(2), 1000*fgaus2->GetParError(2)));
   tex->DrawLatex(0.15, 0.93, "16 GeV Electron Beam, 6 X_{0} Absorber");
   c->SaveAs("deltaT_16GeV_6X0.pdf");
- 
-  c = new TCanvas ("c","c",800, 600);
+
+
+  c = new TCanvas ("c","c",800, 800);
+  c->SetRightMargin(0.05);
+  c->SetLeftMargin(0.15);
   deltaT3->Draw();
+  deltaT3->GetXaxis()->SetRangeUser(-0.2,0.2);
   TF1* fgaus3 = new TF1("fgaus3","gaus", deltaT3->GetMean() - 1.5*deltaT3->GetRMS(), deltaT3->GetMean() + 1.5*deltaT3->GetRMS());
   deltaT3->Fit("fgaus3","Q","", deltaT3->GetMean() - 1.5*deltaT3->GetRMS(), deltaT3->GetMean() + 1.5*deltaT3->GetRMS());
   float res3 = fgaus3->GetParameter(2);
   float error3 = fgaus3->GetParError(2);
+  deltaT3->GetYaxis()->SetTitle("Number of Events");
+  deltaT3->GetYaxis()->SetTitleSize(0.045);
+  deltaT3->GetYaxis()->SetTitleOffset(1.7);
+  deltaT3->GetYaxis()->SetLabelSize(0.045);
+  deltaT3->GetYaxis()->SetLabelOffset(0.015);
+  deltaT3->GetYaxis()->SetTitle("Number of Events");
   deltaT3->GetXaxis()->SetTitle("#Delta t [ns]");
+  deltaT3->GetXaxis()->SetTitleSize(0.045);
+  deltaT3->GetXaxis()->SetLabelSize(0.045);
   deltaT3->SetTitle("");
   tex = new TLatex();
   tex->SetNDC();
-  tex->SetTextSize(0.060);
+  tex->SetTextSize(0.050);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.1f ps", 1000*fgaus3->GetParameter(2), 1000*fgaus3->GetParError(2)));
+  tex->DrawLatex(0.62, 0.80, Form("#sigma = %.0f #pm %.1f ps", 1000*fgaus3->GetParameter(2), 1000*fgaus3->GetParError(2)));
   tex->DrawLatex(0.15, 0.93, "32 GeV Electron Beam, 6 X_{0} Absorber");
   c->SaveAs("deltaT_32GeV_6X0.pdf");
 
@@ -325,8 +371,8 @@ void makeTimeResolutionVsVoltage(){
 
 void makePaperPlots() {
 
-  //makeTimeResolutionVsBeamEnergy();
+  makeTimeResolutionVsBeamEnergy();
   //makeTimeResolutionVsAbsorber();
-  makeTimeResolutionVsVoltage();
+  //makeTimeResolutionVsVoltage();
 
 }

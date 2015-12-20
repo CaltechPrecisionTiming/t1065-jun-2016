@@ -120,6 +120,9 @@ void MakeAmplificationGraph() {
   graphInputVsOutput->SetMarkerStyle(20);
   graphInputVsOutput->SetMarkerSize(0.2);
 
+  c->SaveAs( "AmplifierInputOutput.gif" );
+  c->SaveAs( "AmplifierInputOutput.pdf" );
+
 
 }
 
