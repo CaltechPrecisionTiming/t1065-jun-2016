@@ -91,10 +91,6 @@ conclusion, respectively.
 \section{General Properties of Silicon Timing and Bench Test Studies}
 \label{sec:siliconpad}
 
-
-
-%Signal response of silicon detectors could be about few ns with rise time of $\sim$1 ns. 
-
 A few factors determine the timing response of silicon detectors. The
 time constant depends on the series resistance of the silicon, the load
 resistance, and the terminal capacitance. The carrier velocity and its collection
@@ -147,62 +143,70 @@ in Figure~\ref{fig:SiliconPad}.
 %TODO: We should put the photo of the circuit here
 
 
-
-\section{Test beam setup and results of the silicon test }
+\section{Test-beam Setup and Experimental Apparatus }
 \label{sec:tbeam}
 
-% We need a schematic diagram drawn in eg. powerpoint
 % We need a better photograph of the testbeam setup. try to find it from phones.
 
-
-
-The test beam measurements were performed in FTBF. The main parts of the setup are well described in Refs.~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,
-Ronzhin201552}. For the measurement with silicon it was slightly modified as shown in Fig.~\ref{fig:SiliconPadTBeam}.
+We performed the test-beam measurements at the Fermilab Test-beam Facility (FTBF) which provided
+proton beams from the Fermilab Main Injector accelerator at $120$~GeV, and secondary beams composed
+of electrons, pions, and muons of energies ranging from $4$~GeV to $32$~GeV. A simple schematic diagram
+of the experimental setup is shown in Figure~\ref{fig:BeamSchematicDiagram}. A small plastic scintillator 
+of transverse dimensions $1.8$~mm$\times 2$~mm is used as a trigger counter to initiate the read out of
+the data acquisition (DAQ) system. It is also used to constrain the transverse beam-spot to a small geometric area. 
+Next, we place a stack of tungsten absorbers of various thicknesses for measurements at various
+longitudinal locations within the electromagnetic shower. The silicon pad sensor is located within a metal
+box covered by copper foil, and is placed immediately downstream of the absorber plates. Finally, a 
+Photek 240 micro-channel plate photomultiplier detector~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552} is placed furthest downstream, and serves to provide
+a very precise reference timestamp. A photograph showing the various detector components is presented
+in Figure~\ref{fig:BeamPhotoDiagram}. A differential Cherenkov counter is located further upstream of our
+experimental setup and can provide additional particle identification capability. More details of
+the experimental setup are described in our previous studies using the same experimental facility in
+references~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552}.
 
 \begin{figure}[htbp] 
 \centering
-\includegraphics[width=0.8\textwidth]{plots/SiliconPadTestBeam.png} 
-\caption{Test beam setup.} 
-\label{fig:SiliconPadTBeam} 
+\includegraphics[width=0.65\textwidth]{plots/BeamSchematicDiagram.pdf} 
+\caption{A schematic diagram of the test-beam setup is shown. } 
+\label{fig:BeamSchematicDiagram} 
 \end{figure} 
 
-The test beam setup is shown in Fig.~\ref{fig:SiliconPadTBeam}. The silicon
-detector was placed inside of the metal box. The absorber (W or Pb) was placed
-upstream for measurements with electron beam. We have not used absorber in
-measurements with 120 GeV protons. Other detectors which shown in the
-Fig.~\ref{fig:SiliconPadTBeam} were tested simultaneously. The setup contains a data acquisition (DAQ) system based on CAEN V1742 5 Gs/s
-digitizer~\cite{CAENDRS}, HV power supplies, and equipment to monitor and
-control test beam parameters. The dark box was located on a moving table
-allowing us to change the box position both in the horizontal and vertical
-direction in the range of 300 mm in X and Y with an accuracy better than 0.5 mm.
-Event selection and analysis was described in detail in
-Ref.~\cite{MCPFastCaloNIMA}. The trigger was based on a scintillation counter
-with 1.8 x 2 mm2 transverse size. \textbf{DO WE NEED TO TALK ABOUT THESE The
-three detectors (4x4 Hamamatsu MPPC matrix [16], Photek 240 timing reference
-MCP-PMT and 6x6 cm2 LAPD [17])} were placed in line downstream of the tested
-silicon. The silicon detector was positioned on an X-Y moving stage, which
-allowed movement in both X and Y directions by $\pm$15mm. The stage was operated
-remotely from the test beam control room. It was possible to align the silicon
-detector with ~10 $\mu$m accuracy in both X and Y directions. The tungsten absorber material was used to initiate an electromagnetic shower
-when high energy electrons pass through. Signals from the detectors and the
-Cherenkov counter used for electron identification were split by high frequency
-Mini-Circuits ZFRSC-42-S Ã¾ splitters (4.2 GHz BW). The outputs were connected to
-CAEN V1742 digitizer, which allowed to hook up 32 channels for the measurements.
-The schematic of the similar readout (with DRS4) is described in detail in~\cite{Anderson:2015gha}. 
+\begin{figure}[htbp] 
+\centering
+\includegraphics[width=0.65\textwidth]{plots/BeamPhotoDiagram.pdf} 
+\caption{Test beam setup.} 
+\label{fig:BeamPhotoDiagram} 
+\end{figure} 
+
+The DAQ system is based on the CAEN V1742 digitizer board~\cite{CAENDRS}, 
+which provides digitized waveforms sampled at 5 GS/s. The metal box containing
+the silicon sensor was located on a motorized X-Y moving stage allowing us to change the 
+location of the sensor in the plane transverse to the beam at an accuracy better 
+than $0.1$~mm. A nominal bias voltage of $500$~V was applied to deplete the silicon sensor.
+The signals from the silicon sensor were amplified by two fast and high-bandwidth pre-amplifiers 
+connected in series. The first amplifier is an ORTEC VT120C pre-amplifier, and the second
+amplifier is a Hamamatsu C5595 amplifier. Using a pulse-generator, we measured the
+combined amplification gain of the two amplifiers in series as a function of the input
+signal amplitude and found some degree of non-linearity for typical signals
+produced by the silicon sensor under study. The measured gain ranged from 
+$200$ for signals with amplitude around $0.15$~mV to $650$ for signals with
+amplitude around $10$~mV.
 
 \section{Test Beam Measurements and Results} 
 \label{sec:results} 
 
 Measurements were performed using the secondary beam at the FTBF, which provides
 a beam of electrons and pions. Beam energies ranging from 4 GeV/c$^2$ to 32 GeV/c$^2$
-were used, for which the electron purity ranges between 70\% at the lowest
-energy to about 10\% at the highest energy. Stacks of tungsten plates with
+were used, for which the electron purity ranges between $70\%$ at the lowest
+energy to about $10\%$ at the highest energy. Stacks of tungsten plates with
 different thicknesses were placed immediately upstream of the silicon device in
 order to measure the response along the longitudinal direction of the
 electromagnetic shower. The transverse size of the tungsten plates allowed us to
 fully cover the transverse size of the silicon device. The signals from the
 silicon sensor and the Photek MCP-PMT are read out and digitized by the V1742
 digitizer, and example signal waveforms are shown in Fig.~\ref{fig:pulses}.
+The signal pulse in the silicon sensor has a rise time of about $1.5$~ns, and
+a full pulse width of around $7$~ns. 
 
 \begin{figure}[htbp] 
 \centering
@@ -214,13 +218,13 @@ digitizer, and example signal waveforms are shown in Fig.~\ref{fig:pulses}.
 
 The raw waveforms are calibrated in both the voltage and time dimension using
 known inputs from a pulse generator~\cite{Kim201467}. The total collected charge for each
-signal pulse is computed by integrating a 10-ns window around the peak of the
+signal pulse is computed by integrating a $10-$ns window around the peak of the
 pulse. The time for the reference Photek MCP-PMT detector is obtained by fitting
 the peak region of the pulse to a Gaussian function and the mean parameter of
 the Gaussian is assigned as the timestamp. The time for signals from the silicon
 sensor is obtained by performed a linear fit to the rising edge of the pulse and
 the time at which the pulse reaches 30\% of the maximum amplitude is assigned as
-its timestamp. We measured the â€œelectronicâ€ time resolution (TR) of the CAEN
+its timestamp. We measured the €œelectronic€ time resolution of the CAEN
 V1742 digitizer as $\sim$4~ps and neglected this impact on the timing measurements
 described below.
 
@@ -231,17 +235,6 @@ produce significantly larger signals in the Photek MCP-PMT, while pions produce
 a much smaller signal. After imposing the electron identification 
 requirements the electron purity is between $80\%$ and $90\%$ for all beam
 conditions. 
-
-%% The gain of the silicon detector with the amplifiers was
-%% in excess of $10^{6}$. Placement of absorbers in front of the silicon also increased
-%% the signal size due to increased particle flux from secondary shower particles. We can estimate the 
-%% amplitude of the silicon signal for 120 GeV proton. The
-%% amount of electron produced is ~30000 in 300 um silicon. The gain of used
-%% amplifiers (2 Ortec 120V in series) is 200. The total gain of the circuit is
-%% $6\times 10^6$ electrons. The corresponding charge is 1 pC/proton. Taking into account
-%% the pulse duration (which is $\sim$5ns), external load 50 Ohm and factor of 2 for
-%% triangular signal shape we obtain 20 mV/proton the silicon signal amplitude.
-%% This estimation consistent with the measurement.
 
 We begin by establishing the signal characteristics of a minimum-ionizing
 particle (MIP) using beams of 120 GeV protons as well as 8 GeV electrons with no
@@ -369,15 +362,34 @@ reference is shown as a function of bias voltage applied on the silicon sensor. 
 \section{Discussion} 
 \label{sec:discussion} 
 
-Electric field applied to silicon results in the built-in junction voltage
+From Figures~\ref{fig:noise}~and~\ref{fig:MIP}, we observe that the noise of the
+prototype system is sufficiently low to extract signals from MIPs. Comparing
+the RMS of the noise distribution with the mean of the MIP signal, we find a
+signal-to-noise ratio around $2$ to $2.5$. A rough estimate from 
+Figure~\ref{fig:MIP} demonstrates that the efficiency to detect $120$~GeV protons
+and $8$~GeV electrons with no absorber present is larger than $80\%$.
+Based on the measurements for MIPs, we derive signal distributions for
+electromagnetic showers normalized to MIP response, and observe
+a relatively linear response to the electron beam energy after 6 radiation lengths 
+of tungsten absorber in Figure~\ref{fig:MIPVsEnergy}. We also measure a 
+longitudinal shower profile in Figure~\ref{fig:MIPVsAbsorberAt8GeV} 
+that is consistent with similar past measurements. Having established 
+standard calorimetric properties of the prototype, we proceed to study 
+the timing properties. 
+
+We begin with some general considerations of timing in silicon.
+An electric field applied to silicon results in a built-in junction voltage
 (~0.6V) which is typical of silicon diodes. The high electric field in silicon
-leads to total depletion which is formed from a conducting region by removal of
-all free charge carriers. When charged particle pass through the totally
-depleted silicon region it produces carriers collecting on corresponding
-electrodes and producing output signal. Suppose the thickness of the silicon is
-100 $\mu$m. The relativistic particle pass the 100~$\mu$m by 0.3~ps, so we can neglect
-this time (and jitter) in the consideration. The electrons produced by the
-particle collected on positive electrode and the holes on the negative. At high
+leads to total depletion as all free charge carriers are removed. 
+When charged particles pass through the totally depleted region in silicon, 
+it ionizes atoms and produces electron-hole pairs which serve as charge carriers.
+The electrons are collected on positive electrode and the holes are collected
+on the negative electrode. The time and jitter associated with relativistic particles 
+traversing through the silicon material can be neglected as it takes 
+less than $1$~ps for relativistic particles to pass through the full $300$~$\mu$m
+of silicon material. 
+
+ At high
 fields E > 105 V/cm the mobility of carriers attain a constant drift velocity of
 108~mm/s (1$\mu$m/10~ps) in the silicon [21]. The amount of electrons produced in the
 100 um is ~10000 (letâ€™s take this value instead of 8000 for simplicity). The
@@ -390,16 +402,10 @@ electrons (with additional amplification) produced in silicon they collected
 from the thickness of $\sim$10~$\mu$m. We can say that the ``rest of the silicon
 thickness'' does not participate in the silicon time jitter, because these
 electrons are coming ``too late''. This simple model can explain in general
-obtained test beam results.The obtained data are in good consistency with calculation. The noise of the
-silicon with performed schematics is pretty low. It allows to detects the 120
-GeV proton and 4 GeV electron (w/o absorber) with high efficiency, which could
-be estimated as $>80$\% (Figs. 6-8). The detected charge shows linear dependence
-on absorber length. (Figs. 9, 10). The longitudinal shower profile performed
-with the silicon is in good consistency with previous result obtained with MCP.
-The integrated silicon charge in dependence on Bias voltage show saturation at
-$\sim$500V for used silicon. This is $\sim 150$~V less of maximum voltage that could be
-applied to the silicon. The measured and calculated time resolution for the
-silicon are in good consistency (Fig. 13).
+obtained test beam results.The obtained data are in good consistency with calculation. 
+
+
+
 
 
 \section{Conclusion}
