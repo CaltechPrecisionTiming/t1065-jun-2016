@@ -387,14 +387,13 @@ The electrons are collected on positive electrode and the holes are collected
 on the negative electrode. The time and jitter associated with relativistic particles 
 traversing through the silicon material can be neglected as it takes 
 less than $1$~ps for relativistic particles to pass through the full $300$~$\mu$m
-of silicon material. 
-
- At high
-fields E > 105 V/cm the mobility of carriers attain a constant drift velocity of
-108~mm/s (1$\mu$m/10~ps) in the silicon [21]. The amount of electrons produced in the
-100 um is ~10000 (let’s take this value instead of 8000 for simplicity). The
-time needed to collect all electrons in the 100 um is ~1ns. The electrons produced closer to the positive electrode collected first. The
-time needed to pass 1~$\mu$m by electron is $\sim$10~ps. The average time between the
+of silicon material. At high electric field (more than $105$~V/cm), the mobility 
+of carriers attain a constant drift velocity of $108$~mm/s 
+(or about $1\mu$m$/10$~ps) in the silicon material~\cite{Ronzhin2015}. 
+The amount of electrons produced in the 100 um is ~10000. The
+time needed to collect all electrons in the 100 um is ~1ns. The electrons produced closer to 
+the positive electrode collected first. The time needed to pass 1~$\mu$m by electron 
+is $\sim$10~ps. The average time between the
 electrons is $\sim$1~ps. If electronic can detect 100 electrons its arrival time
 could be inside of the 10~ps. The time jitter could be estimated as 3~ps for
 Poisson timing distribution. For example, if electronics can detects $\sim$100
@@ -402,27 +401,38 @@ electrons (with additional amplification) produced in silicon they collected
 from the thickness of $\sim$10~$\mu$m. We can say that the ``rest of the silicon
 thickness'' does not participate in the silicon time jitter, because these
 electrons are coming ``too late''. This simple model can explain in general
-obtained test beam results.The obtained data are in good consistency with calculation. 
+obtained test beam results. 
 
-
-
-
+Our results show that the time stamp associated with electromagnetic 
+showers induced by electrons with energy between $20$~GeV and $30$~GeV 
+can be measured with a precision better than $25$~ps. Subtracting for the resolution
+of the reference Photek MCP-PMT detector yields a precision better than $20$~ps. 
+Moreover, we observe an improvement of the time resolution with the energy of 
+the electron, and more generally with an increase in the signal amplitude. 
+These measurements demonstrate that a calorimeter based on silicon sensors as
+the active medium can achieve intrinsic time resolution at the $20$~ps level, as long
+as noise is kept under control. Time jitter arising from intrinsic properties of the
+silicon sensor is demonstrated to be well below the $20$~ps level.
 
 \section{Conclusion}
 \label{sec:conclusion} 
 
-We obtained time resolution for the silicon $\sim$23 ps. This could correspond to
-$\sim$137 particle registered in the shower. The 120~GeV proton amplitude corresponds
-to $\sim$20 mV according to measurements and estimation. We see significant amplitude
-increase when absorber used. This open an opportunity to use the silicon as
-active layer in calorimeter, for example in CMS HGC upgrade [22]. We can
-consider the results of this work as good opportunity to use silicon for timing
-measurements in future calorimeter. We plan to perform optimization of the
-possible silicon version, e.g. transverse size and configuration for multipixel
-readout, etc. This will be aim of our next work.
+We obtained a best time resolution measurement for silicon sensors of $23$~ps,
+using a beam of $32$~GeV electrons and with the silicon sensor placed after 6 radiation
+lengths of tungsten absorber. Based on our calibration data for the response of the
+silicon sensor to MIPs, this measurement corresponds roughly to 
+$54$ secondary particles registered from the electromagnetic shower. 
+We observe a roughly linearly increasing response as the energy of the electron beam
+is increased, and we observe a longitudinal shower profile consistent with similar 
+past measurements. This result yields further encouragement to use silicon as
+active layer in calorimeters, as is planned for example for the CMS Phase 2 
+upgrade~\cite{Butler:2020886}, and explicitly demonstrates the opportunity 
+to use silicon for timing measurements in future calorimeters. In the future, we plan to 
+extend our studies to more realistic prototypes covering larger transverse and longitudinal 
+regions of the electromagnetic shower and using multiple channels. 
 
 
-\section{Acknowledgements} We thank FTBF personnel for very good beam condition during our test run. We also appreciate technical support of Fermilab SiDet department for production of high quality silicon samples. We appreciate Helmuth Spieler monography as a good source of silicon information [23].
+\section{Acknowledgements} We thank the FTBF personnel for very good beam condition during our test beam run. We also appreciate the technical support of the Fermilab SiDet department for the production of high quality silicon samples. We appreciate Helmuth Spieler monography as a good source of silicon information~\cite{spieler2005semiconductor}.
 
 \bibliography{SiliconCalorimeter}{}
 \bibliographystyle{ieeetr} 
