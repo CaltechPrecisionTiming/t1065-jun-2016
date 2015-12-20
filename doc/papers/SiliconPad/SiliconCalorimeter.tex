@@ -34,44 +34,70 @@
 \linenumbers
 \maketitle
 
-\abstract{The high luminosity upgrade of the Large Hadron Collider (HL-LHC) at
+\abstract{ The high luminosity upgrade of the Large Hadron Collider (HL-LHC) at
 CERN is expected to provide instantaneous luminosities of $5\times 10^{34}$
-cm$^{-2}$ s$^{-1}$. Collision at the high luminosity has shorter bunch spacing
-and more pileup [PU] events in the complex luminous regions. Precision timing
-allows extend calorimetric measurements into high density environment. We
-performed some study of the possible options to improve timing for
-calorimetry~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,
-Ronzhin201552}. CMS calorimetry upgrade based on silicon as sensitive layer is
-another upgrade option~\cite{Butler:2020886}. Signal response of silicon
-detectors could be about few ns with rise time of $\sim$1 ns. 8000 e-h pairs
-produced in silicon per 100 $\mu$m, which is much higher than silicon noise  .
-These properties with relatively high radiation hardness~\cite{CMSPreshower} allow to use
-silicon in calorimetric detectors. In this article we present results of
-timing study of silicon produced by Hamamatsu~\cite{hamamatsu}.}
-
+cm$^{-2}$ s$^{-1}$. The high luminosities expected at the HL-LHC will be 
+accompanied by a factor of $5$ to $10$ more pileup compared with LHC conditions
+in $2015$, causing general confusion for particle identification and event 
+reconstruction. Precision timing allows to extend calorimetric measurements into such
+a high density environment. Calorimeters employing silicon as the active 
+component have recently become a popular choice for the HL-LHC and future collider 
+experiments which face very high radiation environments. In this article, we present 
+studies of calorimetric and precision timing measurements using a prototype composed of 
+tungsten absorber and silicon pad sensors as the active medium. We show that
+for the bulk of electromagnetic showers induced by electrons in the range of 
+$20$~GeV to $30$~GeV, we can achieve time resolutions better than $25$~ps. 
 
 \section{Introduction} 
+
+Future hadron colliders, including the high luminosity upgrade of the Large Hadron Collider 
+(HL-LHC) at CERN, will require improvements to the instantaneous luminosity by an order
+of magnitude or more compared to what has been achieved at the LHC so far. 
+With the increased instantaneous luminosity, it is expected that the 
+pileup, multiple collisions occurring simultaneous in time, will increase correspondingly by a
+factor of $5$ to $10$. This increased pileup will result in significantly increased
+particle densities, causing overall confusion for particle identification and event 
+reconstruction. 
 
 One way to mitigate the pileup confusion effects, complementary to precision
 tracking methods, is to perform a time of arrival measurement associated with a
 particular layer of the calorimeter, allowing for a time assignment for both
 charged particles and photons. Such a measurement with a precision of about
 20-30 ps, when unambiguously associated to the corresponding energy measurement,
-will significantly reduce the inclusion of pileup particles in the
-reconstruction of the event of interest, given that the spread in collision time
-of the pileup interactions is approximately 200~ps. The association of the time
+will reduce the effective amount of pileup by a factor of $10$ given that the spread in 
+collision time of the pileup interactions is approximately 200~ps. The association of the time
 measurement with the energy measurement is crucial, and leads to a prototype
 design that calls for the time and energy measurements to be performed in the
-same active detector element. It is in this context that we studied the
-possibility of measuring the time of arrival of the particles with a
-calorimetric device when using silicon as sensitive element. The paper is organized as follows. The general silicon timing properties are
-described and bench test results of the used silicon described in
-Section~\ref{sec:siliconpad}. Test beam setup are presented in
-Section~\ref{sec:tbeam}, and the results of the silicon test are presented in
-Section~\ref{sec:results}. Sections~\ref{sec:discussion} and
-~\ref{sec:conclusion} are devoted to discussion and conclusion, respectively.
+same active detector element. 
+
+We have performed past studies of alternative options to improve 
+timing for calorimetry~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552}.
+In this article, we describe the continuation of this program of study using a calorimeter
+prototype employing a silicon pad sensor as the active medium. Silicon-based
+calorimeters have recently become a popular choice for future hadron colliders due to its radiation 
+hardness properties. An important example is the calorimeter proposed for the CMS Phase 2
+Upgrade~\cite{Butler:2020886}. We study the timing properties of silicon-based calorimeters
+using a prototype composed of tungsten absorber and a silicon sensor produced by 
+Hamamatsu~\cite{hamamatsu}. 
+
+The paper is organized as follows. General silicon timing properties 
+and bench test results are described in Section~\ref{sec:siliconpad}. 
+The test beam setup and experimental apparatus are presented in Section~\ref{sec:tbeam}. 
+The results of the test beam measurements are presented in Section~\ref{sec:results},
+and Sections~\ref{sec:discussion} and ~\ref{sec:conclusion} are devoted to discussion and 
+conclusion, respectively.
+
+
 \section{Silicon timing. Bench test of used silicon}
 \label{sec:siliconpad}
+
+
+
+%Signal response of silicon detectors could be about few ns with rise time of $\sim$1 ns. 
+
+
+
+
 
 Few factors determine the timing response of silicon detectors. One of them
 defines time constant and depends on series resistance of the silicon, load
