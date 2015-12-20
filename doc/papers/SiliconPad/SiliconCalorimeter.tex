@@ -88,45 +88,53 @@ and Sections~\ref{sec:discussion} and ~\ref{sec:conclusion} are devoted to discu
 conclusion, respectively.
 
 
-\section{Silicon timing. Bench test of used silicon}
+\section{General Properties of Silicon Timing and Bench Test Studies}
 \label{sec:siliconpad}
 
 
 
 %Signal response of silicon detectors could be about few ns with rise time of $\sim$1 ns. 
 
+A few factors determine the timing response of silicon detectors. The
+time constant depends on the series resistance of the silicon, the load
+resistance, and the terminal capacitance. The carrier velocity and its collection
+time depend on the thickness of the silicon, the depletion voltage, and the type of
+carrier. The drift time of the carriers in fully depleted silicon determines the 
+carrier’s collection time. In the case of small time constant, the time
+response of the silicon sensor is determined by the collection time, however
+for silicon with large capacitance the time response depends mostly on the
+time constant.
 
-
-
-
-Few factors determine the timing response of silicon detectors. One of them
-defines time constant and depends on series resistance of the silicon, load
-resistance and terminal capacitance. The other are due to silicon intrinsic
-properties: the silicon thickness, the carrier’s velocity and its collection
-time, dependent on depletion voltage and type of the carriers. The carriers
-drift time in fully depleted silicon determines the carrier’s collection time.
-This time determines the silicon time response in case of small time constant,
-but the response could be mostly dependent on time constant for silicon with
-large capacitance.We used for our test the silicon, produced by Hamamatsu~\cite{hamamatsu}. The
-thickness of the silicon is ~325 $\mu$m. The transverse size of the silicon is
+For our measurements, we used a silicon sensor produced by Hamamatsu~\cite{hamamatsu}. The
+thickness of the silicon was measured to be ~325 $\mu$m. The transverse size of the silicon is
 6x6 mm$^2$. The negative bias voltage was applied to p-side of the silicon. The
 dependence of the diode capacitance on the bias voltage is presented in
-Fig.~\ref{fig:SiliconDiode}. The junction capacitance depends on the area of
-p-layer and the thickness of the depletion layer which increased with inverse
-bias voltage. When charged particle pass through the silicon the produced
-electrons collected on the opposite (to p-side) n-side of the silicon and forms
-the output signal. The electrical schematics of the silicon diode and
-capacitance dependence on bias voltage presented in Fig.~\ref{fig:SiliconDiode}.
+Figure~\ref{fig:SiliconDiode}. The junction capacitance depends on the area of
+p-layer and the thickness of the depletion layer which increases with reverse
+bias voltage. When charged particles pass through the silicon the electrons produced
+are collected on the n-side of the silicon, opposite to the p-side, and forms
+the output signal. The electrical schematics of the silicon diode are 
+presented in Figure~\ref{fig:SiliconDiode}.
 
 
 \begin{figure}[htbp] 
 \centering
 \includegraphics[width=0.45\textwidth]{plots/SiliconDiodeDiagram.png} 
 \includegraphics[width=0.45\textwidth]{plots/SiliconDiodeCV.png} 
-\caption{Electrical schematics of the silicon diode (left) and it capacitance in dependence on bias voltage (right). } 
+\caption{The electrical schematics of the silicon diode is shown on the left. The measured
+capacitance as a function of the applied bias voltage is shown on the right. } 
 \label{fig:SiliconDiode} 
 \end{figure} 
-The silicon box and bench test setup presented in Fig.~\ref{fig:SiliconPad}. Measurements were performed at SiDet facility of Fermilab. The sensitivity of the silicon diode to light was tested to check it functionality.\begin{figure}[htbp] 
+
+
+The silicon diode was placed inside a metal box of thickness $1.5$~cm. 
+The HV was applied to the printed circuit board by a cable terminated by an SHV connector
+at the other end. The silicon diode output signal is read out through an SMA connector attached 
+to the box. The dark current was measured as a function of the bias voltage. The maximum value of the 
+current at -500 V of the bias was less of $1$~nA. The silicon box and bench test setup are presented 
+in Figure~\ref{fig:SiliconPad}. 
+
+\begin{figure}[htbp] 
 \centering
 \includegraphics[width=0.45\textwidth]{plots/SiliconPadExternalView.png} 
 \includegraphics[width=0.45\textwidth]{plots/SiliconPadBench.png} 
@@ -134,12 +142,13 @@ The silicon box and bench test setup presented in Fig.~\ref{fig:SiliconPad}. Mea
 \label{fig:SiliconPad} 
 \end{figure} 
 
-The silicon diode was placed in the metal box. The HV was applied to the PC
-board by the cable terminated by HSV connector. The silicon diode output signal
-was taken out by using the SMA connector attached to the box. Dark current
-dependence on bias voltage was tested. The maximum value of the current at -500
-V of the bias was less of 1nA. (we had not in hands picoampermeter to measure
-the current). \section{Test beam setup and results of the silicon test }
+
+%TODO: this section is a bit weak...needs more details.
+%TODO: We should put the photo of the circuit here
+
+
+
+\section{Test beam setup and results of the silicon test }
 \label{sec:tbeam}
 
 The test beam measurements were performed in FTBF. The main parts of the setup are well described in Refs.~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,
