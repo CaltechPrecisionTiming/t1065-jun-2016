@@ -118,7 +118,7 @@ void makeTimeResolutionVsBeamEnergy(){
   c->SetRightMargin(0.05);
   c->SetLeftMargin(0.15);
   deltaT3->Draw();
-  deltaT3->GetXaxis()->SetRangeUser(-0.2,0.2);
+  deltaT3->GetXaxis()->SetRangeUser(3.7,4.1);
   TF1* fgaus3 = new TF1("fgaus3","gaus", deltaT3->GetMean() - 1.5*deltaT3->GetRMS(), deltaT3->GetMean() + 1.5*deltaT3->GetRMS());
   deltaT3->Fit("fgaus3","Q","", deltaT3->GetMean() - 1.5*deltaT3->GetRMS(), deltaT3->GetMean() + 1.5*deltaT3->GetRMS());
   float res3 = fgaus3->GetParameter(2);
@@ -141,6 +141,11 @@ void makeTimeResolutionVsBeamEnergy(){
   tex->DrawLatex(0.62, 0.80, Form("#sigma = %.0f #pm %.1f ps", 1000*fgaus3->GetParameter(2), 1000*fgaus3->GetParError(2)));
   tex->DrawLatex(0.15, 0.93, "32 GeV Electron Beam, 6 X_{0} Absorber");
   c->SaveAs("deltaT_32GeV_6X0.pdf");
+
+
+  return;
+
+
 
   float res[4]    = {1000*res0, 1000*res1, 1000*res2, 1000*res3}; 
   float charge[4] = {4., 8, 16, 32};
@@ -174,6 +179,7 @@ void makeTimeResolutionVsBeamEnergy(){
   gr->GetYaxis()->SetRangeUser(0., 80.);
  
   c->SaveAs("SigmaT_vs_BeamEnergy_lin30Stamp.pdf");
+
 }
 
 
@@ -376,8 +382,8 @@ void makeTimeResolutionVsVoltage(){
 
 void makePaperPlots() {
 
-  //makeTimeResolutionVsBeamEnergy();
-  makeTimeResolutionVsAbsorber();
+  makeTimeResolutionVsBeamEnergy();
+  //makeTimeResolutionVsAbsorber();
   //makeTimeResolutionVsVoltage();
 
 }
