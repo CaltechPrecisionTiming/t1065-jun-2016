@@ -179,7 +179,7 @@ references~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552
 \begin{figure}[htbp] 
 \centering
 \includegraphics[width=0.65\textwidth]{plots/BeamSchematicDiagram.pdf} 
-\caption{A schematic diagram of the test-beam setup is shown. } 
+\caption{A schematic diagram of the test-beam setup is shown. The $t_0$ and $t_1$ are defined Section~\ref{sec:results}.} 
 \label{fig:BeamSchematicDiagram} 
 \end{figure} 
 
@@ -231,16 +231,16 @@ voltage applied to the silicon pad sensor is~$500$~V.}
 \end{figure} 
 
 The raw waveforms are calibrated in both the voltage and time dimension using
-known inputs from a pulse generator~\cite{Kim201467}. The total collected charge for each
-signal pulse is computed by integrating a $10-$ns window around the peak of the
-pulse. The time for the reference Photek MCP-PMT detector is obtained by fitting
-the peak region of the pulse to a Gaussian function and the mean parameter of
-the Gaussian is assigned as the timestamp. The time for signals from the silicon
-sensor is obtained by performed a linear fit to the rising edge of the pulse and
-the time at which the pulse reaches 30\% of the maximum amplitude is assigned as
-its timestamp. We measured the electronic time resolution of the CAEN
-V1742 digitizer as $\sim$4~ps and neglected this impact on the timing measurements
-described below.
+known inputs from a pulse generator~\cite{Kim201467}. The total collected charge
+for each signal pulse is computed by integrating a $10$~ns window around the
+peak of the pulse. The time for the reference Photek MCP-PMT detector is
+obtained by fitting the peak region of the pulse to a Gaussian function and the
+mean parameter of the Gaussian is assigned as the timestamp $t_0$. The time for
+signals from the silicon sensor is obtained by performed a linear fit to the
+rising edge of the pulse and the time at which the pulse reaches 30\% of the
+maximum amplitude is assigned as its timestamp $t_1$. We measured the
+electronic time resolution of the CAEN V1742 digitizer as $\sim$4~ps and
+neglected its impact on the timing measurements described below.
 
 Electrons were identified using a combination of the gas Cherenkov counter
 provided by the FTBF and the signal size in the Photek detector located further
