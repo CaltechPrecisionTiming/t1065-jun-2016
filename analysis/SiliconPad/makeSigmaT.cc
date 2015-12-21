@@ -68,9 +68,11 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
   const float Xrange = 20*nBinsX;
 
   TProfile * DeltaT_vs_Charge = new TProfile("DeltaT_vs_Charge", "DeltaT_vs_Charge", nBinsX, 0, Xrange, 2, 6);
-  TH2F *DeltaT_vs_Charge_Corrected = new TH2F("DeltaT_vs_Charge_Corrected","; X; Y", nBinsX, 0, Xrange, 120, -2, 2);
+  TH2F *DeltaT_vs_Charge_Uncorrected = new TH2F("DeltaT_vs_Charge_Uncorrected","; X; Y; Number of Events", 40, 30, 300, 120, 3.6, 4.0);
+  TH2F *DeltaT_vs_Charge_Corrected = new TH2F("DeltaT_vs_Charge_Corrected","; X; Y", 40, 30, 300, 120, 3.6, 4.0);
+  // TH2F *DeltaT_vs_Charge_Corrected = new TH2F("DeltaT_vs_Charge_Corrected","; X; Y", nBinsX, 0, Xrange, 120, -2, 2);
   TH1F *Charge = new TH1F("Charge","Charge", nBinsX, 0, Xrange);
-  TH1F *DeltaT = new TH1F("DeltaT","DeltaT", 200, -1.,1.);
+  TH1F *DeltaT = new TH1F("DeltaT","DeltaT", 200, 3.0,5.0);
 
   //read all entries and fill the histograms
   Long64_t nentries = tree->GetEntries();
@@ -154,8 +156,9 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
       if(amp[18] > electronIDcut && amp[21]<0.48 && amp[18]<0.48 )
 	{
 	  float x = 10*integral[21];
-	  DeltaT_vs_Charge_Corrected->Fill(10*integral[21], gauspeak[18]-timeSilicon - (a + b*x + c*x*x));
-	  DeltaT->Fill(gauspeak[18]-timeSilicon - (a + b*x + c*x*x));
+	  DeltaT_vs_Charge_Uncorrected->Fill(10*integral[21], gauspeak[18]-timeSilicon);
+	  DeltaT_vs_Charge_Corrected->Fill(10*integral[21], gauspeak[18]-timeSilicon - (a + b*x + c*x*x) + (a + b*180 + c*180*180));
+	  DeltaT->Fill(gauspeak[18]-timeSilicon - (a + b*x + c*x*x) + (a + b*180 + c*180*180));
 	}
    }
   
@@ -194,7 +197,7 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
   TGraphErrors* gr = new TGraphErrors( nBinsX, charge, res, errorX, errorY );
   gr->SetTitle("");
   gr->SetMarkerStyle(8);
-  gr->GetXaxis()->SetTitle("Charge [pC]");
+  gr->GetXaxis()->SetTitle("Integrated Charge [pC]");
   gr->GetXaxis()->SetTitleSize(0.045);
   gr->GetXaxis()->SetLabelSize(0.045);
   gr->GetXaxis()->SetTitleOffset(1.0);
@@ -211,6 +214,56 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
   DeltaT_vs_Charge_Corrected->SaveAs(Form("%s_%s_DeltaT_vs_Charge_Corrected.root", outname.c_str(), siliconAlgo.c_str()));
   gr->SaveAs(Form("%s_%s_SigmaT_vs_Charge.root", outname.c_str(), siliconAlgo.c_str()));
   DeltaT->SaveAs(Form("%s_%s_DeltaT.root", outname.c_str(), siliconAlgo.c_str()));
+
+  
+  TCanvas *cv = 0;
+  TLatex *tex = 0;
+
+  cv = new TCanvas("cv","cv",600,600);
+  
+  cv->SetRightMargin(0.15);
+  cv->SetLeftMargin(0.15);
+  cv->SetBottomMargin(0.12);
+  DeltaT_vs_Charge_Uncorrected->Draw("colz");
+  DeltaT_vs_Charge_Uncorrected->SetStats(false);
+  fslopecorr->SetLineWidth(6);
+  fslopecorr->Draw("same");
+  DeltaT_vs_Charge_Uncorrected->GetXaxis()->SetTitle("Charge / Charge per MIP");
+  DeltaT_vs_Charge_Uncorrected->GetXaxis()->SetTitleSize(0.05);
+  DeltaT_vs_Charge_Uncorrected->GetXaxis()->SetLabelSize(0.045);
+  DeltaT_vs_Charge_Uncorrected->GetXaxis()->SetTitleOffset(1.0);
+  DeltaT_vs_Charge_Uncorrected->GetYaxis()->SetTitle("#Delta t [ns]");
+  DeltaT_vs_Charge_Uncorrected->GetYaxis()->SetTitleSize(0.05);
+  DeltaT_vs_Charge_Uncorrected->GetYaxis()->SetLabelSize(0.045);
+  DeltaT_vs_Charge_Uncorrected->GetYaxis()->SetTitleOffset(1.5);
+  DeltaT_vs_Charge_Uncorrected->GetZaxis()->SetTitleSize(0.045);
+  DeltaT_vs_Charge_Uncorrected->GetZaxis()->SetLabelSize(0.045);
+  DeltaT_vs_Charge_Uncorrected->GetZaxis()->SetTitleOffset(1.0);
+  cv->SaveAs("DeltaT_vs_Charge_Uncorrected.gif");
+  cv->SaveAs("DeltaT_vs_Charge_Uncorrected.pdf");
+
+
+  cv = new TCanvas("cv","cv",600,600);  
+  cv->SetRightMargin(0.15);
+  cv->SetLeftMargin(0.15);
+  cv->SetBottomMargin(0.12);
+  DeltaT_vs_Charge_Corrected->Draw("colz");
+  DeltaT_vs_Charge_Corrected->SetStats(false); 
+  DeltaT_vs_Charge_Corrected->GetXaxis()->SetTitle("Charge / Charge per MIP");
+  DeltaT_vs_Charge_Corrected->GetXaxis()->SetTitleSize(0.05);
+  DeltaT_vs_Charge_Corrected->GetXaxis()->SetLabelSize(0.045);
+  DeltaT_vs_Charge_Corrected->GetXaxis()->SetTitleOffset(1.0);
+  DeltaT_vs_Charge_Corrected->GetYaxis()->SetTitle("Corrected #Delta t [ns]");
+  DeltaT_vs_Charge_Corrected->GetYaxis()->SetTitleSize(0.05);
+  DeltaT_vs_Charge_Corrected->GetYaxis()->SetLabelSize(0.045);
+  DeltaT_vs_Charge_Corrected->GetYaxis()->SetTitleOffset(1.5);
+  DeltaT_vs_Charge_Corrected->GetZaxis()->SetTitleSize(0.045);
+  DeltaT_vs_Charge_Corrected->GetZaxis()->SetLabelSize(0.045);
+  DeltaT_vs_Charge_Corrected->GetZaxis()->SetTitleOffset(1.0);
+  cv->SaveAs("DeltaT_vs_Charge_Corrected.gif");
+  cv->SaveAs("DeltaT_vs_Charge_Corrected.pdf");
+
+
 }
 
 int main(int argc, char **argv)
