@@ -16,10 +16,10 @@
 
 \author[1]{A.~Apresyan}
 \author[2]{G.~Bolla}
+\author[1]{A.~Bornheim}
 \author[3]{H.~Kim}
 \author[2]{S.~Los}
 \author[1]{C.~Pena}
-\author[1]{F.~Presutti}
 \author[2]{E.~Ramberg}
 \author[2]{A.~Ronzhin}
 \author[1]{M.~Spiropulu}
@@ -44,15 +44,15 @@ such a high density environment by subtracting the energy deposits from pileup
 interactions. Calorimeters employing silicon as the active component have
 recently become a popular choice for the HL-LHC and future collider experiments
 which face very high radiation environments. In this article, we present studies
-of calorimetric and precision timing measurements using a prototype composed of
-tungsten absorber and silicon pad sensors as the active medium. We show that for
+of basic calorimetric and precision timing measurements using a prototype composed of
+tungsten absorber and silicon sensor as the active medium. We show that for
 the bulk of electromagnetic showers induced by electrons in the range of
 $20$~GeV to $30$~GeV, we can achieve time resolutions better than $25$~ps per
 single pad sensor. 
 
 \section{Introduction} 
 
-Future hadron colliders, including the high luminosity upgrade of the Large
+Future colliders, including the high luminosity upgrade of the Large
 Hadron Collider (HL-LHC) at CERN, will require improvements to the instantaneous
 luminosity by an order of magnitude or more compared to what has been achieved
 at the LHC so far. With the increased instantaneous luminosity the rate of
@@ -67,7 +67,7 @@ deteriorate, and several other physics objects performance metrics will suffer.
 
 One way to mitigate the pileup confusion effects, complementary to precision
 tracking methods, is to perform a time of arrival measurement associated with a
-particular layer of the calorimeter, allowing for a time assignment for both
+particular layer of the calorimeter, allowing for a time assignment for 
 charged particles and photons. Such a measurement with a precision of about
 20-30 ps, when unambiguously associated to the corresponding energy measurement,
 will reduce the effective amount of pileup by a factor of 10, given that the
@@ -83,20 +83,21 @@ Several alternative options to combine high resolution energy and timing
 measurements for calorimetry have been reported in Refs.~\cite{Anderson:2015gha,
 MCPFastCaloNIMA, Ronzhin2015288, Ronzhin201552, Brianza2015216}. In this
 article, we describe the continuation of this program of study using a
-calorimeter prototype employing a silicon pad sensor as the active medium.
-Silicon-based calorimeters have recently become a popular choice for future
-hadron colliders due to the radiation hardness of silicon, and the ability to
-construct highly granular detectors. An important example is the calorimeter
-proposed for the CMS Phase 2 Upgrade~\cite{Butler:2020886}. We study the timing
-properties of silicon-based calorimeters using a prototype composed of tungsten
-absorber and a silicon sensor produced by Hamamatsu~\cite{hamamatsu}. 
+calorimeter prototype employing a silicon pad sensor of $6\times 6$~mm$^2$ size
+as the active element. Silicon-based calorimeters have recently become a popular
+choice for future colliders due to the radiation hardness of silicon, and the
+ability to construct highly granular detectors. An important example is the
+forward calorimeter proposed for the CMS Phase 2 Upgrade~\cite{Butler:2020886}.
+We study the timing properties of silicon-based calorimetery using a prototype
+composed of tungsten absorber and a silicon sensor produced by
+Hamamatsu~\cite{hamamatsu}. 
 
-The paper is organized as follows. General silicon timing properties 
-and bench test results are described in Section~\ref{sec:siliconpad}. 
-The test beam setup and experimental apparatus are presented in Section~\ref{sec:tbeam}. 
-The results of the test beam measurements are presented in Section~\ref{sec:results},
-and Sections~\ref{sec:discussion} and ~\ref{sec:conclusion} are devoted to discussion and 
-conclusion, respectively.
+The paper is organized as follows. General silicon timing properties and bench
+test results are described in Section~\ref{sec:siliconpad}. The test beam setup
+and experimental apparatus are presented in Section~\ref{sec:tbeam}. The results
+of the test beam measurements are presented in Section~\ref{sec:results}.
+Sections~\ref{sec:discussion}~and~\ref{sec:conclusion} are devoted to discussion
+and conclusion, respectively.
 
 
 \section{General Properties of Silicon Timing and Bench Test Studies}
@@ -110,43 +111,49 @@ carrier. The drift time of the carriers in fully depleted silicon determines the
 carrier's collection time. In the case of small time constant, the time
 response of the silicon sensor is determined by the collection time, however
 for silicon with large capacitance the time response depends mostly on the
-time constant.
+time constant. \textbf {WRITE SOMETHING ABOUT THE EFFECT OF BIAS VOLTAGE. SERGEY SAID PULSE CHARACTERISTICS ARE DOMINATED BY THE SILICON AND NOT CIRCUIT. ARTUR SAID SOME OF THE TEXT SOUNDS TOO MUCH LIKE A LECTURE WITHOUT PUNCHLINE}
 
 For our measurements, we used a silicon sensor produced by
 Hamamatsu~\cite{hamamatsu}. The thickness of the silicon was measured to be ~325
 $\mu$m. The transverse size of the sensor is 6x6 mm$^2$. The negative bias
-voltage was applied to the p-side of the silicon. The dependence of the diode
-capacitance on the bias voltage is presented in Figure~\ref{fig:SiliconDiode}.
-The junction capacitance depends on the area of p-layer and the thickness of the
-depletion layer which increases with reverse bias voltage. When charged
-particles pass through the silicon the electrons produced are collected on the
-n-side of the silicon, opposite to the p-side, and forms the output signal. The
-electrical schematics of the silicon diode are presented in
-Figure~\ref{fig:SiliconDiode}.
+voltage was applied to the p-side of the silicon. \textbf{FIXME FROM HERE} The
+dependence of the diode capacitance on the bias voltage is presented in
+Figure~\ref{fig:SiliconDiode}. The junction capacitance depends on the area of
+p-layer and the thickness of the depletion layer which increases with reverse
+bias voltage. When charged particles pass through the silicon the electrons
+produced are collected on the n-side of the silicon, opposite to the p-side, and
+forms the output signal. \textbf{TILL HERE} The electric diagram of the silicon
+diode connections is presented in Figure~\ref{fig:SiliconDiode}. Attention was
+paid to provide good filtering for bias voltage, to reduce ground loop effects, and
+to minimize inductive loop for the signal readout.
 
 
 \begin{figure}[htbp] 
 \centering
-\includegraphics[width=0.45\textwidth]{plots/SiliconDiodeDiagram.pdf} 
 \includegraphics[width=0.45\textwidth]{plots/SiliconDiodeCV.png} 
-\caption{The electrical schematics of the silicon diode is shown on the left. The measured
-capacitance as a function of the applied bias voltage is shown on the right. } 
+\caption{The measured capacitance as a function of the applied bias voltage.} 
 \label{fig:SiliconDiode} 
 \end{figure} 
 
 
-The silicon diode was placed inside a metal box of thickness $1.5$~cm. 
-The HV was applied to the printed circuit board by a cable terminated by an SHV connector
-at the other end. The silicon diode output signal is read out through an SMA connector attached 
-to the box. The dark current was measured as a function of the bias voltage. The maximum value of the 
-current at -500 V of the bias was less of $1$~nA. The silicon box and bench test setup are presented 
-in Figure~\ref{fig:SiliconPad}. 
+The silicon diode was placed inside a light-tight box of thickness $1.5$~cm,
+which also provides electromagnetic shielding. The box is made of 0.2~mm steel.
+The bias voltage was supplied to the circuitry by a cable with a balun filter,
+terminated with an SHV connector. The silicon diode output signal is read out
+through an SMA connector electrically connected to the box. The dark current was
+measured at several values of the bias voltage. The maximum value of the dark
+current was less than $1.0$~nA at $-500$~V, which is the largest bias voltage
+used in the measurements reported in this paper. The silicon box and bench test
+setup are presented in Figure~\ref{fig:SiliconPad}. 
 
 \begin{figure}[htbp] 
 \centering
-\includegraphics[width=0.45\textwidth]{plots/SiliconPadExternalView.png} 
-\includegraphics[width=0.45\textwidth]{plots/SiliconPadBench.png} 
-\caption{External view of the box with silicon diode and PC board inside (left) and bench test setup (right).} 
+\includegraphics[width=0.45\textwidth]{plots/SiliconDiodeDiagram.pdf} 
+\includegraphics[width=0.45\textwidth]{plots/SiliconDiodeBox.jpg} 
+%\includegraphics[width=0.45\textwidth]{plots/SiliconPadBench.png} 
+\caption{The electric diagram for the silicon diode connections (left). External
+view of the box with silicon diode, and the bias voltage connection is shown
+below it (right).} 
 \label{fig:SiliconPad} 
 \end{figure} 
 
@@ -160,21 +167,28 @@ in Figure~\ref{fig:SiliconPad}.
 
 % We need a better photograph of the testbeam setup. try to find it from phones.
 
-We performed the test-beam measurements at the Fermilab Test-beam Facility (FTBF) which provided
-proton beams from the Fermilab Main Injector accelerator at $120$~GeV, and secondary beams composed
-of electrons, pions, and muons of energies ranging from $4$~GeV to $32$~GeV. A simple schematic diagram
-of the experimental setup is shown in Figure~\ref{fig:BeamSchematicDiagram}. A small plastic scintillator 
-of transverse dimensions $1.8$~mm$\times 2$~mm is used as a trigger counter to initiate the read out of
-the data acquisition (DAQ) system. It is also used to constrain the transverse beam-spot to a small geometric area. 
-Next, we place a stack of tungsten absorbers of various thicknesses for measurements at various
-longitudinal locations within the electromagnetic shower. The silicon pad sensor is located within a metal
-box covered by copper foil, and is placed immediately downstream of the absorber plates. Finally, a 
-Photek 240 micro-channel plate photomultiplier detector~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552} is placed furthest downstream, and serves to provide
-a very precise reference timestamp. A photograph showing the various detector components is presented
-in Figure~\ref{fig:BeamPhotoDiagram}. A differential Cherenkov counter is located further upstream of our
-experimental setup and can provide additional particle identification capability. More details of
-the experimental setup are described in our previous studies using the same experimental facility in
-references~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552}.
+We performed the test-beam measurements at the Fermilab Test-beam Facility
+(FTBF) which provided a proton beam from the Fermilab Main Injector accelerator
+at $120$~GeV, and secondary beams composed of electrons, pions, and muons of
+energies ranging from $4$~GeV to $32$~GeV. A simple schematic diagram of the
+experimental setup is shown in Figure~\ref{fig:BeamSchematicDiagram}. A small
+plastic scintillator of transverse dimensions $1.8$~mm$\times 2$~mm is used as a
+trigger counter to initiate the read out of the data acquisition (DAQ) system.
+It is also used to constrain the transverse beam-spot to a small geometric area.
+Next, we place a stack of tungsten absorbers of various thicknesses for
+measurements of the longitudinal profile of the electromagnetic shower. The
+silicon pad sensor is located within a metal box covered by copper foil, and is
+placed immediately downstream of the absorber plates. Finally, a Photek 240
+micro-channel plate photomultiplier detector~\cite{Anderson:2015gha,
+MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552} is placed furthest downstream,
+and serves to provide a very precise reference timestamp. Its precision was
+previously measured to be around 10~ps~\cite{MCPShowerMaxPaper}. A photograph showing the various
+detector components is presented in Figure~\ref{fig:BeamPhotoDiagram}. A
+differential Cherenkov counter is located further upstream of our experimental
+setup and can provide additional particle identification capability. More
+details of the experimental setup are described in our previous studies using
+the same experimental facility in references~\cite{Anderson:2015gha,
+MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552}.
 
 \begin{figure}[htbp] 
 \centering
@@ -190,19 +204,20 @@ references~\cite{Anderson:2015gha, MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552
 \label{fig:BeamPhotoDiagram} 
 \end{figure} 
 
-The DAQ system is based on the CAEN V1742 digitizer board~\cite{CAENDRS}, 
-which provides digitized waveforms sampled at 5 GS/s. The metal box containing
-the silicon sensor was located on a motorized X-Y moving stage allowing us to change the 
-location of the sensor in the plane transverse to the beam at an accuracy better 
-than $0.1$~mm. A nominal bias voltage of $500$~V was applied to deplete the silicon sensor.
-The signals from the silicon sensor were amplified by two fast and high-bandwidth pre-amplifiers 
-connected in series. The first amplifier is an ORTEC VT120C pre-amplifier, and the second
-amplifier is a Hamamatsu C5595 amplifier. Using a pulse-generator, we measured the
-combined amplification gain of the two amplifiers in series as a function of the input
-signal amplitude and found some degree of non-linearity for typical signals
-produced by the silicon sensor under study. The measured gain ranged from 
-$200$ for signals with amplitude around $0.15$~mV to $650$ for signals with
-amplitude around $10$~mV.
+The DAQ system is based on the CAEN V1742 digitizer board~\cite{CAENDRS}, which
+provides digitized waveforms sampled at 5 GS/s. The metal box containing the
+silicon sensor was located on a motorized X-Y moving stage allowing us to change
+the location of the sensor in the plane transverse to the beam at an accuracy
+better than $0.1$~mm. A nominal bias voltage of $500$~V was applied to deplete
+the silicon sensor in most of the studies shown below, unless noted otherwise.
+The signals from the silicon sensor were amplified by two fast and
+high-bandwidth pre-amplifiers connected in series. The first amplifier is an
+ORTEC VT120C pre-amplifier, and the second amplifier is a Hamamatsu C5595
+amplifier. Using a pulse-generator, we measured the combined amplification gain
+of the two amplifiers in series as a function of the input signal amplitude and
+found some degree of non-linearity for typical signals produced by the silicon
+sensor under study. The measured gain ranged from $200$ for signals with
+amplitude around $0.15$~mV to $650$ for signals with amplitude around $10$~mV.
 
 \section{Test Beam Measurements and Results} 
 \label{sec:results} 
@@ -326,23 +341,40 @@ Photek MCP-PMT reference is shown as a function of the electron beam energy.
 \label{fig:MIPVsEnergy} 
 \end{figure} 
 
-We also measure the time resolution between the silicon sensor and the Photek MCP-PMT.
-An example of the time of flight distribution is shown on the right of 
-Figure~\ref{fig:ChargeDistributionExample} for $32$~GeV electrons after 6 radiation
-lengths of tungsten. The dependence of the measured time resolution on the beam
-energy is shown on the right of Figure~\ref{fig:MIPVsEnergy}. We observe an improvement
-in the time resolution as beam energy increases, and achieve a time resolution of $23$~ps
-for the $32$~GeV electron beam. 
+We also measure the time resolution between the silicon sensor and the Photek
+MCP-PMT, by measuring the standard deviation of the gaussian fit to the
+distribution of $\Delta t = t_0-t_1$. We observe a dependence of the time of
+flight on the total charge measured in the silicon detector, as shown in
+Fig.~\ref{fig:timewalk}. We perform a correction to the time of flight
+measurement for each event dependent on the measured charge in the silicon
+sensor. The correction is obtained from a second degree polynomial fit to the
+distribution of the $\Delta t$ versus total charge collected in the silicon
+sensor, as shown in Figure~\ref{fig:timewalk}. We verify that the correction
+does flatten the dependence of the time measurement on the integrated charge, as
+shown on the right panel of Figure~\ref{fig:timewalk}. An example of the time of
+flight distribution after the correction is applied is shown on the right of
+Figure~\ref{fig:ChargeDistributionExample} for $32$~GeV electrons after 6
+radiation lengths of tungsten. We observe an improvement in the time resolution
+as beam energy increases, and achieve a time resolution of $23$~ps for the
+$32$~GeV electron beam. 
+
+\begin{figure}[htbp] 
+\centering
+\includegraphics[width=0.49\textwidth]{plots/MIPVsAbsorberAt8GeV.pdf} 
+\includegraphics[width=0.5\textwidth]{plots/SigmaT_vs_X0_lin30Stamp.pdf} 
+\caption{TimeWalk plot} 
+\label{fig:timewalk} 
+\end{figure} 
 
 Furthermore, we study the response and time resolution of the silicon sensor
 along the longitudinal direction of the shower development. We measure the
 integrated charge and the time resolution as a function of the absorber thickness
 and present the results in Figure~\ref{fig:MIPVsAbsorberAt8GeV}. A typical 
 longitudinal shower profile is observed, consistent with previous studies performed
-using a secondary emission calorimter prototype based on MCP's~\cite{MCPShowerMaxPaper},
+using a secondary emission calorimeter prototype based on MCP's~\cite{MCPShowerMaxPaper},
 as well as independent studies of silicon-based calorimeter prototypes~\cite{Muhuri201424}.
 We also observe that the time resolution improves as the shower develops towards its 
-maximum in the longitudinal direction.
+maximum in the longitudinal direction. 
 
 \begin{figure}[htbp] 
 \centering
