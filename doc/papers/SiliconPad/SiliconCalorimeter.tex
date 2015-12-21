@@ -222,18 +222,20 @@ amplitude around $0.15$~mV to $650$ for signals with amplitude around $10$~mV.
 \section{Test Beam Measurements and Results} 
 \label{sec:results} 
 
-Measurements were performed using the secondary beam at the FTBF, which provides
-a beam of electrons and pions. Beam energies ranging from 4 GeV/c$^2$ to 32 GeV/c$^2$
-were used, for which the electron purity ranges between $70\%$ at the lowest
-energy to about $10\%$ at the highest energy. Stacks of tungsten plates with
-different thicknesses were placed immediately upstream of the silicon device in
-order to measure the response along the longitudinal direction of the
-electromagnetic shower. The transverse size of the tungsten plates allowed us to
-fully cover the transverse size of the silicon device. The signals from the
-silicon sensor and the Photek MCP-PMT are read out and digitized by the V1742
-digitizer, and example signal waveforms are shown in Fig.~\ref{fig:pulses}.
-The signal pulse in the silicon sensor has a rise time of about $1.5$~ns, and
-a full pulse width of around $7$~ns. 
+Measurements were performed using the primary 120~GeV proton beam, and secondary
+beams provided for the FTBF. Secondary beams with energies ranging from 4
+GeV/c$^2$ to 32 GeV/c$^2$ were used. Electron purity for those beams ranges
+between $70\%$ at the lowest energy to about $10\%$ at the highest energy.
+Stacks of tungsten plates with varying thicknesses were placed immediately
+upstream of the silicon device in order to measure the response along the
+longitudinal direction of the electromagnetic shower. The radiation length of
+tungsten is 3.5~mm, and the Moliere radius is 9.3~mm. Tungsten plate size is
+sufficient to fully contain the shower in the transverse dimension. Signals from
+the silicon sensor and the Photek MCP-PMT are read out and digitized by the CAEN
+V1742 digitizer, and example signal waveforms are shown in
+Fig.~\ref{fig:pulses}. The signal pulse in the silicon sensor has a rise time of
+about $1.5$~ns, and a full pulse width of around $7$~ns. This rise time is
+consistent with a time constant of a silicon sensor coupled to a 50~Ohm amplifier.
 
 \begin{figure}[htbp] 
 \centering
@@ -245,17 +247,17 @@ voltage applied to the silicon pad sensor is~$500$~V.}
 \label{fig:pulses} 
 \end{figure} 
 
-The raw waveforms are calibrated in both the voltage and time dimension using
-known inputs from a pulse generator~\cite{Kim201467}. The total collected charge
-for each signal pulse is computed by integrating a $10$~ns window around the
-peak of the pulse. The time for the reference Photek MCP-PMT detector is
-obtained by fitting the peak region of the pulse to a Gaussian function and the
-mean parameter of the Gaussian is assigned as the timestamp $t_0$. The time for
-signals from the silicon sensor is obtained by performed a linear fit to the
-rising edge of the pulse and the time at which the pulse reaches 30\% of the
-maximum amplitude is assigned as its timestamp $t_1$. We measured the
-electronic time resolution of the CAEN V1742 digitizer as $\sim$4~ps and
-neglected its impact on the timing measurements described below.
+The raw waveforms are voltage and time calibrated using the  procedure
+described in Ref.~\cite{Kim201467}. The total collected charge for each signal
+pulse is computed by integrating a $10$~ns window around the peak of the pulse.
+The time for the reference Photek MCP-PMT detector is obtained by fitting the
+peak region of the pulse to a Gaussian function and the mean parameter of the
+Gaussian is assigned as the timestamp $t_0$. The time for signals from the
+silicon sensor is obtained by performing a linear fit to the rising edge of the
+pulse and the time at which the pulse reaches 30\% of the maximum amplitude is
+assigned as its timestamp $t_1$. We measured the electronic time resolution
+of the CAEN V1742 digitizer as $\sim$4~ps and neglected its impact on the timing
+measurements described below.
 
 Electrons were identified using a combination of the gas Cherenkov counter
 provided by the FTBF and the signal size in the Photek detector located further
@@ -267,31 +269,30 @@ conditions.
 
 We begin by establishing the signal characteristics of a minimum-ionizing
 particle (MIP) using beams of 120 GeV protons as well as 8 GeV electrons with no
-absorbers upstream of the silicon pad sensor. To distinguish MIP signals from
-noise, we collect data events of pure noise with no beam and random triggers.
-The charge distribution for noise runs is presented in
-Fig.~\ref{fig:noise}. As expected, the charge distribution for noise
-runs is centered at 0, and the RMS is about $2$~fC. 
+absorbers upstream of the silicon pad sensor. To separate MIP signals from
+noise, we first collect data events with no beam and random trigger. The charge
+distribution for these noise runs is presented in Fig.~\ref{fig:noise}. As expected,
+the charge distribution is centered at $0$, and the RMS is about
+$2$~fC. 
 
 \begin{figure}[htbp] 
 \centering
 \includegraphics[width=0.45\textwidth]{plots/NoiseNoBeam_charge.pdf} 
-\caption{The distribution of charge integrated in the silicon sensor is shown for randomly triggered 
-data recorded with no beam. } 
+\caption{The distribution of charge integrated in the silicon sensor is shown for data events with no beam and random trigger. } 
 \label{fig:noise} 
 \end{figure} 
 
-In Figure~\ref{fig:MIP}, we show the response of the silicon sensor to
-the proton and electron beam without any absorbers upstream. We observe very similar
-response for these two cases, and measure an integrated charge of $4.5$~fC and $5.0$~fC
-for the proton and electron beams respectively. The measured charge takes into account
-the response of the amplifiers and attenuators used, which were measured 
-in the lab using a pulse generator in the full dynamic range relevant for the current study.
-We expect that a MIP traversing a silicon sensor of thickness 300$\mu$m to produce roughly 32000 
-electron-hole pairs, corresponding to a charge of about $5.1$~fC. Thus, our measured value
-is in close agreement with expectations. Having established the absolute scale of the measured 
-response using MIP's, in our remaining studies we normalize all charge measurements to the 
-charge integrated in the silicon sensor for one MIP. 
+In Figure~\ref{fig:MIP}, we show the response of the silicon sensor to the
+proton and electron beams without any absorbers upstream. We observe very
+similar response for these two cases, and measure an integrated charge of
+$4.5$~fC and $5.0$~fC for the proton and electron beams, respectively. The
+measured charge is corrected for the gain of the amplifiers and attenuators
+used, hence is the output of the silicon sensor. We expect that a MIP traversing
+a silicon sensor of thickness 325~$\mu$m to produce roughly 35,000 electron-hole
+pairs, corresponding to a collected charge of about $5$~fC. Thus, our measured value is
+in agreement with expectations. Having established the absolute scale of
+the  response using MIP's, in our remaining studies we normalize all
+charge measurements to the charge integrated in the silicon sensor for one MIP. 
 
 \begin{figure}[htbp] 
 \centering
@@ -305,26 +306,28 @@ of the silicon sensor to a minimum-ionizing particle.
 \label{fig:MIP} 
 \end{figure} 
 
-We study the response of the silicon sensor to electron beams of various energies after
-6 radiation lengths of tungsten absorber. The silicon sensor is expected to be
-sensitive to the number of secondary electrons produced within the electromagnetic
-shower, and therefore its response is expected to scale up with higher incident
-electron energy. In Figure~\ref{fig:ChargeDistributionExample}, we show
-an example of the integrated charge distribution measured in the silicon sensor
-after 6 radiation lengths of tungsten for $32$~GeV electrons. We plot the mean 
-and RMS of these distributions as a function of incident electron beam energy
-in Figure~\ref{fig:MIPVsEnergy}. The uncertainties plotted show the RMS
-of the charge distribution. We observe a fairly linear depedence between
-the measured charge and the incident beam energy, for beam energies
-between $4$~GeV and $32$~GeV. 
+We study the response of the silicon sensor to electron beams of various
+energies after 6 radiation lengths ($X_0$) of tungsten absorber. The silicon
+sensor is expected to be sensitive to the number of secondary electrons produced
+within the electromagnetic shower, and therefore its response is expected to
+scale up with higher incident electron energy. In
+Figure~\ref{fig:ChargeDistributionExample}, we show an example of the integrated
+charge distribution measured in the silicon sensor after 6 radiation lengths of
+tungsten, for runs with for $32$~GeV electrons. We plot the mean and RMS of
+these distributions as a function of incident electron beam energy in
+Figure~\ref{fig:MIPVsEnergy}. The uncertainties plotted show the RMS of the
+charge distribution. We observe a fairly linear depedence between the measured
+charge and the incident beam energy, for beam energies between $4$~GeV and
+$32$~GeV. 
 
 \begin{figure}[htbp] 
 \centering
 \includegraphics[width=0.49\textwidth]{plots/Electron_6X0_32GeV_chargeMIP.pdf} 
 \includegraphics[width=0.50\textwidth]{plots/deltaT_32GeV_6X0.pdf} 
-\caption{ An example of the distribution of integrated charge in the silicon sensor is 
-shown in units of the charge measured for MIP's. A 32 GeV electron beam is used, and the
-silicon sensor is placed after 6 radiation lengths of tungsten absorber.} 
+\caption{ An example of the distribution of integrated charge in the silicon
+sensor is shown in units of charge measured for a MIP (left). Time
+resolution between the silicon sensor and the Photek MCP-PMT (right). A 32 GeV
+electron beam is used, and the silicon sensor is placed after 6~$X_0$ of tungsten absorber.} 
 \label{fig:ChargeDistributionExample}
 \end{figure}
 
@@ -332,49 +335,51 @@ silicon sensor is placed after 6 radiation lengths of tungsten absorber.}
 \centering
 \includegraphics[width=0.49\textwidth]{plots/MIPVsEnergyAt6X0.pdf} 
 \includegraphics[width=0.50\textwidth]{plots/SigmaT_vs_BeamEnergy_lin30Stamp.pdf} 
-\caption{On the left, the integrated charge in the silicon sensor expressed in units of the 
-charge measured for MIP's is shown as a function of the electron beam energy. The uncertainty
-bands show the RMS of the measured charge distribution. The red line is the best fit to a 
-linear function. On the right, the measured time resolution between the silicon sensor and the 
-Photek MCP-PMT reference is shown as a function of the electron beam energy.
-} 
+\caption{Left: The integrated charge in the silicon sensor expressed in units of the
+charge measured for a MIP is shown as a function of the electron beam
+energy. The uncertainty bands show the RMS of the measured charge distribution.
+The red line is the best fit to a linear function. Right: The measured
+time resolution between the silicon sensor and the Photek MCP-PMT reference is
+shown as a function of the electron beam energy. } 
 \label{fig:MIPVsEnergy} 
 \end{figure} 
 
 We also measure the time resolution between the silicon sensor and the Photek
 MCP-PMT, by measuring the standard deviation of the gaussian fit to the
-distribution of $\Delta t = t_0-t_1$. We observe a dependence of the time of
-flight on the total charge measured in the silicon detector, as shown in
-Fig.~\ref{fig:timewalk}. We perform a correction to the time of flight
-measurement for each event dependent on the measured charge in the silicon
-sensor. The correction is obtained from a second degree polynomial fit to the
-distribution of the $\Delta t$ versus total charge collected in the silicon
-sensor, as shown in Figure~\ref{fig:timewalk}. We verify that the correction
-does flatten the dependence of the time measurement on the integrated charge, as
-shown on the right panel of Figure~\ref{fig:timewalk}. An example of the time of
-flight distribution after the correction is applied is shown on the right of
-Figure~\ref{fig:ChargeDistributionExample} for $32$~GeV electrons after 6
-radiation lengths of tungsten. We observe an improvement in the time resolution
+distribution of $\Delta t = t_0-t_1$. We observe a systematic dependence of
+$\Delta t$ on the total charge measured in the silicon detector, as shown in
+Figure~\ref{fig:timewalk}. We perform a correction to $\Delta t$ for each event
+using the measured charge in the silicon sensor. The correction is obtained from
+a second degree polynomial fit to the distribution of the $\Delta t$ versus
+total charge collected in the silicon sensor, as shown in
+Figure~\ref{fig:timewalk}. We verify that the correction flattens the dependence
+of the time measurement on the integrated charge, as shown on the right panel of
+Figure~\ref{fig:timewalk}. An example of a corrected $\Delta t$ distribution for
+$32$~GeV electrons after 6 $X_0$ is shown on the right of
+Figure~\ref{fig:ChargeDistributionExample}. The dependence of the measured time
+resolution on the beam energy is shown on the right of
+Figure~\ref{fig:MIPVsEnergy}. We observe an improvement in the time resolution
 as beam energy increases, and achieve a time resolution of $23$~ps for the
-$32$~GeV electron beam. 
+$32$~GeV electron beam.
 
 \begin{figure}[htbp] 
 \centering
-\includegraphics[width=0.49\textwidth]{plots/MIPVsAbsorberAt8GeV.pdf} 
-\includegraphics[width=0.5\textwidth]{plots/SigmaT_vs_X0_lin30Stamp.pdf} 
+\includegraphics[width=0.49\textwidth]{plots/DeltaT_vs_Charge_Uncorrected.pdf} 
+\includegraphics[width=0.5\textwidth]{plots/DeltaT_vs_Charge_Corrected.pdf} 
 \caption{TimeWalk plot} 
 \label{fig:timewalk} 
 \end{figure} 
 
 Furthermore, we study the response and time resolution of the silicon sensor
 along the longitudinal direction of the shower development. We measure the
-integrated charge and the time resolution as a function of the absorber thickness
-and present the results in Figure~\ref{fig:MIPVsAbsorberAt8GeV}. A typical 
-longitudinal shower profile is observed, consistent with previous studies performed
-using a secondary emission calorimeter prototype based on MCP's~\cite{MCPShowerMaxPaper},
-as well as independent studies of silicon-based calorimeter prototypes~\cite{Muhuri201424}.
-We also observe that the time resolution improves as the shower develops towards its 
-maximum in the longitudinal direction. 
+integrated charge and the time resolution as a function of the absorber
+thickness and present the results in Figure~\ref{fig:MIPVsAbsorberAt8GeV}. A
+typical longitudinal shower profile is observed, consistent with previous
+studies performed using a secondary emission calorimeter prototype based on
+MCP's~\cite{MCPShowerMaxPaper}, as well as independent studies of silicon-based
+calorimeter prototypes~\cite{Muhuri201424}. We also observe that the time
+resolution improves as the shower develops towards its maximum in the
+longitudinal direction. 
 
 \begin{figure}[htbp] 
 \centering
@@ -393,7 +398,7 @@ absorber thickness.
 Finally, we studied the dependence of the time resolution as a function of the
 bias voltage applied to deplete the silicon sensor. The measurements are shown
 in Figure~\ref{fig:SigmaT_vs_DV_lin30Stamp} for $16$~GeV electrons after
-6 radiation lengths of tungsten absorber. We find that the time resolution
+6~$X_0$ of tungsten absorber. We find that the time resolution
 improves as the bias voltage is increased, which is expected on the basis of 
 increased velocity of electrons and holes in silicon at larger bias voltage. 
 
@@ -409,21 +414,19 @@ reference is shown as a function of bias voltage applied on the silicon sensor. 
 \label{sec:discussion} 
 
 From Figures~\ref{fig:noise}~and~\ref{fig:MIP}, we observe that the noise of the
-prototype system is sufficiently low to extract signals from MIPs. Comparing
-the RMS of the noise distribution with the mean of the MIP signal, we find a
-signal-to-noise ratio around $2$ to $2.5$. A rough estimate from 
-Figure~\ref{fig:MIP} demonstrates that the efficiency to detect $120$~GeV protons
-and $8$~GeV electrons with no absorber present is larger than $80\%$.
+prototype system is sufficiently low to extract signals from MIPs. Comparing the
+RMS of the noise distribution with the mean of the MIP signal, we find a
+signal-to-noise ratio around $2$ to $2.5$. A rough estimate from
+Figure~\ref{fig:MIP} demonstrates that the efficiency to detect $120$~GeV
+protons and $8$~GeV electrons with no absorber present is larger than $80\%$.
 Based on the measurements for MIPs, we derive signal distributions for
-electromagnetic showers normalized to MIP response, and observe
-a relatively linear response to the electron beam energy after 6 radiation lengths 
-of tungsten absorber in Figure~\ref{fig:MIPVsEnergy}. We also measure a 
-longitudinal shower profile in Figure~\ref{fig:MIPVsAbsorberAt8GeV} 
-that is consistent with similar past measurements. Having established 
-standard calorimetric properties of the prototype, we proceed to study 
-the timing properties. 
+electromagnetic showers normalized to MIP response, and observe a relatively
+linear response to the electron beam energy in the range from 4~GeV to 32~GeV
+after 6 $X_0$ of tungsten absorber, as shown in Figure~\ref{fig:MIPVsEnergy}. We also
+measure a longitudinal shower profile in Figure~\ref{fig:MIPVsAbsorberAt8GeV}
+that is consistent with similar past measurements.
 
-We begin with some general considerations of timing in silicon.
+\textbf{SI XIE KNOWS WHAT TO DO} We begin with some general considerations of timing in silicon.
 An electric field applied to silicon results in a built-in junction voltage
 (~0.6V) which is typical of silicon diodes. The high electric field in silicon
 leads to total depletion as all free charge carriers are removed. 
@@ -447,7 +450,8 @@ electrons (with additional amplification) produced in silicon they collected
 from the thickness of $\sim$10~$\mu$m. We can say that the rest of the silicon
 thickness does not participate in the silicon time jitter, because these
 electrons are coming too late. This simple model can explain in general
-obtained test beam results. 
+obtained test beam results. \textbf{SI XIE KNOWS UNTIL HERE} 
+
 
 Our results show that the time stamp associated with electromagnetic 
 showers induced by electrons with energy between $20$~GeV and $30$~GeV 
