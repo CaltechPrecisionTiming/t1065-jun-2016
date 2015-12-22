@@ -1,88 +1,18 @@
-%% 
-%% Copyright 2007, 2008, 2009 Elsevier Ltd
-%% 
-%% This file is part of the 'Elsarticle Bundle'.
-%% ---------------------------------------------
-%% 
-%% It may be distributed under the conditions of the LaTeX Project Public
-%% License, either version 1.2 of this license or (at your option) any
-%% later version.  The latest version of this license is in
-%%    http://www.latex-project.org/lppl.txt
-%% and version 1.2 or later is part of all distributions of LaTeX
-%% version 1999/12/01 or later.
-%% 
-%% The list of all files belonging to the 'Elsarticle Bundle' is
-%% given in the file `manifest.txt'.
-%% 
+\documentclass[12pt]{article}
 
-%% Template article for Elsevier's document class `elsarticle'
-%% with numbered style bibliographic references
-%% SP 2008/03/01
-
-\documentclass[preprint,12pt]{elsarticle}
-\biboptions{numbers,sort&compress}
-
-%% Use the option review to obtain double line spacing
-%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
-
-%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
-%% for a journal layout:
-%% \documentclass[final,1p,times]{elsarticle}
-%% \documentclass[final,1p,times,twocolumn]{elsarticle}
-%% \documentclass[final,3p,times]{elsarticle}
-%% \documentclass[final,3p,times,twocolumn]{elsarticle}
-%% \documentclass[final,5p,times]{elsarticle}
-%% \documentclass[final,5p,times,twocolumn]{elsarticle}
-
-%% For including figures, graphicx.sty has been loaded in
-%% elsarticle.cls. If you prefer to use the old commands
-%% please give \usepackage{epsfig}
-
-%% The amssymb package provides various useful mathematical symbols
-\usepackage{amssymb}
 \usepackage{lineno}
+
+
+\usepackage[hmargin=1.5cm,vmargin=1.5cm]{geometry}
+
+\usepackage[affil-it]{authblk}
+\usepackage[percent]{overpic}
+\usepackage{float}
+\usepackage{color}
 \usepackage{hyperref}
-%% The amsthm package provides extended theorem environments
-%% \usepackage{amsthm}
-
-%% The lineno packages adds line numbers. Start line numbering with
-%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
-%% for the whole article with \linenumbers.
-%% \usepackage{lineno}
-
-\journal{Nucl. Instrum. Meth. A}
-
-\begin{document}
-\linenumbers
-
-\begin{frontmatter}
-
-%% Title, authors and addresses
-
-%% use the tnoteref command within \title for footnotes;
-%% use the tnotetext command for theassociated footnote;
-%% use the fnref command within \author or \address for footnotes;
-%% use the fntext command for theassociated footnote;
-%% use the corref command within \author for corresponding author footnotes;
-%% use the cortext command for theassociated footnote;
-%% use the ead command for the email address,
-%% and the form \ead[url] for the home page:
-%% \title{Title\tnoteref{label1}}
-%% \tnotetext[label1]{}
-%% \author{Name\corref{cor1}\fnref{label2}}
-%% \ead{email address}
-%% \ead[url]{home page}
-%% \fntext[label2]{}
-%% \cortext[cor1]{}
-%% \address{Address\fnref{label3}}
-%% \fntext[label3]{}
+\usepackage[numbers,sort&compress]{natbib}
 
 \title{Test Beam Studies Of Silicon Timing for Use in Calorimetry.}
-
-%% use optional labels to link authors explicitly to addresses:
-%% \author[label1,label2]{}
-%% \address[label1]{}
-%% \address[label2]{}
 
 \author[1]{A.~Apresyan}
 \author[2]{G.~Bolla}
@@ -94,13 +24,17 @@
 \author[2]{A.~Ronzhin}
 \author[1]{M.~Spiropulu}
 \author[1]{S.~Xie}
-\address[1]{California Institute of Technology, Pasadena, CA, USA}
-\address[2]{Fermi National Accelerator Laboratory, Batavia, IL, USA}
-\address[3]{University of Chicago, Chicago, IL,  USA}
+\affil[1]{California Institute of Technology, Pasadena, CA, USA}
+\affil[2]{Fermi National Accelerator Laboratory, Batavia, IL, USA}
+\affil[3]{University of Chicago, Chicago, IL,  USA}
 
-\begin{abstract}
-%% Text of abstract
-The high luminosity upgrade of the Large Hadron Collider (HL-LHC) at
+\date{}
+
+\begin{document}
+\linenumbers
+\maketitle
+
+\abstract{ The high luminosity upgrade of the Large Hadron Collider (HL-LHC) at
 CERN is expected to provide instantaneous luminosities of $5\times 10^{34}$
 cm$^{-2}$ s$^{-1}$. The high luminosities expected at the HL-LHC will be
 accompanied by a factor of $5$ to $10$ more pileup compared with LHC conditions
@@ -116,23 +50,6 @@ the bulk of electromagnetic showers induced by electrons in the range of
 $20$~GeV to $30$~GeV, we can achieve time resolutions better than $25$~ps per
 single pad sensor. 
 
-\end{abstract}
-
-\begin{keyword}
-%% keywords here, in the form: keyword \sep keyword
-
-%% PACS codes here, in the form: \PACS code \sep code
-
-%% MSC codes here, in the form: \MSC code \sep code
-%% or \MSC[2008] code \sep code (2000 is the default)
-
-\end{keyword}
-
-\end{frontmatter}
-
-%% \linenumbers
-
-%% main text
 \section{Introduction} 
 
 Future colliders, including the high luminosity upgrade of the Large
@@ -182,6 +99,7 @@ of the test beam measurements are presented in Section~\ref{sec:results}.
 Sections~\ref{sec:discussion}~and~\ref{sec:conclusion} are devoted to discussion
 and conclusion, respectively.
 
+
 \section{General Properties of Silicon Timing and Bench Test Studies}
 \label{sec:siliconpad}
 
@@ -203,7 +121,7 @@ silicon sensor rather than the details of the circuit.
 
 \begin{figure}[htbp] 
 \centering
-\includegraphics[width=0.8\textwidth]{plots/SiliconDiodeCV.png} 
+\includegraphics[width=0.45\textwidth]{plots/SiliconDiodeCV.png} 
 \caption{The measured capacitance as a function of the applied bias voltage.} 
 \label{fig:SiliconDiode} 
 \end{figure} 
@@ -289,7 +207,7 @@ the silicon sensor in most of the studies shown below, unless noted otherwise.
 \section{Test Beam Measurements and Results} 
 \label{sec:results} 
 
-Measurements were performed during December 2015, using the primary 120~GeV proton beam, and secondary
+Measurements were performed using the primary 120~GeV proton beam, and secondary
 beams provided for the FTBF. Secondary beams with energies ranging from 4
 GeV/c$^2$ to 32 GeV/c$^2$ were used. Electron purity for those beams ranges
 between $70\%$ at the lowest energy to about $10\%$ at the highest energy.
@@ -452,11 +370,9 @@ thickness and present the results in Figure~\ref{fig:MIPVsAbsorberAt8GeV}. A
 typical longitudinal shower profile is observed, consistent with previous
 studies performed using a secondary emission calorimeter prototype based on
 MCP's~\cite{Ronzhin2015288}, as well as independent studies of silicon-based
-calorimeter prototypes~\cite{Muhuri201424}. The RMS of the integrated charge at
-each absorber thickness is relatively large, due to a small size of the active
-element used in the experiment. We also observe that the time resolution
-improves as the shower develops towards its maximum in the longitudinal
-direction. 
+calorimeter prototypes~\cite{Muhuri201424}. We also observe that the time
+resolution improves as the shower develops towards its maximum in the
+longitudinal direction. 
 
 \begin{figure}[htbp] 
 \centering
@@ -555,34 +471,28 @@ regions of the electromagnetic shower and using multiple channels.
 conditions during our test beam time. We also appreciate the technical support of 
 the Fermilab SiDet department for the production of high quality silicon samples. 
 
-%% The Appendices part is started with the command \appendix;
-%% appendix sections are then done as normal sections
-%% \appendix
-
-%% \section{}
-%% \label{}
-
-%% If you have bibdatabase file and want bibtex to generate the
-%% bibitems, please use
-%%
-%%  \bibliographystyle{elsarticle-num} 
-%%  \bibliography{<your bibdatabase>}
-
-%% else use the following coding to input the bibitems directly in the
-%% TeX file.
-
 \bibliography{SiliconCalorimeter}{}
 \bibliographystyle{ieeetr} 
 
-%\begin{thebibliography}{00}
-
-%% \bibitem{label}
-%% Text of bibliographic item
-
-%\bibitem{}
-
-%\end{thebibliography}
 \end{document}
-\endinput
-%%
-%% End of file `elsarticle-template-num.tex'.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

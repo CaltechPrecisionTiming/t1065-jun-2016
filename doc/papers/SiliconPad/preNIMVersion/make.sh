@@ -1,0 +1,4 @@
+pdflatex SiliconCalorimeter
+bibtex SiliconCalorimeter
+pdflatex SiliconCalorimeter
+pdflatex SiliconCalorimeter
