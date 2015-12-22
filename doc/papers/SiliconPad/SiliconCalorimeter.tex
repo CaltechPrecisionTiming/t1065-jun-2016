@@ -103,30 +103,21 @@ and conclusion, respectively.
 \section{General Properties of Silicon Timing and Bench Test Studies}
 \label{sec:siliconpad}
 
-A few factors determine the timing response of silicon detectors. The
-time constant depends on the series resistance of the silicon, the load
-resistance, and the terminal capacitance. The carrier velocity and its collection
-time depend on the thickness of the silicon, the depletion voltage, and the type of
-carrier. The drift time of the carriers in fully depleted silicon determines the 
-carrier's collection time. In the case of small time constant, the time
-response of the silicon sensor is determined by the collection time, however
-for silicon with large capacitance the time response depends mostly on the
-time constant. \textbf {WRITE SOMETHING ABOUT THE EFFECT OF BIAS VOLTAGE. SERGEY SAID PULSE CHARACTERISTICS ARE DOMINATED BY THE SILICON AND NOT CIRCUIT. ARTUR SAID SOME OF THE TEXT SOUNDS TOO MUCH LIKE A LECTURE WITHOUT PUNCHLINE}
-
 For our measurements, we used a silicon sensor produced by
 Hamamatsu~\cite{hamamatsu}. The thickness of the silicon was measured to be ~325
 $\mu$m. The transverse size of the sensor is 6x6 mm$^2$. The negative bias
-voltage was applied to the p-side of the silicon. \textbf{FIXME FROM HERE} The
-dependence of the diode capacitance on the bias voltage is presented in
-Figure~\ref{fig:SiliconDiode}. The junction capacitance depends on the area of
-p-layer and the thickness of the depletion layer which increases with reverse
-bias voltage. When charged particles pass through the silicon the electrons
-produced are collected on the n-side of the silicon, opposite to the p-side, and
-forms the output signal. \textbf{TILL HERE} The electric diagram of the silicon
+voltage was applied to the p-side of the silicon. The capacitance
+of the silicon diode is measured as a function of the bias voltage
+and shown in Figure~\ref{fig:SiliconDiode}. We observe that the silicon
+is fully depleted above about $120$~V. Timing measurements are expected
+to improve with larger bias voltage as the the carrier velocity increases.
+
+The electric diagram of the silicon
 diode connections is presented in Figure~\ref{fig:SiliconDiode}. Attention was
 paid to provide good filtering for bias voltage, to reduce ground loop effects, and
-to minimize inductive loop for the signal readout.
-
+to minimize inductive loop for the signal readout. The timing characteristics
+of the signal pulses are dominated primarily by properties of the
+silicon sensor rather than the details of the circuit.
 
 \begin{figure}[htbp] 
 \centering
@@ -134,7 +125,6 @@ to minimize inductive loop for the signal readout.
 \caption{The measured capacitance as a function of the applied bias voltage.} 
 \label{fig:SiliconDiode} 
 \end{figure} 
-
 
 The silicon diode was placed inside a light-tight box of thickness $1.5$~cm,
 which also provides electromagnetic shielding. The box is made of 0.2~mm steel.
@@ -148,18 +138,13 @@ setup are presented in Figure~\ref{fig:SiliconPad}.
 
 \begin{figure}[htbp] 
 \centering
-\includegraphics[width=0.45\textwidth]{plots/SiliconDiodeDiagram.pdf} 
-\includegraphics[width=0.45\textwidth]{plots/SiliconDiodeBox.jpg} 
-%\includegraphics[width=0.45\textwidth]{plots/SiliconPadBench.png} 
+\includegraphics[width=0.60\textwidth]{plots/SiliconDiodeDiagram.pdf} 
+\includegraphics[width=0.39\textwidth]{plots/SiliconDiodeBox.jpg} 
 \caption{The electric diagram for the silicon diode connections (left). External
 view of the box with silicon diode, and the bias voltage connection is shown
 below it (right).} 
 \label{fig:SiliconPad} 
 \end{figure} 
-
-
-%TODO: this section is a bit weak...needs more details.
-%TODO: We should put the photo of the circuit here
 
 
 \section{Test-beam Setup and Experimental Apparatus }
@@ -193,7 +178,7 @@ MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552}.
 \begin{figure}[htbp] 
 \centering
 \includegraphics[width=0.65\textwidth]{plots/BeamSchematicDiagram.pdf} 
-\caption{A schematic diagram of the test-beam setup is shown. The $t_0$ and $t_1$ are defined Section~\ref{sec:results}.} 
+\caption{A schematic diagram of the test-beam setup is shown. The $t_0$ and $t_1$ are defined in Section~\ref{sec:results}.} 
 \label{fig:BeamSchematicDiagram} 
 \end{figure} 
 
@@ -356,7 +341,9 @@ Figure~\ref{fig:timewalk}. We verify that the correction flattens the dependence
 of the time measurement on the integrated charge, as shown on the right panel of
 Figure~\ref{fig:timewalk}. An example of a corrected $\Delta t$ distribution for
 $32$~GeV electrons after 6 $X_0$ is shown on the right of
-Figure~\ref{fig:ChargeDistributionExample}. The dependence of the measured time
+Figure~\ref{fig:ChargeDistributionExample}. Other than the electron identification
+requirements, no additional selection requirements on the amplitude of the
+signal in the silicon sensor were made. The dependence of the measured time
 resolution on the beam energy is shown on the right of
 Figure~\ref{fig:MIPVsEnergy}. We observe an improvement in the time resolution
 as beam energy increases, and achieve a time resolution of $23$~ps for the
@@ -426,7 +413,7 @@ after 6 $X_0$ of tungsten absorber, as shown in Figure~\ref{fig:MIPVsEnergy}. We
 measure a longitudinal shower profile in Figure~\ref{fig:MIPVsAbsorberAt8GeV}
 that is consistent with similar past measurements.
 
-\textbf{SI XIE KNOWS WHAT TO DO} We begin with some general considerations of timing in silicon.
+We begin with some general considerations of timing in silicon.
 An electric field applied to silicon results in a built-in junction voltage
 (~0.6V) which is typical of silicon diodes. The high electric field in silicon
 leads to total depletion as all free charge carriers are removed. 
@@ -436,22 +423,14 @@ The electrons are collected on positive electrode and the holes are collected
 on the negative electrode. The time and jitter associated with relativistic particles 
 traversing through the silicon material can be neglected as it takes 
 less than $1$~ps for relativistic particles to pass through the full $300$~$\mu$m
-of silicon material. At high electric field (more than $105$~V/cm), the mobility 
-of carriers attain a constant drift velocity of $108$~mm/s 
-(or about $1\mu$m$/10$~ps) in the silicon material~\cite{Ronzhin2015}. 
-The amount of electrons produced in the 100 um is ~10000. The
-time needed to collect all electrons in the 100 um is ~1ns. The electrons produced closer to 
-the positive electrode collected first. The time needed to pass 1~$\mu$m by electron 
-is $\sim$10~ps. The average time between the
-electrons is $\sim$1~ps. If electronic can detect 100 electrons its arrival time
-could be inside of the 10~ps. The time jitter could be estimated as 3~ps for
-Poisson timing distribution. For example, if electronics can detects $\sim$100
-electrons (with additional amplification) produced in silicon they collected
-from the thickness of $\sim$10~$\mu$m. We can say that the rest of the silicon
-thickness does not participate in the silicon time jitter, because these
-electrons are coming too late. This simple model can explain in general
-obtained test beam results. \textbf{SI XIE KNOWS UNTIL HERE} 
-
+of silicon material. At high electric field (more than $10^{5}$~V/cm), the mobility 
+of carriers attain a constant drift velocity of $1\mu$m$/10$~ps in the silicon 
+material~\cite{Ronzhin2015,spieler2005semiconductor}. The time required to collect all ionization electrons
+produced by a charged particle traversing the $300\mu$m is about $3$~ns.
+The electrons produced closer to the positive electron are collected first and are
+most relevant for the time stamp assignment. The time needed to collect the electrons
+produced in the last $3\mu$m of silicon is about $30$~ps, and sets the scale
+of the time measurement.
 
 Our results show that the time stamp associated with electromagnetic 
 showers induced by electrons with energy between $20$~GeV and $30$~GeV 
@@ -485,8 +464,6 @@ regions of the electromagnetic shower and using multiple channels.
 \section{Acknowledgements} We thank the FTBF personnel for very good beam 
 condition during our test beam run. We also appreciate the technical support of 
 the Fermilab SiDet department for the production of high quality silicon samples. 
-We appreciate Helmuth Spieler monography as a good source of silicon 
-information~\cite{spieler2005semiconductor}.
 
 \bibliography{SiliconCalorimeter}{}
 \bibliographystyle{ieeetr} 

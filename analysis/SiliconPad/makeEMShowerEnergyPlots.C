@@ -275,7 +275,7 @@ void makeEMShowerEnergyPlots() {
   //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run112-500V_123.root", "Electron_6X0_4GeV", 0.02, 10.0, 0, 200, 20, 80 );
   //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run109.root","Electron_6X0_8GeV", 0.05, 10.0, 0, 300, 50, 175);
   //MakeChargePlot("root://eoscms://eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run110.root","Electron_6X0_16GeV", 0.1, 10.0, 0, 500, 150, 300);
-  //MakeChargePlot("root://eoscms://eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run113-114.root","Electron_6X0_32GeV", 0.1, 10.0, 0, 700, 250, 450);
+  MakeChargePlot("root://eoscms://eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run113-114.root","Electron_6X0_32GeV", 0.1, 10.0, 0, 700, 250, 450);
  
   //MakeAmplitudeVsBeamEnergyGraph();
   
@@ -289,7 +289,7 @@ void makeEMShowerEnergyPlots() {
   //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run117.root", "Electron_4X0_8GeV", 0.05, sqrt(10.0), 0, 300, 40, 175 );
   //MakeChargePlot("root://eoscms:///eos/cms/store/group/phys_susy/razor/Timing/t1065-dec-2015/reco/v1/t1065_dec2015_run116.root", "Electron_6X0_8GeV", 0.05, sqrt(10.0), 0, 300, 30, 150 );
 
-  MakeAmplitudeVsAbsorberThicknessGraph();
+  //MakeAmplitudeVsAbsorberThicknessGraph();
 
 
   //*************************************

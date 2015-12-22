@@ -176,7 +176,7 @@ void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, dou
     c->SetBottomMargin(0.13);
     histIntMIP->SetAxisRange(xmin/6.5,xmax/6.5,"X");
     histIntMIP->SetTitle("");
-    histIntMIP->GetXaxis()->SetTitle("Integrated Charge [Q_{MIP}]");
+    histIntMIP->GetXaxis()->SetTitle("Integrated Charge [ Q_{MIP} ]");
     histIntMIP->GetXaxis()->SetTitleSize(0.045);
     histIntMIP->GetXaxis()->SetLabelSize(0.045);
     histIntMIP->GetXaxis()->SetTitleOffset(1.15);
