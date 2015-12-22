@@ -173,13 +173,14 @@ void MakeChargePlot(string filename, string plotname, double ampCutOnPhotek, dou
     c = new TCanvas("c","c",600,600);  
     c->SetRightMargin(0.05);
     c->SetLeftMargin(0.15);
+    c->SetBottomMargin(0.13);
     histIntMIP->SetAxisRange(xmin/6.5,xmax/6.5,"X");
     histIntMIP->SetTitle("");
-    histIntMIP->GetXaxis()->SetTitle("Integrated Charge / Charge for MIP");
+    histIntMIP->GetXaxis()->SetTitle("Integrated Charge [Q_{MIP}]");
     histIntMIP->GetXaxis()->SetTitleSize(0.045);
     histIntMIP->GetXaxis()->SetLabelSize(0.045);
+    histIntMIP->GetXaxis()->SetTitleOffset(1.15);
     histIntMIP->GetYaxis()->SetTitle("Number of Events");
-    histIntMIP->GetYaxis()->SetTitleOffset(1.3);
     histIntMIP->GetYaxis()->SetTitleSize(0.05);
     histIntMIP->GetYaxis()->SetLabelSize(0.045);
     histIntMIP->GetYaxis()->SetLabelOffset(0.015);

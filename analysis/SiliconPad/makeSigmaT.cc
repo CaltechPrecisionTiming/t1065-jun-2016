@@ -68,8 +68,8 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
   const float Xrange = 20*nBinsX;
 
   TProfile * DeltaT_vs_Charge = new TProfile("DeltaT_vs_Charge", "DeltaT_vs_Charge", nBinsX, 0, Xrange, 2, 6);
-  TH2F *DeltaT_vs_Charge_Uncorrected = new TH2F("DeltaT_vs_Charge_Uncorrected","; X; Y; Number of Events", 40, 30, 300, 120, 3.6, 4.0);
-  TH2F *DeltaT_vs_Charge_Corrected = new TH2F("DeltaT_vs_Charge_Corrected","; X; Y", 40, 30, 300, 120, 3.6, 4.0);
+  TH2F *DeltaT_vs_Charge_Uncorrected = new TH2F("DeltaT_vs_Charge_Uncorrected","; X; Y; Number of Events", 40, 30, 150, 120, 3.6, 4.0);
+  TH2F *DeltaT_vs_Charge_Corrected = new TH2F("DeltaT_vs_Charge_Corrected","; X; Y; Number of Events", 40, 30, 150, 120, 3.6, 4.0);
   // TH2F *DeltaT_vs_Charge_Corrected = new TH2F("DeltaT_vs_Charge_Corrected","; X; Y", nBinsX, 0, Xrange, 120, -2, 2);
   TH1F *Charge = new TH1F("Charge","Charge", nBinsX, 0, Xrange);
   TH1F *DeltaT = new TH1F("DeltaT","DeltaT", 200, 3.0,5.0);
@@ -157,8 +157,8 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
 	{
 	  float x = 10*integral[21];
 	  DeltaT_vs_Charge_Uncorrected->Fill(10*integral[21], gauspeak[18]-timeSilicon);
-	  DeltaT_vs_Charge_Corrected->Fill(10*integral[21], gauspeak[18]-timeSilicon - (a + b*x + c*x*x) + (a + b*180 + c*180*180));
-	  DeltaT->Fill(gauspeak[18]-timeSilicon - (a + b*x + c*x*x) + (a + b*180 + c*180*180));
+	  DeltaT_vs_Charge_Corrected->Fill(10*integral[21], gauspeak[18]-timeSilicon - (a + b*x + c*x*x) + (a + b*80 + c*80*80));
+	  DeltaT->Fill(gauspeak[18]-timeSilicon - (a + b*x + c*x*x) + (a + b*80 + c*80*80));
 	}
    }
   
@@ -228,7 +228,7 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
   DeltaT_vs_Charge_Uncorrected->SetStats(false);
   fslopecorr->SetLineWidth(6);
   fslopecorr->Draw("same");
-  DeltaT_vs_Charge_Uncorrected->GetXaxis()->SetTitle("Charge / Charge per MIP");
+  DeltaT_vs_Charge_Uncorrected->GetXaxis()->SetTitle("Integrated Charge [ Q_{MIP} ]");
   DeltaT_vs_Charge_Uncorrected->GetXaxis()->SetTitleSize(0.05);
   DeltaT_vs_Charge_Uncorrected->GetXaxis()->SetLabelSize(0.045);
   DeltaT_vs_Charge_Uncorrected->GetXaxis()->SetTitleOffset(1.0);
@@ -249,7 +249,7 @@ void MakeAmplitudePlot(std::string filename, std::string outname, float electron
   cv->SetBottomMargin(0.12);
   DeltaT_vs_Charge_Corrected->Draw("colz");
   DeltaT_vs_Charge_Corrected->SetStats(false); 
-  DeltaT_vs_Charge_Corrected->GetXaxis()->SetTitle("Charge / Charge per MIP");
+  DeltaT_vs_Charge_Corrected->GetXaxis()->SetTitle("Integrated Charge [ Q_{MIP} ]");
   DeltaT_vs_Charge_Corrected->GetXaxis()->SetTitleSize(0.05);
   DeltaT_vs_Charge_Corrected->GetXaxis()->SetLabelSize(0.045);
   DeltaT_vs_Charge_Corrected->GetXaxis()->SetTitleOffset(1.0);

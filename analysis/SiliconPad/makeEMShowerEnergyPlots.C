@@ -74,13 +74,14 @@ void MakeAmplitudeVsBeamEnergyGraph() {
 
 
   c = new TCanvas("c","c",800,600);
+  c->SetLeftMargin(0.11);
   graphMIPVsEnergy->Draw("AP");
   graphMIPVsEnergy->SetTitle("");
   graphMIPVsEnergy->GetXaxis()->SetTitle("Electron Beam Energy [GeV/c^{2}]");
   graphMIPVsEnergy->GetXaxis()->SetTitleSize(0.045);
   graphMIPVsEnergy->GetXaxis()->SetLabelSize(0.045);
   graphMIPVsEnergy->GetXaxis()->SetTitleOffset(1.0);
-  graphMIPVsEnergy->GetYaxis()->SetTitle("Charge / Charge per MIP");
+  graphMIPVsEnergy->GetYaxis()->SetTitle("Integrated Charge [ Q_{MIP} ]");
   graphMIPVsEnergy->GetYaxis()->SetTitleOffset(0.9);
   graphMIPVsEnergy->GetYaxis()->SetTitleSize(0.05);
   graphMIPVsEnergy->GetYaxis()->SetLabelSize(0.045);
@@ -145,6 +146,7 @@ void MakeAmplitudeVsAbsorberThicknessGraph() {
 
   c = new TCanvas("c","c",800,600);
   c->SetBottomMargin(0.12);
+  c->SetLeftMargin(0.11);
 
   graphMIPVsAbsorber->Draw("AP");
   graphMIPVsAbsorber->SetTitle("");
@@ -152,7 +154,7 @@ void MakeAmplitudeVsAbsorberThicknessGraph() {
   graphMIPVsAbsorber->GetXaxis()->SetTitleSize(0.045);
   graphMIPVsAbsorber->GetXaxis()->SetLabelSize(0.045);
   graphMIPVsAbsorber->GetXaxis()->SetTitleOffset(1.2);
-  graphMIPVsAbsorber->GetYaxis()->SetTitle("Charge / Charge per MIP");
+  graphMIPVsAbsorber->GetYaxis()->SetTitle("Integrated Charge [ Q_{MIP} ]");
   graphMIPVsAbsorber->GetYaxis()->SetTitleOffset(0.9);
   graphMIPVsAbsorber->GetYaxis()->SetTitleSize(0.05);
   graphMIPVsAbsorber->GetYaxis()->SetLabelSize(0.045);
@@ -227,13 +229,14 @@ void MakeAmplitudeVsBiasVoltageGraph() {
 
 
   c = new TCanvas("c","c",800,600);
+  c->SetLeftMargin(0.11);
   graphMIPVsBiasVoltage->Draw("AP");
   graphMIPVsBiasVoltage->SetTitle("");
   graphMIPVsBiasVoltage->GetXaxis()->SetTitle("Bias Voltage [V]");
   graphMIPVsBiasVoltage->GetXaxis()->SetTitleSize(0.045);
   graphMIPVsBiasVoltage->GetXaxis()->SetLabelSize(0.045);
   graphMIPVsBiasVoltage->GetXaxis()->SetTitleOffset(1.0);
-  graphMIPVsBiasVoltage->GetYaxis()->SetTitle("Charge / Charge per MIP");
+  graphMIPVsBiasVoltage->GetYaxis()->SetTitle("Integrated Charge [ Q_{MIP} ]");
   graphMIPVsBiasVoltage->GetYaxis()->SetTitleOffset(1.02);
   graphMIPVsBiasVoltage->GetYaxis()->SetTitleSize(0.045);
   graphMIPVsBiasVoltage->GetYaxis()->SetLabelSize(0.045);
