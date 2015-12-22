@@ -12,7 +12,7 @@
 \usepackage{hyperref}
 \usepackage[numbers,sort&compress]{natbib}
 
-\title{Beam test of the silicon timing for use in calorimetry.}
+\title{Test Beam Studies Of Silicon Timing for Use in Calorimetry.}
 
 \author[1]{A.~Apresyan}
 \author[2]{G.~Bolla}
@@ -130,7 +130,7 @@ The silicon diode was placed inside a light-tight box of thickness $1.5$~cm,
 which also provides electromagnetic shielding. The box is made of 0.2~mm steel.
 The bias voltage was supplied to the circuitry by a cable with a balun filter,
 terminated with an SHV connector. The silicon diode output signal is read out
-through an SMA connector electrically connected to the box. The dark current was
+through an SMA connector electrically grounded to the box. The dark current was
 measured at several values of the bias voltage. The maximum value of the dark
 current was less than $1.0$~nA at $-500$~V, which is the largest bias voltage
 used in the measurements reported in this paper. The silicon box and bench test
@@ -146,10 +146,10 @@ below it (right).}
 \label{fig:SiliconPad} 
 \end{figure} 
 
-The signals from the silicon sensor were amplified by two fast and
+The signals from the silicon sensor were amplified by two fast, 
 high-bandwidth pre-amplifiers connected in series. The first amplifier is an
 ORTEC VT120C pre-amplifier, and the second amplifier is a Hamamatsu C5595
-amplifier. Using a pulse-generator, we measured the combined amplification gain
+amplifier. Using a pulse-generator, we measured the combined gain
 of the two amplifiers in series as a function of the input signal amplitude and
 found some degree of non-linearity for typical signals produced by the silicon
 sensor under study. The measured gain ranged from $200$ for signals with
@@ -164,16 +164,16 @@ at $120$~GeV, and secondary beams composed of electrons, pions, and muons of
 energies ranging from $4$~GeV to $32$~GeV. A simple schematic diagram of the
 experimental setup is shown in Figure~\ref{fig:BeamSchematicDiagram}. A small
 plastic scintillator of transverse dimensions $1.8$~mm$\times 2$~mm is used as a
-trigger counter to initiate the read out of the data acquisition (DAQ) system.
-It is also used to constrain the transverse beam-spot to a small geometric area.
-Next, we place a stack of tungsten absorbers of various thicknesses for
+trigger counter to initiate the read out of the data acquisition (DAQ) system
+and to select incident beam particles from a small geometric area, allowing us to center the 
+beam particles on the silicon sensor. Next, we place a stack of tungsten absorbers of various thicknesses for
 measurements of the longitudinal profile of the electromagnetic shower. The
 silicon pad sensor is located within a metal box covered by copper foil, and is
 placed immediately downstream of the absorber plates. Finally, a Photek 240
 micro-channel plate photomultiplier detector~\cite{Anderson:2015gha,
 MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552} is placed furthest downstream,
 and serves to provide a very precise reference timestamp. Its precision was
-previously measured to be less than $10$~ps~\cite{MCPShowerMaxPaper}. 
+previously measured to be less than $10$~ps~\cite{Ronzhin2015288}. 
 A photograph showing the various
 detector components is presented in Figure~\ref{fig:BeamPhotoDiagram}. A
 differential Cherenkov counter is located further upstream of our experimental
@@ -196,7 +196,7 @@ MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552}.
 \label{fig:BeamPhotoDiagram} 
 \end{figure} 
 
-The DAQ system is based on the CAEN V1742 digitizer board~\cite{CAENDRS}, which
+The DAQ system is based on a CAEN V1742 digitizer board~\cite{CAENDRS}, which
 provides digitized waveforms sampled at 5 GS/s. The metal box containing the
 silicon sensor was located on a motorized X-Y moving stage allowing us to change
 the location of the sensor in the plane transverse to the beam at an accuracy
@@ -232,7 +232,7 @@ voltage applied to the silicon pad sensor is~$500$~V.}
 \label{fig:pulses} 
 \end{figure} 
 
-The raw waveforms are voltage and time calibrated using the  procedure
+The CAEN digitizer is voltage and time calibrated using the  procedure
 described in Ref.~\cite{Kim201467}. The total collected charge for each signal
 pulse is computed by integrating a $10$~ns window around the peak of the pulse.
 The time for the reference Photek MCP-PMT detector is obtained by fitting the
@@ -248,12 +248,12 @@ Electrons were identified using a combination of the gas Cherenkov counter
 provided by the FTBF and the signal amplitude in the Photek detector located further
 downstream of the silicon sensor. Electromagnetic showers induced by electrons
 produce significantly larger signals in the Photek MCP-PMT, while pions produce
-a much smaller signal. After imposing the electron identification 
+much smaller signals. After imposing the electron identification 
 requirements the electron purity is between $80\%$ and $90\%$ for all beam
 conditions. 
 
 We begin by establishing the signal characteristics of a minimum-ionizing
-particle (MIP) using beams of 120 GeV protons as well as 8 GeV electrons with no
+particle (MIP) using beams of $120$~GeV protons and $8$~GeV electrons with no
 absorbers upstream of the silicon pad sensor. To separate MIP signals from
 noise, we first collect data events with no beam and random trigger. The charge
 distribution for these noise runs is presented in Fig.~\ref{fig:noise}. As expected,
@@ -369,7 +369,7 @@ integrated charge and the time resolution as a function of the absorber
 thickness and present the results in Figure~\ref{fig:MIPVsAbsorberAt8GeV}. A
 typical longitudinal shower profile is observed, consistent with previous
 studies performed using a secondary emission calorimeter prototype based on
-MCP's~\cite{MCPShowerMaxPaper}, as well as independent studies of silicon-based
+MCP's~\cite{Ronzhin2015288}, as well as independent studies of silicon-based
 calorimeter prototypes~\cite{Muhuri201424}. We also observe that the time
 resolution improves as the shower develops towards its maximum in the
 longitudinal direction. 
@@ -419,29 +419,29 @@ after 6 $X_0$ of tungsten absorber, as shown in Figure~\ref{fig:MIPVsEnergy}. We
 measure a longitudinal shower profile in Figure~\ref{fig:MIPVsAbsorberAt8GeV}
 that is consistent with similar past measurements.
 
-With regards to the timing measurements, we begin with some general considerations.
-An electric field applied to silicon results in a built-in junction voltage
-($\sim 0.6$~V) which is typical of silicon diodes. The high electric field in silicon
-leads to total depletion as all free charge carriers are removed. 
-When charged particles pass through the totally depleted region in silicon, 
-it ionizes atoms and produces electron-hole pairs which serve as charge carriers.
-The electrons are collected on positive electrode and the holes are collected
-on the negative electrode. The time and jitter associated with relativistic particles 
-traversing through the silicon material can be neglected as it takes 
-less than $1$~ps for relativistic particles to pass through the full $300$~$\mu$m
-of silicon material. At high electric field (more than $10^{5}$~V/cm), the mobility 
-of carriers attain a constant drift velocity of $1\mu$m$/10$~ps in the silicon 
-material~\cite{Ronzhin2015,spieler2005semiconductor}. The time required to collect all ionization electrons
-produced by a charged particle traversing the $300\mu$m is about $3$~ns.
-The electrons produced closer to the positive electron are collected first and are
-most relevant for the time stamp assignment. The time needed to collect the electrons
-produced in the last $3\mu$m of silicon is about $30$~ps, and roughly sets the scale
-of the time measurement.
+%With regards to the timing measurements, we begin with some general considerations.
+%An electric field applied to silicon results in a built-in junction voltage
+%($\sim 0.6$~V) which is typical of silicon diodes. The high electric field in silicon
+%leads to total depletion as all free charge carriers are removed. 
+%When charged particles pass through the totally depleted region in silicon, 
+%it ionizes atoms and produces electron-hole pairs which serve as charge carriers.
+%The electrons are collected on positive electrode and the holes are collected
+%on the negative electrode. The time and jitter associated with relativistic particles 
+%traversing through the silicon material can be neglected as it takes 
+%less than $1$~ps for relativistic particles to pass through the full $300$~$\mu$m
+%of silicon material. At high electric field (more than $10^{5}$~V/cm), the mobility 
+%of carriers attain a constant drift velocity of $1\mu$m$/10$~ps in the silicon 
+%material~\cite{Ronzhin2015,spieler2005semiconductor}. The time required to collect all ionization electrons
+%produced by a charged particle traversing the $300\mu$m is about $3$~ns.
+%The electrons produced closer to the positive electron are collected first and are
+%most relevant for the time stamp assignment. The time needed to collect the electrons
+%produced in the last $3\mu$m of silicon is about $30$~ps, and roughly sets the scale
+%of the time measurement.
 
 Our results show that the time stamp associated with electromagnetic 
 showers induced by electrons with energy between $20$~GeV and $30$~GeV 
 can be measured with a precision better than $25$~ps. Subtracting for the resolution
-of the reference Photek MCP-PMT detector yields a precision better than $20$~ps. 
+of the reference Photek MCP-PMT detector yields a precision close to $20$~ps. 
 Moreover, we observe an improvement of the time resolution with the energy of 
 the electron, and more generally with an increase in the signal amplitude. 
 These measurements demonstrate that a calorimeter based on silicon sensors as
@@ -452,23 +452,23 @@ silicon sensor is demonstrated to be well below the $20$~ps level.
 \section{Conclusion}
 \label{sec:conclusion} 
 
-We obtained a best time resolution measurement for silicon sensors of $23$~ps,
-using a beam of $32$~GeV electrons and with the silicon sensor placed after 6 radiation
+The best time resolution of $23$~ps for a silicon sensor was achieved with a $32$~GeV beam 
+and with the silicon sensor placed after 6 radiation
 lengths of tungsten absorber. Based on our calibration data for the response of the
 silicon sensor to MIPs, this measurement corresponds roughly to 
-$54$ secondary particles registered from the electromagnetic shower. 
+an average of $54$ secondary particles registered from the electromagnetic shower. 
 We observe a roughly linearly increasing response as the energy of the electron beam
 is increased, and we observe a longitudinal shower profile consistent with similar 
-past measurements. This result yields further encouragement to use silicon as
+past measurements. This result yields further encouragement to use silicon for 
 active layers in calorimeters, as is planned for example for the CMS Phase 2 
 upgrade~\cite{Butler:2020886}, and explicitly demonstrates the opportunity 
-to use silicon for timing measurements in future calorimeters. In the future, we plan to 
+to use silicon for timing measurements in future calorimeters. To continue, we plan to 
 extend our studies to more realistic prototypes covering larger transverse and longitudinal 
 regions of the electromagnetic shower and using multiple channels. 
 
 
 \section{Acknowledgements} We thank the FTBF personnel for very good beam 
-condition during our test beam run. We also appreciate the technical support of 
+conditions during our test beam time. We also appreciate the technical support of 
 the Fermilab SiDet department for the production of high quality silicon samples. 
 
 \bibliography{SiliconCalorimeter}{}
