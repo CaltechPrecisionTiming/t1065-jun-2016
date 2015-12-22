@@ -205,8 +205,6 @@ void makeTimeResolutionVsAbsorber(){
 
   c->cd();
   //gStyle->SetOptStat(0);
-  c->SetGridx();
-  c->SetGridy();
  
 
   deltaT0->Draw();
@@ -251,6 +249,8 @@ void makeTimeResolutionVsAbsorber(){
 
 
   c = new TCanvas ("c","c",800, 600);
+  c->SetGridx();
+  c->SetGridy();
   c->SetBottomMargin(0.12);
 
   float res[4]    = {1000*res0, 1000*res1, 1000*res2, 1000*res3}; 
@@ -306,8 +306,6 @@ void makeTimeResolutionVsVoltage(){
 
   c->cd();
   //gStyle->SetOptStat(0);
-  c->SetGridx();
-  c->SetGridy();
 
   deltaT0->Draw();
   TF1* fgaus0 = new TF1("fgaus0","gaus", deltaT0->GetMean() - 1.0*deltaT0->GetRMS(), deltaT0->GetMean() + 1.0*deltaT0->GetRMS());
@@ -382,8 +380,8 @@ void makeTimeResolutionVsVoltage(){
 
 void makePaperPlots() {
 
-  makeTimeResolutionVsBeamEnergy();
-  //makeTimeResolutionVsAbsorber();
+  //makeTimeResolutionVsBeamEnergy();
+  makeTimeResolutionVsAbsorber();
   //makeTimeResolutionVsVoltage();
 
 }
