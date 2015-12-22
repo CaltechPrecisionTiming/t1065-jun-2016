@@ -1,0 +1,60 @@
+\begin{thebibliography}{10}
+
+\bibitem{Anderson:2015gha}
+D.~Anderson, A.~Apresyan, A.~Bornheim, J.~Duarte, C.~Pena, A.~Ronzhin,
+  M.~Spiropulu, J.~Trevor, and S.~Xie, ``{On Timing Properties of LYSO-Based
+  Calorimeters},'' {\em Nucl. Instrum. Meth. A}, vol.~794, pp.~7--14, 2015.
+
+\bibitem{MCPFastCaloNIMA}
+A.~Ronzhin, S.~Los, E.~Ramberg, M.~Spiropulu, A.~Apresyan, S.~Xie, H.~Kim, and
+  A.~Zatserklyaniy, ``{Development of a new fast shower maximum detector based
+  on microchannel plates photomultipliers (MCP-PMT) as an active element},''
+  {\em Nucl. Instrum. Meth. A}, vol.~759, pp.~65 -- 73, 2014.
+
+\bibitem{Ronzhin2015288}
+A.~Ronzhin, S.~Los, E.~Ramberg, A.~Apresyan, S.~Xie, M.~Spiropulu, and H.~Kim,
+  ``Study of the timing performance of micro-channel plate photomultiplier for
+  use as an active layer in a shower maximum detector,'' {\em Nucl. Instrum.
+  Meth. A}, vol.~795, pp.~288 -- 292, 2015.
+
+\bibitem{Ronzhin201552}
+A.~Ronzhin, S.~Los, E.~Ramberg, A.~Apresyan, S.~Xie, M.~Spiropulu, and H.~Kim,
+  ``Direct tests of micro channel plates as the active element of a new shower
+  maximum detector,'' {\em Nucl. Instrum. Meth. A}, vol.~795, pp.~52 -- 57,
+  2015.
+
+\bibitem{Brianza2015216}
+{L. Brianza, F. Cavallari, D. Del Re, S. Gelli, A. Ghezzi, C. Gotti, P. Govoni,
+  C. Jorda Lopez, A. Martelli, B. Marzocchi, P. Meridiani, G. Organtini, R.
+  Paramatti, L. Pernie, S. Pigazzini, S. Rahatlou, C. Rovelli, F.
+  Santanastasio, T. Tabarelli de Fatis, N. Trevisani}, ``Response of
+  microchannel plates to single particles and to electromagnetic showers,''
+  {\em Nucl. Instrum. Meth. A}, vol.~797, pp.~216 -- 221, 2015.
+
+\bibitem{Butler:2020886}
+J.~Butler, D.~Contardo, M.~Klute, J.~Mans, and L.~Silvestris, ``{Technical
+  Proposal for the Phase-II Upgrade of the CMS Detector},'' Tech. Rep.
+  CERN-LHCC-2015-010. LHCC-P-008, CERN, Geneva, Jun 2015.
+
+\bibitem{hamamatsu}
+
+\newblock
+  \url{https://www.hamamatsu.com/resources/pdf/ssd/e10_handbook_for_high_energy.pdf}.
+
+\bibitem{CAENDRS}
+
+\newblock \url{http://www.caen.it/csite/CaenProd.jsp?parent=11&idmod=661}.
+
+\bibitem{Kim201467}
+H.~Kim, C.-T. Chen, N.~Eclov, A.~Ronzhin, P.~Murat, E.~Ramberg, S.~Los,
+  W.~Moses, W.-S. Choong, and C.-M. Kao, ``A new time calibration method for
+  switched-capacitor-array-based waveform samplers,'' {\em Nucl. Instrum. Meth.
+  A}, vol.~767, pp.~67 -- 74, 2014.
+
+\bibitem{Muhuri201424}
+S.~Muhuri, S.~Mukhopadhyay, V.~B. Chandratre, M.~Sukhwani, S.~Jena, S.~A. Khan,
+  T.~K. Nayak, J.~Saini, and R.~N. Singaraju, ``Test and characterization of a
+  prototype silicon-tungsten electromagnetic calorimeter,'' {\em Nucl. Instrum.
+  Meth. A}, vol.~764, pp.~24 -- 29, 2014.
+
+\end{thebibliography}

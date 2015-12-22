@@ -1,0 +1,68 @@
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: elsarticle-template-num.aux
+The style file: ieeetr.bst
+Database file #1: SiliconCalorimeter.bib
+You're missing a field name---line 302 of file SiliconCalorimeter.bib
+ : 
+ : %      note          = "Upgrade Project Leader Deputies: Lucia Silvestris
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+"," immediately follows an entry type---line 304 of file SiliconCalorimeter.bib
+ : %                       Additional contacts: Lucia.Silvestris@cern.ch
+ :                                                                      ,
+I'm skipping whatever remains of this entry
+""" immediately follows an entry type---line 305 of file SiliconCalorimeter.bib
+ : %                       Jeremy.Mans@cern.ch
+ :                                            ",
+I'm skipping whatever remains of this entry
+Warning--empty author in hamamatsu
+Warning--empty title in hamamatsu
+Warning--empty journal in hamamatsu
+Warning--empty year in hamamatsu
+Warning--empty author in CAENDRS
+Warning--empty title in CAENDRS
+Warning--empty journal in CAENDRS
+Warning--empty year in CAENDRS
+You've used 10 entries,
+            1876 wiz_defined-function locations,
+            533 strings with 5738 characters,
+and the built_in function-call counts, 3152 in all, are:
+= -- 268
+> -- 185
+< -- 1
++ -- 66
+- -- 56
+* -- 267
+:= -- 470
+add.period$ -- 10
+call.type$ -- 10
+change.case$ -- 8
+chr.to.int$ -- 0
+cite$ -- 18
+duplicate$ -- 144
+empty$ -- 258
+format.name$ -- 56
+if$ -- 741
+int.to.chr$ -- 0
+int.to.str$ -- 10
+missing$ -- 9
+newline$ -- 35
+num.names$ -- 8
+pop$ -- 31
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 100
+stack$ -- 0
+substring$ -- 199
+swap$ -- 64
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 8
+while$ -- 22
+width$ -- 12
+write$ -- 94
+(There were 3 error messages)
