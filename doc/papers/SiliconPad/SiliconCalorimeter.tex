@@ -63,7 +63,7 @@ from particles produced in different pileup interactions. The ability to
 discriminate between jets produced in the events of interests, especially those
 associated with the vector boson fusion processes, and jets produced by pileup
 interactions will be degraded. The missing transverse energy resolution will
-deteriorate, and several other physics objects performance metrics will suffer.
+deteriorate, and several other physics object performance metrics will suffer.
 
 One way to mitigate the pileup confusion effects, complementary to precision
 tracking methods, is to perform a time of arrival measurement associated with a
@@ -113,7 +113,7 @@ is fully depleted above about $120$~V. Timing measurements are expected
 to improve with larger bias voltage as the the carrier velocity increases.
 
 The electric diagram of the silicon
-diode connections is presented in Figure~\ref{fig:SiliconDiode}. Attention was
+diode connections is presented in Figure~\ref{fig:SiliconPad}. Attention was
 paid to provide good filtering for bias voltage, to reduce ground loop effects, and
 to minimize inductive loop for the signal readout. The timing characteristics
 of the signal pulses are dominated primarily by properties of the
@@ -146,11 +146,17 @@ below it (right).}
 \label{fig:SiliconPad} 
 \end{figure} 
 
+The signals from the silicon sensor were amplified by two fast and
+high-bandwidth pre-amplifiers connected in series. The first amplifier is an
+ORTEC VT120C pre-amplifier, and the second amplifier is a Hamamatsu C5595
+amplifier. Using a pulse-generator, we measured the combined amplification gain
+of the two amplifiers in series as a function of the input signal amplitude and
+found some degree of non-linearity for typical signals produced by the silicon
+sensor under study. The measured gain ranged from $200$ for signals with
+amplitude around $0.15$~mV to $650$ for signals with amplitude around $10$~mV.
 
 \section{Test-beam Setup and Experimental Apparatus }
 \label{sec:tbeam}
-
-% We need a better photograph of the testbeam setup. try to find it from phones.
 
 We performed the test-beam measurements at the Fermilab Test-beam Facility
 (FTBF) which provided a proton beam from the Fermilab Main Injector accelerator
@@ -167,10 +173,11 @@ placed immediately downstream of the absorber plates. Finally, a Photek 240
 micro-channel plate photomultiplier detector~\cite{Anderson:2015gha,
 MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552} is placed furthest downstream,
 and serves to provide a very precise reference timestamp. Its precision was
-previously measured to be around 10~ps~\cite{MCPShowerMaxPaper}. A photograph showing the various
+previously measured to be less than $10$~ps~\cite{MCPShowerMaxPaper}. 
+A photograph showing the various
 detector components is presented in Figure~\ref{fig:BeamPhotoDiagram}. A
 differential Cherenkov counter is located further upstream of our experimental
-setup and can provide additional particle identification capability. More
+setup and provides additional particle identification capability. More
 details of the experimental setup are described in our previous studies using
 the same experimental facility in references~\cite{Anderson:2015gha,
 MCPFastCaloNIMA, Ronzhin2015288,Ronzhin201552}.
@@ -195,14 +202,7 @@ silicon sensor was located on a motorized X-Y moving stage allowing us to change
 the location of the sensor in the plane transverse to the beam at an accuracy
 better than $0.1$~mm. A nominal bias voltage of $500$~V was applied to deplete
 the silicon sensor in most of the studies shown below, unless noted otherwise.
-The signals from the silicon sensor were amplified by two fast and
-high-bandwidth pre-amplifiers connected in series. The first amplifier is an
-ORTEC VT120C pre-amplifier, and the second amplifier is a Hamamatsu C5595
-amplifier. Using a pulse-generator, we measured the combined amplification gain
-of the two amplifiers in series as a function of the input signal amplitude and
-found some degree of non-linearity for typical signals produced by the silicon
-sensor under study. The measured gain ranged from $200$ for signals with
-amplitude around $0.15$~mV to $650$ for signals with amplitude around $10$~mV.
+
 
 \section{Test Beam Measurements and Results} 
 \label{sec:results} 
@@ -214,7 +214,7 @@ between $70\%$ at the lowest energy to about $10\%$ at the highest energy.
 Stacks of tungsten plates with varying thicknesses were placed immediately
 upstream of the silicon device in order to measure the response along the
 longitudinal direction of the electromagnetic shower. The radiation length of
-tungsten is 3.5~mm, and the Moliere radius is 9.3~mm. Tungsten plate size is
+tungsten is 3.5~mm, and the Moliere radius is 9.3~mm. The tungsten plate size is
 sufficient to fully contain the shower in the transverse dimension. Signals from
 the silicon sensor and the Photek MCP-PMT are read out and digitized by the CAEN
 V1742 digitizer, and example signal waveforms are shown in
@@ -245,7 +245,7 @@ of the CAEN V1742 digitizer as $\sim$4~ps and neglected its impact on the timing
 measurements described below.
 
 Electrons were identified using a combination of the gas Cherenkov counter
-provided by the FTBF and the signal size in the Photek detector located further
+provided by the FTBF and the signal amplitude in the Photek detector located further
 downstream of the silicon sensor. Electromagnetic showers induced by electrons
 produce significantly larger signals in the Photek MCP-PMT, while pions produce
 a much smaller signal. After imposing the electron identification 
@@ -272,12 +272,13 @@ proton and electron beams without any absorbers upstream. We observe very
 similar response for these two cases, and measure an integrated charge of
 $4.5$~fC and $5.0$~fC for the proton and electron beams, respectively. The
 measured charge is corrected for the gain of the amplifiers and attenuators
-used, hence is the output of the silicon sensor. We expect that a MIP traversing
+used, and hence is the output of the silicon sensor. We expect that a MIP traversing
 a silicon sensor of thickness 325~$\mu$m to produce roughly 35,000 electron-hole
 pairs, corresponding to a collected charge of about $5$~fC. Thus, our measured value is
 in agreement with expectations. Having established the absolute scale of
-the  response using MIP's, in our remaining studies we normalize all
-charge measurements to the charge integrated in the silicon sensor for one MIP. 
+the  response using MIPs, in our remaining studies we normalize all
+charge measurements to the charge integrated in the silicon sensor for one MIP, 
+$\mathrm{Q}_{\mathrm{MIP}}$. 
 
 \begin{figure}[htbp] 
 \centering
@@ -298,7 +299,7 @@ within the electromagnetic shower, and therefore its response is expected to
 scale up with higher incident electron energy. In
 Figure~\ref{fig:ChargeDistributionExample}, we show an example of the integrated
 charge distribution measured in the silicon sensor after 6 radiation lengths of
-tungsten, for runs with for $32$~GeV electrons. We plot the mean and RMS of
+tungsten, for runs with $32$~GeV electrons. We plot the mean and RMS of
 these distributions as a function of incident electron beam energy in
 Figure~\ref{fig:MIPVsEnergy}. The uncertainties plotted show the RMS of the
 charge distribution. We observe a fairly linear depedence between the measured
@@ -309,9 +310,9 @@ $32$~GeV.
 \centering
 \includegraphics[width=0.49\textwidth]{plots/Electron_6X0_32GeV_chargeMIP.pdf} 
 \includegraphics[width=0.50\textwidth]{plots/deltaT_32GeV_6X0.pdf} 
-\caption{ An example of the distribution of integrated charge in the silicon
-sensor is shown in units of charge measured for a MIP (left). Time
-resolution between the silicon sensor and the Photek MCP-PMT (right). A 32 GeV
+\caption{ Left: An example of the distribution of integrated charge in the silicon
+sensor shown in units of charge measured for a MIP. Right: The distribution
+of $\Delta$t between the silicon sensor and the Photek MCP-PMT. A 32 GeV
 electron beam is used, and the silicon sensor is placed after 6~$X_0$ of tungsten absorber.} 
 \label{fig:ChargeDistributionExample}
 \end{figure}
@@ -353,7 +354,12 @@ $32$~GeV electron beam.
 \centering
 \includegraphics[width=0.49\textwidth]{plots/DeltaT_vs_Charge_Uncorrected.pdf} 
 \includegraphics[width=0.5\textwidth]{plots/DeltaT_vs_Charge_Corrected.pdf} 
-\caption{TimeWalk plot} 
+\caption{ The dependence of $\Delta$t on the integrated charge in the 
+silicon sensor is shown on the left. The red curve represents the fit to the
+profile plot of the two dimensional distribution, and is used to correct
+$\Delta$t for this effect. On the right, we show the corresponding two dimensional
+distribution after performing the correction.
+} 
 \label{fig:timewalk} 
 \end{figure} 
 
@@ -373,7 +379,7 @@ longitudinal direction.
 \includegraphics[width=0.49\textwidth]{plots/MIPVsAbsorberAt8GeV.pdf} 
 \includegraphics[width=0.5\textwidth]{plots/SigmaT_vs_X0_lin30Stamp.pdf} 
 \caption{On the left, the integrated charge in the silicon sensor expressed in units of the 
-charge measured for MIP's is shown as a function of the absorber (W) thickness measured in
+charge measured for MIPs is shown as a function of the absorber (W) thickness measured in
 units of radiation lengths ($X_{0}$). The uncertainty bands show the RMS of the measured charge 
 distribution. On the right, the time resolution between the silicon 
 sensor and the Photek MCP-PMT reference is shown as a function of the 
@@ -413,9 +419,9 @@ after 6 $X_0$ of tungsten absorber, as shown in Figure~\ref{fig:MIPVsEnergy}. We
 measure a longitudinal shower profile in Figure~\ref{fig:MIPVsAbsorberAt8GeV}
 that is consistent with similar past measurements.
 
-We begin with some general considerations of timing in silicon.
+With regards to the timing measurements, we begin with some general considerations.
 An electric field applied to silicon results in a built-in junction voltage
-(~0.6V) which is typical of silicon diodes. The high electric field in silicon
+($\sim 0.6$~V) which is typical of silicon diodes. The high electric field in silicon
 leads to total depletion as all free charge carriers are removed. 
 When charged particles pass through the totally depleted region in silicon, 
 it ionizes atoms and produces electron-hole pairs which serve as charge carriers.
@@ -429,7 +435,7 @@ material~\cite{Ronzhin2015,spieler2005semiconductor}. The time required to colle
 produced by a charged particle traversing the $300\mu$m is about $3$~ns.
 The electrons produced closer to the positive electron are collected first and are
 most relevant for the time stamp assignment. The time needed to collect the electrons
-produced in the last $3\mu$m of silicon is about $30$~ps, and sets the scale
+produced in the last $3\mu$m of silicon is about $30$~ps, and roughly sets the scale
 of the time measurement.
 
 Our results show that the time stamp associated with electromagnetic 
@@ -454,7 +460,7 @@ $54$ secondary particles registered from the electromagnetic shower.
 We observe a roughly linearly increasing response as the energy of the electron beam
 is increased, and we observe a longitudinal shower profile consistent with similar 
 past measurements. This result yields further encouragement to use silicon as
-active layer in calorimeters, as is planned for example for the CMS Phase 2 
+active layers in calorimeters, as is planned for example for the CMS Phase 2 
 upgrade~\cite{Butler:2020886}, and explicitly demonstrates the opportunity 
 to use silicon for timing measurements in future calorimeters. In the future, we plan to 
 extend our studies to more realistic prototypes covering larger transverse and longitudinal 
