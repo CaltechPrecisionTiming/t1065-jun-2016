@@ -100,20 +100,20 @@
 
 \begin{abstract}
 %% Text of abstract
-The high luminosity upgrade of the Large Hadron Collider (HL-LHC) at
-CERN is expected to provide instantaneous luminosities of $5\times 10^{34}$
-cm$^{-2}$ s$^{-1}$. The high luminosities expected at the HL-LHC will be
-accompanied by a factor of $5$ to $10$ more pileup compared with LHC conditions
-in $2015$, causing general confusion for particle identification and event
+The high luminosity upgrade of the Large Hadron Collider (HL-LHC) at CERN is
+expected to provide instantaneous luminosities of $5\times 10^{34}$ cm$^{-2}$
+s$^{-1}$. The high luminosities expected at the HL-LHC will be accompanied by a
+factor of $5$ to $10$ more pileup compared with LHC conditions in $2015$,
+further increasing the challenge for particle identification and event
 reconstruction. Precision timing allows to extend calorimetric measurements into
 such a high density environment by subtracting the energy deposits from pileup
 interactions. Calorimeters employing silicon as the active component have
-recently become a popular choice for the HL-LHC and future collider experiments
+recently become a viable choice for the HL-LHC and future collider experiments
 which face very high radiation environments. In this article, we present studies
-of basic calorimetric and precision timing measurements using a prototype composed of
-tungsten absorber and silicon sensor as the active medium. We show that for
-the bulk of electromagnetic showers induced by electrons in the range of
-$20$~GeV to $30$~GeV, we can achieve time resolutions better than $25$~ps per
+of basic calorimetric and precision timing measurements using a prototype
+composed of tungsten absorber and silicon sensor as the active medium. We show
+that for the bulk of electromagnetic showers induced by electrons in the range
+of $20$~GeV to $30$~GeV, we can achieve time resolutions better than $25$~ps per
 single pad sensor. 
 
 \end{abstract}
@@ -135,18 +135,18 @@ single pad sensor.
 %% main text
 \section{Introduction} 
 
-Future colliders, including the high luminosity upgrade of the Large
-Hadron Collider (HL-LHC) at CERN, will require improvements to the instantaneous
-luminosity by an order of magnitude or more compared to what has been achieved
-at the LHC so far. With the increased instantaneous luminosity the rate of
-simultaneous interactions per bunch crossing (pileup) is projected to reach an
-average of 140 to 200. The large amount of pileup increases the likelihood of
-confusion in the reconstruction of events of interest, due to the contamination
-from particles produced in different pileup interactions. The ability to
-discriminate between jets produced in the events of interests, especially those
-associated with the vector boson fusion processes, and jets produced by pileup
-interactions will be degraded. The missing transverse energy resolution will
-deteriorate, and several other physics object performance metrics will suffer.
+Future colliders, including the high luminosity upgrade of the Large Hadron
+Collider (HL-LHC) at CERN, will operate with an order of magnitude higher
+instantaneous luminosity compared to what has been achieved at the LHC so far.
+With the increased instantaneous luminosity the rate of simultaneous
+interactions per bunch crossing (pileup) is projected to reach an average of 140
+to 200. The large amount of pileup increases the likelihood of confusion in the
+reconstruction of particles from the hard scatter interaction with those
+produced in different pileup interactions. The ability to discriminate between
+jets produced in the events of interests, especially those associated with the
+vector boson fusion processes, and jets produced by pileup interactions will be
+degraded. The missing transverse energy resolution will deteriorate, and several
+other physics objects performance metrics will suffer.
 
 One way to mitigate the pileup confusion effects, complementary to precision
 tracking methods, is to perform a time of arrival measurement associated with a
@@ -156,7 +156,7 @@ charged particles and photons. Such a measurement with a precision of about
 will reduce the effective amount of pileup by a factor of 10, given that the
 spread in collision time of the pileup interactions at HL-LHC is foreseen to be
 approximately 200~ps. The association of the time measurement with the energy
-measurement is crucial, and leads to a prototype design that calls for the time
+measurement is crucial, and leads to a prototype design that calls for  time
 and energy measurements to be performed in the same detector element. Since both
 the energy and time measurement are performed in the same detector element, once
 an energy deposit is identified as originating from a pileup interaction, it can
@@ -166,14 +166,14 @@ Several alternative options to combine high resolution energy and timing
 measurements for calorimetry have been reported in Refs.~\cite{Anderson:2015gha,
 MCPFastCaloNIMA, Ronzhin2015288, Ronzhin201552, Brianza2015216}. In this
 article, we describe the continuation of this program of study using a
-calorimeter prototype employing a silicon pad sensor of $6\times 6$~mm$^2$ size
-as the active element. Silicon-based calorimeters have recently become a popular
-choice for future colliders due to the radiation hardness of silicon, and the
-ability to construct highly granular detectors. An important example is the
-forward calorimeter proposed for the CMS Phase 2 Upgrade~\cite{Butler:2020886}.
-We study the timing properties of silicon-based calorimetery using a prototype
-composed of tungsten absorber and a silicon sensor produced by
-Hamamatsu~\cite{hamamatsu}. 
+calorimeter prototype employing a 300~$\mu$m thick silicon pad sensor of
+$6\times 6$~mm$^2$ size as the active element. Silicon-based calorimeters have
+recently become a viable choice for future colliders due to the radiation
+hardness of silicon, and the ability to construct highly granular detectors. An
+important example is the forward calorimeter proposed for the CMS Phase 2
+Upgrade~\cite{Butler:2020886}. We study the timing properties of silicon-based
+calorimetery using a prototype composed of tungsten absorber and a silicon
+sensor produced by Hamamatsu~\cite{hamamatsu}. 
 
 The paper is organized as follows. General silicon timing properties and bench
 test results are described in Section~\ref{sec:siliconpad}. The test beam setup
@@ -228,14 +228,16 @@ below it (right).}
 \label{fig:SiliconPad} 
 \end{figure} 
 
-The signals from the silicon sensor were amplified by two fast, 
-high-bandwidth pre-amplifiers connected in series. The first amplifier is an
-ORTEC VT120C pre-amplifier, and the second amplifier is a Hamamatsu C5595
-amplifier. Using a pulse-generator, we measured the combined gain
-of the two amplifiers in series as a function of the input signal amplitude and
-found some degree of non-linearity for typical signals produced by the silicon
-sensor under study. The measured gain ranged from $200$ for signals with
-amplitude around $0.15$~mV to $650$ for signals with amplitude around $10$~mV.
+The signals from the silicon sensor were amplified by two fast, high-bandwidth
+pre-amplifiers connected in series. The first amplifier is an ORTEC VT120C
+pre-amplifier, and the second amplifier is a Hamamatsu C5594 amplifier. Using a
+pulse-generator, we measured the combined gain of the two amplifiers in series
+as a function of the input signal amplitude and found some degree of
+non-linearity for typical signals produced by the silicon sensor under study,
+and we corrected for them.
+
+%. The measured gain ranged from $200$ for signals with
+%input amplitude around $0.15$~mV to $650$ for signals with amplitude around $10$~mV.
 
 \section{Test-beam Setup and Experimental Apparatus }
 \label{sec:tbeam}
@@ -350,16 +352,19 @@ $2$~fC.
 \end{figure} 
 
 In Figure~\ref{fig:MIP}, we show the response of the silicon sensor to the
-proton and electron beams without any absorbers upstream. We observe very
-similar response for these two cases, and measure an integrated charge of
-$4.5$~fC and $5.0$~fC for the proton and electron beams, respectively. The
-measured charge is corrected for the gain of the amplifiers and attenuators
-used, and hence is the output of the silicon sensor. We expect that a MIP traversing
-a silicon sensor of thickness 325~$\mu$m to produce roughly 35,000 electron-hole
-pairs, corresponding to a collected charge of about $5$~fC. Thus, our measured value is
-in agreement with expectations. Having established the absolute scale of
-the  response using MIPs, in our remaining studies we normalize all
-charge measurements to the charge integrated in the silicon sensor for one MIP, 
+proton and electron beams without any absorbers upstream. All triggered events
+were used in these distributions. We observe very similar response for these two
+cases, and measure an integrated charge of $4.5$~fC and $5.0$~fC for the proton
+and electron beams, respectively. The measured charge is corrected for the gain
+of the amplifiers and attenuators used, and hence is the output of the silicon
+sensor. We expect that a MIP traversing a silicon sensor of thickness 325~$\mu$m
+to produce roughly 35,000 electron-hole pairs~\cite{Agashe:2014kda},
+corresponding to a collected charge of about $5$~fC. The difference in
+ionization losses in silicon is expected to be about 10\% between 120~GeV
+protons and 8~GeV electrons~\cite{Agashe:2014kda}. Thus, our measured values are
+in agreement with expectations. Having established the absolute scale of the
+response using MIPs, in our remaining studies we normalize all charge
+measurements to the charge integrated in the silicon sensor for one MIP,
 $\mathrm{Q}_{\mathrm{MIP}}$. 
 
 \begin{figure}[htbp] 
@@ -367,10 +372,10 @@ $\mathrm{Q}_{\mathrm{MIP}}$.
 \includegraphics[width=0.45\textwidth]{plots/Proton_charge.pdf} 
 \includegraphics[width=0.45\textwidth]{plots/Electron_0X0_charge.pdf} 
 \caption{The distribution of charge integrated in the silicon sensor is shown
-for a beam of $120$~GeV protons (left) and $8$~GeV electrons (right) without
-any absorber upstream of the silicon sensor. These conditions mimic the response
-of the silicon sensor to a minimum-ionizing particle. 
-} 
+for a beam of $120$~GeV protons (left) and $8$~GeV electrons (right) without any
+absorber upstream of the silicon sensor. These conditions mimic the response of the silicon sensor to a
+minimum-ionizing particle. All triggered events were used in these
+distributions.} 
 \label{fig:MIP} 
 \end{figure} 
 
