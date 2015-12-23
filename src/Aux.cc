@@ -1,5 +1,55 @@
 #include "Aux.hh"
 
+
+//*********************************************************
+// Get amplification factor used for the silicon sensor
+//*********************************************************
+double GetAmplificationFactor ( double measuredAmplitude ) {
+  
+  int index_firstBinAboveInput = -1;
+  for (int i=0; i < nPoints; ++i) {
+    index_firstBinAboveInput = i;
+    if (measuredAmplitude < outputAmplitude[i]) break;
+  }
+  
+  double answer = 0; 
+
+  if (measuredAmplitude > outputAmplitude[21]) answer =amplificationFactor[21];
+  else if (index_firstBinAboveInput == 0) answer = amplificationFactor[0];
+  else {
+    
+    //cout << "index_firstBinAboveInput = " << index_firstBinAboveInput << " : "
+    //	 << amplificationFactor[index_firstBinAboveInput-1] << " " << outputAmplitude[index_firstBinAboveInput]
+    //	 << "\n";
+    double x = measuredAmplitude - outputAmplitude[index_firstBinAboveInput-1];
+    double y = amplificationFactor[index_firstBinAboveInput-1] + x * (amplificationFactor[index_firstBinAboveInput] - amplificationFactor[index_firstBinAboveInput-1]) / (outputAmplitude[index_firstBinAboveInput] - outputAmplitude[index_firstBinAboveInput-1]);
+    //cout << "x = " << x << " , y = " << y << "\n";
+    answer = y;
+  }
+
+  //cout << measuredAmplitude << " " << answer << "\n";
+
+  return answer;
+  
+}
+
+
+TGraphErrors* GetTGraph(  float* channel, float* time )
+{		
+  //Setting Errors
+  float errorX[1024], errorY[1024], channelFloat[1024];
+  float _errorY = 0.00; //5%error on Y
+  for ( int i = 0; i < 1024; i++ )
+    {
+      errorX[i]       = .0;
+      errorY[i]       = _errorY*channel[i];
+      channelFloat[i] = -channel[i];
+    }
+  TGraphErrors* tg = new TGraphErrors( 1024, time, channelFloat, errorX, errorY );
+  return tg;
+};
+
+
 TGraphErrors* GetTGraph(  short* channel, float* time )
 {		
   //Setting Errors
