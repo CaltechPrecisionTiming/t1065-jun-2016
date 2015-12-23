@@ -99,6 +99,12 @@ main(int argc, char **argv){
   if ( _doFilter == "yes" ) saveRaw = true;
   if (doFilter) std::cout << "Using Algorithmic Frequency Filtering\n";
 
+  bool doAmplificationCorrection = true;
+  std::string _doAmplificationCorrection = ParseCommandLine( argc, argv, "--doAmplificationCorrection" );
+  if ( _doAmplificationCorrection == "yes" ) doAmplificationCorrection = true;
+  if (doAmplificationCorrection) std::cout << "Do Amplification Correction for Silicon Sensor Channel: 21\n";
+
+
   //**************************************
   //Load Voltage Calibration
   //**************************************
@@ -161,6 +167,7 @@ main(int argc, char **argv){
   float time[4][1024];
   short raw[36][1024];
   short channel[36][1024];
+  float channelCorrected[36][1024];
   float base[36];
   float amp[36];
   float integral[36];
@@ -335,11 +342,19 @@ main(int argc, char **argv){
 	//Correct pulse shape for baseline offset
 	for(int j = 0; j < 1024; j++) {
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]) - baseline);
+	  channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
+	}
+
+	//for the channel connected to the silicon sensor, make pulse shape correction for the amplifiers
+	if (doAmplificationCorrection) {
+	  for(int j = 0; j < 1024; j++) {
+	    channelCorrected[21][j] = channel[21][j] / GetAmplificationFactor( channel[21][j] * ( 1.0 / 4096 ) );
+	  }
 	}
 
 	//Make Pulse shape Graph
 	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
-	TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
+	TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
 	TGraphErrors* pulse = originalPulse;
 	if (doFilter) {
 	  pulse = GetTGraphFilter( channel[realGroup[group]*9 + i], time[realGroup[group]], pulseName , false);
