@@ -19,7 +19,7 @@
 %% with numbered style bibliographic references
 %% SP 2008/03/01
 
-\documentclass[preprint,12pt]{elsarticle}
+\documentclass[preprint,1p]{elsarticle}
 \biboptions{numbers,sort&compress}
 
 %% Use the option review to obtain double line spacing
@@ -88,7 +88,8 @@
 \author[2]{G.~Bolla}
 \author[1]{A.~Bornheim}
 \author[3]{H.~Kim}
-\author[2]{S.~Los}
+\author[2]{S.~Los\corref{cor}}
+\ead{los@fnal.gov}
 \author[1]{C.~Pena}
 \author[2]{E.~Ramberg}
 \author[2]{A.~Ronzhin}
@@ -97,6 +98,7 @@
 \address[1]{California Institute of Technology, Pasadena, CA, USA}
 \address[2]{Fermi National Accelerator Laboratory, Batavia, IL, USA}
 \address[3]{University of Chicago, Chicago, IL,  USA}
+\cortext[cor]{Corresponding author}
 
 \begin{abstract}
 %% Text of abstract
@@ -122,7 +124,7 @@ single pad sensor.
 %% keywords here, in the form: keyword \sep keyword
 
 %% PACS codes here, in the form: \PACS code \sep code
-
+Silicon \sep Timing \sep Calorimeter
 %% MSC codes here, in the form: \MSC code \sep code
 %% or \MSC[2008] code \sep code (2000 is the default)
 
@@ -351,21 +353,35 @@ $2$~fC.
 \label{fig:noise} 
 \end{figure} 
 
-In Figure~\ref{fig:MIP}, we show the response of the silicon sensor to the
-proton and electron beams without any absorbers upstream. All triggered events
-were used in these distributions. We observe very similar response for these two
-cases, and measure an integrated charge of $4.5$~fC and $5.0$~fC for the proton
-and electron beams, respectively. The measured charge is corrected for the gain
-of the amplifiers and attenuators used, and hence is the output of the silicon
-sensor. We expect that a MIP traversing a silicon sensor of thickness 325~$\mu$m
-to produce roughly 35,000 electron-hole pairs~\cite{Agashe:2014kda},
-corresponding to a collected charge of about $5$~fC. The difference in
-ionization losses in silicon is expected to be about 10\% between 120~GeV
-protons and 8~GeV electrons~\cite{Agashe:2014kda}. Thus, our measured values are
-in agreement with expectations. Having established the absolute scale of the
-response using MIPs, in our remaining studies we normalize all charge
-measurements to the charge integrated in the silicon sensor for one MIP,
+In Figure~\ref{fig:MIP}, we show silicon sensor response to $120$~GeV protons
+and $8$~GeV electrons without any absorber. We observe very similar response for
+these two cases, and measure peak integrated charge of $4.5$~fC and $5.0$~fC
+respectively. The measured signal is corrected for the gain of the amplifiers
+used, and hence is the output charge of the silicon sensor. We expect peak charge
+of $28,000$ and $31,000$ electron-hole pairs in a $325$ $\mu$m thick silicon
+detector for ionizing particles with Lorentz factor $\gamma=120$ (protons) and $16,000$
+(electrons)~\cite{Agashe:2014kda}, which is in a good agreement with the measured
+values. Having established the absolute scale of the response using single
+particles, in our remaining studies we normalize all charge measurements to the
+$120$ GeV proton signal, which we refer to in the following as
 $\mathrm{Q}_{\mathrm{MIP}}$. 
+
+
+%In Figure~\ref{fig:MIP}, we show the response of the silicon sensor to the
+%proton and electron beams without any absorbers upstream. All triggered events
+%were used in these distributions. We observe very similar response for these two
+%cases, and measure an integrated charge of $4.5$~fC and $5.0$~fC for the proton
+%and electron beams, respectively. The measured charge is corrected for the gain
+%of the amplifiers and attenuators used, and hence is the output of the silicon
+%sensor. We expect that a MIP traversing a silicon sensor of thickness 325~$\mu$m
+%to produce roughly 35,000 electron-hole pairs~\cite{Agashe:2014kda},
+%corresponding to a collected charge of about $5$~fC. The difference in
+%ionization losses in silicon is expected to be about 10\% between 120~GeV
+%protons and 8~GeV electrons~\cite{Agashe:2014kda}. Thus, our measured values are
+%in agreement with expectations. Having established the absolute scale of the
+%response using MIPs, in our remaining studies we normalize all charge
+%measurements to the charge integrated in the silicon sensor for one MIP,
+%$\mathrm{Q}_{\mathrm{MIP}}$. 
 
 \begin{figure}[htbp] 
 \centering
@@ -529,16 +545,17 @@ that is consistent with similar past measurements.
 %produced in the last $3\mu$m of silicon is about $30$~ps, and roughly sets the scale
 %of the time measurement.
 
-Our results show that the time stamp associated with electromagnetic 
-showers induced by electrons with energy between $20$~GeV and $30$~GeV 
-can be measured with a precision better than $25$~ps. Subtracting for the resolution
-of the reference Photek MCP-PMT detector yields a precision close to $20$~ps. 
-Moreover, we observe an improvement of the time resolution with the energy of 
-the electron, and more generally with an increase in the signal amplitude. 
-These measurements demonstrate that a calorimeter based on silicon sensors as
-the active medium can achieve intrinsic time resolution at the $20$~ps level, as long
-as noise is kept under control. Time jitter arising from intrinsic properties of the
-silicon sensor is demonstrated to be well below the $20$~ps level.
+Our results show that the time stamp associated with electromagnetic showers
+induced by electrons with energy between $20$~GeV and $30$~GeV can be measured
+with a precision better than $25$~ps. Subtracting $13$~ps for the resolution of the
+reference Photek MCP-PMT detector measured in showers~\cite{Ronzhin2015288} yields a precision close
+to $20$~ps. Moreover, we observe an improvement of the time resolution with the
+energy of the electron, and more generally with an increase in the signal
+amplitude. These measurements demonstrate that a calorimeter based on silicon
+sensors as the active medium can achieve intrinsic time resolution at the
+$20$~ps level, as long as noise is kept under control. Time jitter arising from
+intrinsic properties of the silicon sensor is demonstrated to be well below the
+$20$~ps level.
 
 \section{Conclusion}
 \label{sec:conclusion} 
