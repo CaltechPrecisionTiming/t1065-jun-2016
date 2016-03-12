@@ -160,9 +160,11 @@ spread in collision time of the pileup interactions at HL-LHC is foreseen to be
 approximately 200~ps. The association of the time measurement with the energy
 measurement is crucial, and leads to a prototype design that calls for  time
 and energy measurements to be performed in the same detector element. Since both
-the energy and time measurement are performed in the same detector element, once
+the energy and time measurement are performed in the same detector
+element\footnote{If there are no overlapping energy deposits in the same
+detector element from multiple particles.}, once
 an energy deposit is identified as originating from a pileup interaction, it can
-be unambiguously removed from event reconstruction.
+be unambiguously removed from event reconstruction. 
 
 Several alternative options to combine high resolution energy and timing
 measurements for calorimetry have been reported in Refs.~\cite{Anderson:2015gha,
@@ -173,7 +175,7 @@ $6\times 6$~mm$^2$ size as the active element. Silicon-based calorimeters have
 recently become a viable choice for future colliders due to the radiation
 hardness of silicon, and the ability to construct highly granular detectors. An
 important example is the forward calorimeter proposed for the CMS Phase 2
-Upgrade~\cite{Butler:2020886}. We study the timing properties of silicon-based
+Upgrade~\cite{Butler:2020886, Adloff:2011ha}. We study the timing properties of silicon-based
 calorimetery using a prototype composed of tungsten absorber and a silicon
 sensor produced by Hamamatsu~\cite{hamamatsu}. 
 
@@ -402,52 +404,45 @@ within the electromagnetic shower, and therefore its response is expected to
 scale up with higher incident electron energy. In
 Figure~\ref{fig:ChargeDistributionExample}, we show an example of the integrated
 charge distribution measured in the silicon sensor after 6 radiation lengths of
-tungsten, for runs with $32$~GeV electrons. We plot the mean and RMS of
+tungsten, for runs with $32$~GeV electrons. We show the mean and RMS of
 these distributions as a function of incident electron beam energy in
-Figure~\ref{fig:MIPVsEnergy}. The uncertainties plotted show the RMS of the
-charge distribution. We observe a fairly linear depedence between the measured
+Figure~\ref{fig:ChargeDistributionExample}. The uncertainties plotted show the RMS of the
+charge distribution. Since the electron beam profile and purity varies at different beam energies, we collected between 10 and 50 thousand events for each beam energy, in order to ensure sufficiently large data samples. We observe a fairly linear depedence between the measured
 charge and the incident beam energy, for beam energies between $4$~GeV and
 $32$~GeV. 
 
 \begin{figure}[htbp] 
 \centering
 \includegraphics[width=0.49\textwidth]{plots/Electron_6X0_32GeV_chargeMIP.pdf} 
-\includegraphics[width=0.50\textwidth]{plots/deltaT_32GeV_6X0.pdf} 
-\caption{ Left: An example of the distribution of integrated charge in the silicon
-sensor shown in units of charge measured for a MIP. Right: The distribution
-of $\Delta$t between the silicon sensor and the Photek MCP-PMT. A 32 GeV
-electron beam is used, and the silicon sensor is placed after 6~$X_0$ of tungsten absorber.} 
+\includegraphics[width=0.49\textwidth]{plots/MIPVsEnergyAt6X0.pdf} 
+\caption{ Left: An example of the distribution of integrated charge in the
+silicon sensor shown in units of charge measured for a MIP. Right: The
+integrated charge in the silicon sensor expressed in units of the charge
+measured for a MIP is shown as a function of the electron beam energy. The
+uncertainty bands show the RMS of the measured charge distribution. The red line
+is the best fit to a linear function..} 
 \label{fig:ChargeDistributionExample}
 \end{figure}
-
-\begin{figure}[htbp] 
-\centering
-\includegraphics[width=0.49\textwidth]{plots/MIPVsEnergyAt6X0.pdf} 
-\includegraphics[width=0.50\textwidth]{plots/SigmaT_vs_BeamEnergy_lin30Stamp.pdf} 
-\caption{Left: The integrated charge in the silicon sensor expressed in units of the
-charge measured for a MIP is shown as a function of the electron beam
-energy. The uncertainty bands show the RMS of the measured charge distribution.
-The red line is the best fit to a linear function. Right: The measured
-time resolution between the silicon sensor and the Photek MCP-PMT reference is
-shown as a function of the electron beam energy. } 
-\label{fig:MIPVsEnergy} 
-\end{figure} 
 
 We also measure the time resolution between the silicon sensor and the Photek
 MCP-PMT, by measuring the standard deviation of the gaussian fit to the
 distribution of $\Delta t = t_0-t_1$. We observe a systematic dependence of
-$\Delta t$ on the total charge measured in the silicon detector, as shown in
-Figure~\ref{fig:timewalk}. This dependence on the integrated charge of the amplified
-signal was reproduced when we connected the output of the pulse generator to the
-same amplifiers as used in the measurements. We perform a correction to $\Delta
-t$ for each event using the measured charge in the silicon sensor. The
-correction is obtained from a second degree polynomial fit to the distribution
-of the $\Delta t$ versus total charge collected in the silicon sensor, as shown
-in Figure~\ref{fig:timewalk}. We verify that the correction flattens the
-dependence of the time measurement on the integrated charge, as shown on the
-right panel of Figure~\ref{fig:timewalk}. An example of a corrected $\Delta t$
-distribution for $32$~GeV electrons after 6 $X_0$ is shown on the right of
-Figure~\ref{fig:ChargeDistributionExample}. Other than the electron
+$\Delta t$ on the total charge measured in the silicon detector, as shown on the
+left panel in Figure~\ref{fig:timewalk}. This dependence on the integrated
+charge of the amplified signal was reproduced when we connected the output of
+the pulse generator to the same amplifiers as used in the measurements. We
+perform a correction to $\Delta t$ for each event using the measured charge in
+the silicon sensor. This procedure is referred to in the following as
+\textit{time calibration}. The correction is obtained from a second degree
+polynomial fit to the distribution of the $\Delta t$ versus total charge
+collected in the silicon sensor, as shown in Figure~\ref{fig:timewalk}. We
+verify that the time calibration flattens the dependence of the time measurement
+on the integrated charge, as shown on the right panel of
+Figure~\ref{fig:timewalk}, and improves the time resolution measurement by
+$30-35$\%. All time resolution measurements in the rest of this study are
+performed after time calibration. An example of a corrected $\Delta t$
+distribution for $32$~GeV electrons after 6 $X_0$ is shown on the left of
+Figure~\ref{fig:MIPVsEnergy}. Other than the electron
 identification requirements, no additional selection requirements on the
 amplitude of the signal in the silicon sensor were made. The dependence of the
 measured time resolution on the beam energy is shown on the right of
@@ -463,35 +458,48 @@ $32$~GeV electron beam.
 silicon sensor is shown on the left. The red curve represents the fit to the
 profile plot of the two dimensional distribution, and is used to correct
 $\Delta$t for this effect. On the right, we show the corresponding two dimensional
-distribution after performing the correction.
+distribution after performing the correction. A 16 GeV electron beam is used, and the silicon sensor is placed
+after 6~$X_0$ of tungsten absorber.
 } 
 \label{fig:timewalk} 
+\end{figure} 
+
+\begin{figure}[htbp] 
+\centering
+\includegraphics[width=0.49\textwidth]{plots/deltaT_32GeV_6X0.pdf} 
+\includegraphics[width=0.49\textwidth]{plots/SigmaT_vs_BeamEnergy_lin30Stamp.pdf} 
+\caption{Left: The distribution of $\Delta$t between the silicon sensor and the
+Photek MCP-PMT. A 32 GeV electron beam is used, and the silicon sensor is placed
+after 6~$X_0$ of tungsten absorber. Right: The measured time resolution between
+the silicon sensor and the Photek MCP-PMT reference is shown as a function of
+the electron beam energy. The silicon sensor is placed after 6~$X_0$ of
+tungsten absorber. } 
+\label{fig:MIPVsEnergy} 
 \end{figure} 
 
 Furthermore, we study the response and time resolution of the silicon sensor
 along the longitudinal direction of the shower development. We measure the
 integrated charge and the time resolution as a function of the absorber
-thickness and present the results in Figure~\ref{fig:MIPVsAbsorberAt8GeV}. A
-typical longitudinal shower profile is observed, consistent with previous
-studies performed using a secondary emission calorimeter prototype based on
-MCP's~\cite{Ronzhin2015288}, as well as independent studies of silicon-based
-calorimeter prototypes~\cite{Muhuri201424}. The RMS of the integrated charge
-distribution at each absorber thickness is relatively large, due to the small
-transverse size of the active element used in the experiment. We also observe
-that the time resolution improves as the shower develops towards its maximum in
-the longitudinal direction. 
+thickness and present the results in Figure~\ref{fig:MIPVsAbsorberAt8GeV}, for
+electron beam energy of 8 GeV. A typical longitudinal shower profile is
+observed, consistent with previous studies performed using a secondary emission
+calorimeter prototype based on MCP's~\cite{Ronzhin2015288}, as well as
+independent studies of silicon-based calorimeter prototypes~\cite{Muhuri201424}.
+The RMS of the integrated charge distribution at each absorber thickness is
+relatively large, due to the small transverse size of the active element used in
+the experiment. We also observe that the time resolution improves as the shower
+develops towards its maximum in the longitudinal direction. 
 
 \begin{figure}[htbp] 
 \centering
 \includegraphics[width=0.49\textwidth]{plots/MIPVsAbsorberAt8GeV.pdf} 
 \includegraphics[width=0.5\textwidth]{plots/SigmaT_vs_X0_lin30Stamp.pdf} 
-\caption{On the left, the integrated charge in the silicon sensor expressed in units of the 
-charge measured for MIPs is shown as a function of the absorber (W) thickness measured in
-units of radiation lengths ($X_{0}$). The uncertainty bands show the RMS of the measured charge 
-distribution. On the right, the time resolution between the silicon 
-sensor and the Photek MCP-PMT reference is shown as a function of the 
-absorber thickness.
-} 
+\caption{On the left, the integrated charge in the silicon sensor expressed in
+units of the charge measured for MIPs is shown as a function of the absorber (W)
+thickness measured in units of radiation lengths ($X_{0}$). The electron beam
+energy was 8 GeV. The uncertainty bands show the RMS of the measured charge
+distribution. On the right, the time resolution between the silicon sensor and
+the Photek MCP-PMT reference is shown as a function of the absorber thickness. } 
 \label{fig:MIPVsAbsorberAt8GeV} 
 \end{figure} 
 
@@ -506,7 +514,9 @@ increased velocity of electrons and holes in silicon at larger bias voltage.
 \centering
 \includegraphics[width=0.8\textwidth]{plots/SigmaT_vs_DV_lin30Stamp.pdf} 
 \caption{The time resolution between the silicon sensor and the Photek MCP-PMT 
-reference is shown as a function of bias voltage applied on the silicon sensor. } 
+reference is shown as a function of bias voltage applied on the silicon sensor. The electron beam
+energy was 16 GeV, and the silicon sensor is placed
+after 6~$X_0$ of tungsten absorber.} 
 \label{fig:SigmaT_vs_DV_lin30Stamp} 
 \end{figure} 
 
@@ -547,15 +557,17 @@ that is consistent with similar past measurements.
 
 Our results show that the time stamp associated with electromagnetic showers
 induced by electrons with energy between $20$~GeV and $30$~GeV can be measured
-with a precision better than $25$~ps. Subtracting $13$~ps for the resolution of the
-reference Photek MCP-PMT detector measured in showers~\cite{Ronzhin2015288} yields a precision close
-to $20$~ps. Moreover, we observe an improvement of the time resolution with the
-energy of the electron, and more generally with an increase in the signal
-amplitude. These measurements demonstrate that a calorimeter based on silicon
-sensors as the active medium can achieve intrinsic time resolution at the
-$20$~ps level, as long as noise is kept under control. Time jitter arising from
-intrinsic properties of the silicon sensor is demonstrated to be well below the
-$20$~ps level.
+with a precision better than $25$~ps. We find that the time response of the
+amplifier needs to be well calibrated in order to achieve this result.
+Subtracting $13$~ps for the resolution of the reference Photek MCP-PMT detector
+measured in showers~\cite{Ronzhin2015288} yields a precision close to $20$~ps.
+Moreover, we observe an improvement of the time resolution with the energy of
+the electron, and more generally with an increase in the signal amplitude. These
+measurements demonstrate that a calorimeter based on silicon sensors as the
+active medium can achieve intrinsic time resolution at the $20$~ps level, as
+long as noise is kept under control. Time jitter arising from intrinsic
+properties of the silicon sensor is demonstrated to be well below the $20$~ps
+level.
 
 \section{Conclusion}
 \label{sec:conclusion} 
