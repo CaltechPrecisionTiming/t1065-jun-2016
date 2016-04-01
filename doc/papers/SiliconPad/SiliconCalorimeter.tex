@@ -417,10 +417,11 @@ $32$~GeV.
 \includegraphics[width=0.49\textwidth]{plots/Electron_6X0_32GeV_chargeMIP.pdf} 
 \includegraphics[width=0.49\textwidth]{plots/MIPVsEnergyAt6X0.pdf} 
 \caption{ Left: An example of the distribution of integrated charge in the
-silicon sensor shown in units of charge measured for a MIP. Right: The
-integrated charge in the silicon sensor expressed in units of the charge
-measured for a MIP is shown as a function of the electron beam energy. The
-uncertainty bands show the RMS of the measured charge distribution. The red line
+silicon sensor for 32 GeV electrons and $6$~$X_0$ absorber shown in units of 
+$\mathrm{Q}_{\mathrm{MIP}}$. Right: The integrated charge in the silicon sensor 
+expressed in units of $\mathrm{Q}_{\mathrm{MIP}}$
+is shown for the same $6$~$X_0$ absorber as a function of the electron beam energy. 
+The uncertainty bands show the RMS of the measured charge distribution. The red line
 is the best fit to a linear function..} 
 \label{fig:ChargeDistributionExample}
 \end{figure}
@@ -434,14 +435,14 @@ charge of the amplified signal was reproduced when we connected the output of
 the pulse generator to the same amplifiers as used in the measurements. We
 perform a correction to $\Delta t$ for each event using the measured charge in
 the silicon sensor. This procedure is referred to in the following as
-\textit{time calibration}. The correction is obtained from a second degree
+\textit{time correction}. The correction is obtained from a second degree
 polynomial fit to the distribution of the $\Delta t$ versus total charge
 collected in the silicon sensor, as shown in Figure~\ref{fig:timewalk}. We
-verify that the time calibration flattens the dependence of the time measurement
+verify that the time correction flattens the dependence of the time measurement
 on the integrated charge, as shown on the right panel of
 Figure~\ref{fig:timewalk}, and improves the time resolution measurement by
 $30-35$\%. All time resolution measurements in the rest of this study are
-performed after time calibration. An example of a corrected $\Delta t$
+performed after such a time correction. An example of a corrected $\Delta t$
 distribution for $32$~GeV electrons after 6 $X_0$ is shown on the left of
 Figure~\ref{fig:MIPVsEnergy}. Other than the electron
 identification requirements, no additional selection requirements on the
@@ -496,7 +497,7 @@ develops towards its maximum in the longitudinal direction.
 \includegraphics[width=0.49\textwidth]{plots/MIPVsAbsorberAt8GeV.pdf} 
 \includegraphics[width=0.5\textwidth]{plots/SigmaT_vs_X0_lin30Stamp.pdf} 
 \caption{On the left, the integrated charge in the silicon sensor expressed in
-units of the charge measured for MIPs is shown as a function of the absorber (W)
+units of $\mathrm{Q}_{\mathrm{MIP}}$ is shown as a function of the absorber (W)
 thickness measured in units of radiation lengths ($X_{0}$). The electron beam
 energy was 8 GeV. The uncertainty bands show the RMS of the measured charge
 distribution. On the right, the time resolution between the silicon sensor and
@@ -561,9 +562,9 @@ induced by electrons with energy between $20$~GeV and $30$~GeV can be measured
 with a precision better than $25$~ps. Results of the  measurements reported
 in Ref.~\cite{akchurin} showed that a time resolution below $50$~ps could be
 achieved for signals larger than 10 equivalent MIPs. We find that the time
-response of the amplifier needs to be well calibrated in order to achieve this
+response of the electronics needs to be well calibrated in order to achieve this
 result. Subtracting $13$~ps for the resolution of the reference Photek MCP-PMT
-detector measured in showers~\cite{Ronzhin2015288} yields a precision close to
+detector measured with showers~\cite{Ronzhin2015288} yields a precision close to
 $20$~ps. Moreover, we observe an improvement of the time resolution with the
 energy of the electron, and more generally with an increase in the signal
 amplitude. These measurements demonstrate that a calorimeter based on silicon
