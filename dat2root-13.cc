@@ -63,13 +63,13 @@ int graphic_init();
 TStyle* style;
 
 
-int 
-main(int argc, char **argv){
+int main(int argc, char **argv){
 
   FILE* fp1;
   char stitle[200];
   int dummy;
 
+  std::cout << "===Beginning program===" << std::endl;
   //**************************************
   //Arguments
   //**************************************
@@ -108,6 +108,7 @@ main(int argc, char **argv){
   //**************************************
   //Load Voltage Calibration
   //**************************************
+  std::cout << "===Loading Voltage Calibration===" << std::endl;
   double off_mean[4][9][1024];
   for( int i = 0; i < 4; i++){
     sprintf( stitle, "v1740_bd%s_group_%d_offset.txt", boardNumber.c_str(), i);
@@ -216,6 +217,7 @@ main(int argc, char **argv){
   ushort _initVal = 666.0;
   int goodEvents = 0;
 
+  std::cout << "open file" << std::endl;
   //*************************
   //Event Loop
   //*************************
@@ -325,6 +327,10 @@ main(int argc, char **argv){
       //************************************      
       for(int i = 0; i < 9; i++) {
 
+	int totalIndex = realGroup[group]*9 + i;
+	if ( totalIndex == 34 || totalIndex == 33 ) continue;
+	
+	//std::cout << "total index --> " << totalIndex << std::endl;
 	//Fill pulses
 	for(int j = 0; j < 1024; j++) {
 	  b_c[realGroup[group]][i][j] = (short)(samples[i][j]);
@@ -384,18 +390,33 @@ main(int argc, char **argv){
 	if( drawDebugPulses) {
 	  std::cout << "draw" << std::endl;
 	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
-	  timecf0   = RisingEdgeFitTime( pulse, index_min, 0.0, "linearFit_" + pulseName, true );
-	  timecf15   = RisingEdgeFitTime( pulse, index_min, 0.15, "linearFit_" + pulseName, true );
-	  timecf30   = RisingEdgeFitTime( pulse, index_min, 0.3, "linearFit_" + pulseName, true );
-	  timecf45   = RisingEdgeFitTime( pulse, index_min, 0.45, "linearFit_" + pulseName, true );
-	  timecf60   = RisingEdgeFitTime( pulse, index_min, 0.60, "linearFit_" + pulseName, true );
+	  float fs[5];
+	  RisingEdgeFitTime( pulse, index_min, fs, "linearFit_" + pulseName, true);
+	  timecf0  = fs[0];
+	  timecf15 = fs[1];
+	  timecf30 = fs[2];
+	  timecf45 = fs[3];
+	  timecf60 = fs[4];
+	  
+	  //timecf0   = RisingEdgeFitTime( pulse, index_min, 0.0, "linearFit_" + pulseName, true );
+	  //timecf15   = RisingEdgeFitTime( pulse, index_min, 0.15, "linearFit_" + pulseName, true );
+	  //timecf30   = RisingEdgeFitTime( pulse, index_min, 0.3, "linearFit_" + pulseName, true );
+	  //timecf45   = RisingEdgeFitTime( pulse, index_min, 0.45, "linearFit_" + pulseName, true );
+	  //timecf60   = RisingEdgeFitTime( pulse, index_min, 0.60, "linearFit_" + pulseName, true );
 	} else {
 	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
-	  timecf0   = RisingEdgeFitTime( pulse, index_min, 0.0, "" );
-	  timecf15   = RisingEdgeFitTime( pulse, index_min, 0.15, "" );
-	  timecf30   = RisingEdgeFitTime( pulse, index_min, 0.30, "" );
-	  timecf45   = RisingEdgeFitTime( pulse, index_min, 0.45, "" );
-	  timecf60   = RisingEdgeFitTime( pulse, index_min, 0.60, "" );
+	  float fs[5];
+	  RisingEdgeFitTime( pulse, index_min, fs, "");
+	  timecf0  = fs[0];
+	  timecf15 = fs[1];
+	  timecf30 = fs[2];
+	  timecf45 = fs[3];
+	  timecf60 = fs[4];
+	  //timecf0   = RisingEdgeFitTime( pulse, index_min, 0.0, "" );
+	  //timecf15   = RisingEdgeFitTime( pulse, index_min, 0.15, "" );
+	  //timecf30   = RisingEdgeFitTime( pulse, index_min, 0.30, "" );
+	  //timecf45   = RisingEdgeFitTime( pulse, index_min, 0.45, "" );
+	  //timecf60   = RisingEdgeFitTime( pulse, index_min, 0.60, "" );
 	}
 	gauspeak[realGroup[group]*9 + i]   = timepeak;
 	linearTime0[realGroup[group]*9 + i] = timecf0;

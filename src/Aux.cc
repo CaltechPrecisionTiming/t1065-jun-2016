@@ -116,8 +116,10 @@ float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float
 float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, const float constantFraction, TString fname, bool makePlot )
 {
   double x_low, x_high, y, dummy;
-  pulse->GetPoint(index_min-7, x_low, y);
-  pulse->GetPoint(index_min-2, x_high, y);  
+  //pulse->GetPoint(index_min-7, x_low, y);
+  //pulse->GetPoint(index_min-2, x_high, y);
+  pulse->GetPoint(index_min-12, x_low, y);
+  pulse->GetPoint(index_min-7, x_high, y);
   pulse->GetPoint(index_min, dummy, y);  
   TF1* flinear = new TF1("flinear","[0]*x+[1]", x_low, x_high );
   
@@ -141,6 +143,41 @@ float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, const float
   return (constantFraction*y-b)/slope;
 };
 
+
+void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstamp, TString fname, bool makePlot )
+{
+  double x_low, x_high, y, dummy;
+  pulse->GetPoint(index_min-6, x_low, y);
+  pulse->GetPoint(index_min-2, x_high, y);
+  //pulse->GetPoint(index_min-12, x_low, y);
+  //pulse->GetPoint(index_min-7, x_high, y);
+  pulse->GetPoint(index_min, dummy, y);  
+  TF1* flinear = new TF1("flinear","[0]*x+[1]", x_low, x_high );
+  if ( pulse->GetN() != 1024 ) std::cout << pulse->GetN() << std::endl;
+  
+  pulse->Fit("flinear","Q","", x_low, x_high );
+  double slope = flinear->GetParameter(0);
+  double b     = flinear->GetParameter(1);
+  
+  if ( makePlot )
+    {
+      std::cout << "make plot" << std::endl;
+      TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
+      pulse->GetXaxis()->SetLimits(x_low-3, x_high+3);
+      pulse->SetMarkerSize(1);
+      pulse->SetMarkerStyle(20);
+      pulse->Draw("AP");
+      c->SaveAs(fname+"LinearFit.pdf");
+      //delete c;
+    }
+  tstamp[0] = (0.0*y-b)/slope;
+  tstamp[1] = (0.15*y-b)/slope;
+  tstamp[2] = (0.30*y-b)/slope;
+  tstamp[3] = (0.45*y-b)/slope;
+  tstamp[4] = (0.60*y-b)/slope;
+  
+  delete flinear;
+};
 
 
 double GetGaussTime( TGraphErrors* pulse )
