@@ -8,8 +8,10 @@ import sys
 if __name__ == '__main__':
     parser = OptionParser()
 
-    parser.add_option('-c','--cut',dest="cut",type="string",default='',
+    parser.add_option('-c','--cut',dest="cut",type="string",default='1',
                   help="cut to apply before averaging, e.g. to look only at event 101, do event==101; ring0int = 1 central hexagon, ring1int = 6 central hexagons, ring2int = 18 central hexagons")
+    parser.add_option('-p','--plot',dest="plot",type="choice",action='store',default='amp',choices=['amp','int','intfull'],
+                  help="plot varible on the z-axis: amp or int or intfull")
     
     (options,args) = parser.parse_args()
 
@@ -76,10 +78,18 @@ if __name__ == '__main__':
         y2 = array('d',[yi+centerPos[1] for yi in yVertex])
         h2p.AddBin(6,x2,y2)
 
-
+                        
+    options.cut = options.cut.replace('ring0intfull','+'.join(['intfull[%i]'%index for index in ring0Index]))
+    options.cut = options.cut.replace('ring1intfull','+'.join(['intfull[%i]'%index for index in ring1Index]))
+    options.cut = options.cut.replace('ring2intfull','+'.join(['intfull[%i]'%index for index in ring2Index]))
+    
     options.cut = options.cut.replace('ring0int','+'.join(['int[%i]'%index for index in ring0Index]))
     options.cut = options.cut.replace('ring1int','+'.join(['int[%i]'%index for index in ring1Index]))
     options.cut = options.cut.replace('ring2int','+'.join(['int[%i]'%index for index in ring2Index]))
+                                        
+    options.cut = options.cut.replace('ring0amp','+'.join(['ampl[%i]'%index for index in ring0Index]))
+    options.cut = options.cut.replace('ring1amp','+'.join(['amp[%i]'%index for index in ring1Index]))
+    options.cut = options.cut.replace('ring2amp','+'.join(['amp[%i]'%index for index in ring2Index]))
                                     
     nevents = tree.Draw('>>elist',options.cut,'entrylist')
         
@@ -91,7 +101,7 @@ if __name__ == '__main__':
         if entry == -1: break
         tree.GetEntry(entry)
         for key, val in mapArrayToCenterPos.iteritems():
-            h2p.Fill(val[0],val[1], tree.amp[key])
+            h2p.Fill(val[0],val[1], eval('tree.%s[%i]'%(options.plot,key)))
         #print tree.event
         
     h2p.Scale(1.0/nevents)
@@ -104,7 +114,10 @@ if __name__ == '__main__':
     c.SetRightMargin(0.2)
         
     empty.Draw("")
-    h2p.GetZaxis().SetTitle("Amplitude [V]")
+    if options.plot=='amp':
+        h2p.GetZaxis().SetTitle("Amplitude [V]")
+    elif options.plot=='int' or options.plot=='fullint':
+        h2p.GetZaxis().SetTitle("Charge [pC]")
     h2p.GetZaxis().SetTitleOffset(2)
     h2p.SetMaximum(0.1)
     h2p.Draw("colztextsame")
