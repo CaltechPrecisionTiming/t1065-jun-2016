@@ -1,5 +1,5 @@
 #include "Aux.hh"
-
+#include <math.h>
 
 //*********************************************************
 // Get amplification factor used for the silicon sensor
@@ -99,8 +99,15 @@ float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float
 float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last, TString fname)
 {
   TF1* fpeak = new TF1("fpeak","gaus", index_first, index_last);
-  float max = pulse->GetMaximum();
-  if( max < 84 ) return -999999999;  
+  //float max = pulse->GetMaximum();
+  double max = -9999;
+  double* yy = pulse->GetY();
+  for ( int i = 0; i < 1024; i++ )
+    {
+      if ( yy[i] > max ) max = yy[i];
+    }
+  //std::cout << "max: " << max << std::endl;
+  if( max < 42 || index_first < 10 || index_last > 1010 ) return -99999;
   pulse->Fit("fpeak","Q","", index_first, index_last);
   
   TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
@@ -156,8 +163,15 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
   pulse->GetPoint(index_min, dummy, y);
   
   TF1* flinear = new TF1("flinear","[0]*x+[1]", x_low, x_high );
-  float max = pulse->GetMaximum();
-  if( max < 84 ) return;
+  float max = -9999;
+  double* yy = pulse->GetY();
+  
+  for ( int i = 0; i < 1024; i++ )
+    {
+      if ( yy[i] > max ) max = yy[i];
+    }
+  //std::cout << "max: " << max << std::endl;
+  if( max < 42 || index_min < 10 || index_min > 1010 ) return;
   
   pulse->Fit("flinear","Q","", x_low, x_high );
   double slope = flinear->GetParameter(0);
@@ -175,6 +189,7 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
       //delete c;
     }
   tstamp[0] = (0.0*y-b)/slope;
+  //std::cout << "----" << tstamp[0]  << std::endl;
   tstamp[1] = (0.15*y-b)/slope;
   tstamp[2] = (0.30*y-b)/slope;
   tstamp[3] = (0.45*y-b)/slope;
