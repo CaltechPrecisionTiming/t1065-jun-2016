@@ -343,8 +343,7 @@ int main(int argc, char **argv){
       for(int i = 0; i < 9; i++) {
 
 	int totalIndex = realGroup[group]*9 + i;
-	if ( totalIndex == 34 || totalIndex == 33 ) continue;
-	
+		
 	//std::cout << "total index --> " << totalIndex << std::endl;
 	//Fill pulses
 	for(int j = 0; j < 1024; j++) {
