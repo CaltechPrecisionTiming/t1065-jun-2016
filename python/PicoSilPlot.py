@@ -87,7 +87,7 @@ if __name__ == '__main__':
     options.cut = options.cut.replace('ring1int','+'.join(['int[%i]'%index for index in ring1Index]))
     options.cut = options.cut.replace('ring2int','+'.join(['int[%i]'%index for index in ring2Index]))
                                         
-    options.cut = options.cut.replace('ring0amp','+'.join(['ampl[%i]'%index for index in ring0Index]))
+    options.cut = options.cut.replace('ring0amp','+'.join(['amp[%i]'%index for index in ring0Index]))
     options.cut = options.cut.replace('ring1amp','+'.join(['amp[%i]'%index for index in ring1Index]))
     options.cut = options.cut.replace('ring2amp','+'.join(['amp[%i]'%index for index in ring2Index]))
                                     
