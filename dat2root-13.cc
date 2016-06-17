@@ -79,7 +79,22 @@ int main(int argc, char **argv){
   int nEvents = atoi(argv[2]);
 
   std::string boardNumber = "1";
-  if (argc > 3) boardNumber = argv[3];
+  std::string bNumber = ParseCommandLine( argc, argv, "--boardNumber" );
+  if ( bNumber == ""  )
+    {
+      std::cerr << "[ERROR]: WRONG BOARD NUMBER--> " << bNumber << std::endl;
+      boardNumber = "1";
+    }
+  else if ( bNumber == "1" || bNumber == "2" )
+    {
+       boardNumber = bNumber;
+    }
+  else
+    {
+      std::cerr << "[ERROR]: WRONG BOARD NUMBER--> " << bNumber << std::endl;
+    }
+  
+ 
   std::cout << "Using Calibration files for board number " << boardNumber << "\n";
 
   bool saveRaw = false;
@@ -391,7 +406,7 @@ int main(int argc, char **argv){
 	  std::cout << "draw" << std::endl;
 	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
 	  float fs[5];
-	  RisingEdgeFitTime( pulse, index_min, fs, "linearFit_" + pulseName, true);
+	  //RisingEdgeFitTime( pulse, index_min, fs, "linearFit_" + pulseName, true);
 	  timecf0  = fs[0];
 	  timecf15 = fs[1];
 	  timecf30 = fs[2];

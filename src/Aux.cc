@@ -151,9 +151,32 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
   pulse->GetPoint(index_min-2, x_high, y);
   //pulse->GetPoint(index_min-12, x_low, y);
   //pulse->GetPoint(index_min-7, x_high, y);
-  pulse->GetPoint(index_min, dummy, y);  
+  pulse->GetPoint(index_min, dummy, y);
+  
   TF1* flinear = new TF1("flinear","[0]*x+[1]", x_low, x_high );
   if ( pulse->GetN() != 1024 ) std::cout << pulse->GetN() << std::endl;
+  double* yy;
+  yy = pulse->GetY();
+
+  bool _flag = false;
+  int max_index = -1;
+  float max = -999;
+
+  for ( int i = 0; i < 1024; i++ )
+    {
+      if ( yy[i] != 0 )
+	{
+	  _flag = true;
+	}
+      
+      if ( yy[i] > max )
+	{
+	  max = yy[i];
+	  max_index = i;
+	}
+    }
+
+  if( _flag == false  || max_index  > 1000 || max < 42 ) return;
   
   pulse->Fit("flinear","Q","", x_low, x_high );
   double slope = flinear->GetParameter(0);
