@@ -1,5 +1,6 @@
 #include "Aux.hh"
 #include <math.h>
+#include <string>
 
 //*********************************************************
 // Get amplification factor used for the silicon sensor
@@ -229,12 +230,19 @@ float GetBaseline( int peak, short *a ) {
 }
 
 
-float GetPulseIntegral(int peak, short *a) 
+float GetPulseIntegral(int peak, short *a, std::string option) 
 {
   float integral = 0.;
 
-  for (int i=245; i < 295; i++) {
-    integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
+  if (option == "full") {
+    for (int i=0; i < 1024; i++) {
+      integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
+    }
+  }
+  else {
+    for (int i=290; i < 360; i++) {
+      integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
+    }
   }
 
   return -1.0 * integral;

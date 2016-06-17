@@ -187,6 +187,7 @@ int main(int argc, char **argv){
   float base[36];
   float amp[36];
   float integral[36];
+  float integralFull[36];
   float gauspeak[36];
   float linearTime0[36];
   float linearTime15[36];
@@ -208,6 +209,7 @@ int main(int argc, char **argv){
   tree->Branch("time", time, "time[4][1024]/F");
   tree->Branch("amp", amp, "amp[36]/F");
   tree->Branch("int", integral, "int[36]/F");
+  tree->Branch("intfull", integralFull, "intfull[36]/F");
   tree->Branch("gauspeak", gauspeak, "gauspeak[36]/F");
   tree->Branch("linearTime0", linearTime0, "linearTime0[36]/F");
   tree->Branch("linearTime15", linearTime15, "linearTime15[36]/F");
@@ -388,6 +390,7 @@ int main(int argc, char **argv){
 
 	//Get Pulse Integral
 	integral[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i]);
+	integralFull[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i], "full");
 
 	//Gauss Time-Stamping 
 	Double_t min = 0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.; 
