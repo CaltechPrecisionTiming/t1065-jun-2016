@@ -1,5 +1,6 @@
 #include "Aux.hh"
-
+#include <math.h>
+#include <string>
 
 //*********************************************************
 // Get amplification factor used for the silicon sensor
@@ -99,8 +100,15 @@ float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float
 float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last, TString fname)
 {
   TF1* fpeak = new TF1("fpeak","gaus", index_first, index_last);
-  float max = pulse->GetMaximum();
-  if( max < 84 ) return -999999999;  
+  //float max = pulse->GetMaximum();
+  double max = -9999;
+  double* yy = pulse->GetY();
+  for ( int i = 0; i < 1024; i++ )
+    {
+      if ( yy[i] > max ) max = yy[i];
+    }
+  //std::cout << "max: " << max << std::endl;
+  if( max < 42 || index_first < 10 || index_last > 1010 ) return -99999;
   pulse->Fit("fpeak","Q","", index_first, index_last);
   
   TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
@@ -156,8 +164,15 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
   pulse->GetPoint(index_min, dummy, y);
   
   TF1* flinear = new TF1("flinear","[0]*x+[1]", x_low, x_high );
-  float max = pulse->GetMaximum();
-  if( max < 84 ) return;
+  float max = -9999;
+  double* yy = pulse->GetY();
+  
+  for ( int i = 0; i < 1024; i++ )
+    {
+      if ( yy[i] > max ) max = yy[i];
+    }
+  //std::cout << "max: " << max << std::endl;
+  if( max < 42 || index_min < 10 || index_min > 1010 ) return;
   
   pulse->Fit("flinear","Q","", x_low, x_high );
   double slope = flinear->GetParameter(0);
@@ -175,6 +190,7 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
       //delete c;
     }
   tstamp[0] = (0.0*y-b)/slope;
+  //std::cout << "----" << tstamp[0]  << std::endl;
   tstamp[1] = (0.15*y-b)/slope;
   tstamp[2] = (0.30*y-b)/slope;
   tstamp[3] = (0.45*y-b)/slope;
@@ -214,12 +230,19 @@ float GetBaseline( int peak, short *a ) {
 }
 
 
-float GetPulseIntegral(int peak, short *a) 
+float GetPulseIntegral(int peak, short *a, std::string option) 
 {
   float integral = 0.;
 
-  for (int i=245; i < 295; i++) {
-    integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
+  if (option == "full") {
+    for (int i=0; i < 1024; i++) {
+      integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
+    }
+  }
+  else {
+    for (int i=290; i < 360; i++) {
+      integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
+    }
   }
 
   return -1.0 * integral;

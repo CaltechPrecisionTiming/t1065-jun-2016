@@ -5,6 +5,7 @@
 #include <TH1F.h>
 #include <TF1.h>
 #include <TCanvas.h>
+#include <string>
 
 static const int nPoints = 24;
 static float outputAmplitude[nPoints] = { 11.7, 13.5, 16.7, 20.7, 24.6, 33.6, 47.4, 59, 73, 87, 
@@ -27,6 +28,6 @@ float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, const float
 void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstamp, TString fname, bool makePlot = false );
 float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last, TString fname);
 float GetBaseline( int peak, short *a );
-float GetPulseIntegral(int peak, short *a);
+float GetPulseIntegral(int peak, short *a, std::string option = "");
 
 #endif
