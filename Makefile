@@ -18,7 +18,7 @@ TARGET = dat2rootCP
 TARGET1 = makeAmp
 TARGET2 = makeSigma
 
-SRC = dat2root-13.cc src/Aux.cc
+SRC = dat2root.cc src/Aux.cc
 SRC1 = src/makeAmplitude.cc
 SRC2 = analysis/SiliconPad/makeSigmaT.cc
 
