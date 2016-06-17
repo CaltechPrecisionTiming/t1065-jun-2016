@@ -108,7 +108,7 @@ if __name__ == '__main__':
     
     rt.gStyle.SetOptStat(0)
     rt.gStyle.SetOptTitle(0)
-    rt.gStyle.SetPaintTextFormat("3.3f")
+    rt.gStyle.SetPaintTextFormat("+3.3f")
 
     c = rt.TCanvas('c','c',500,500)
     c.SetRightMargin(0.2)
@@ -116,10 +116,13 @@ if __name__ == '__main__':
     empty.Draw("")
     if options.plot=='amp':
         h2p.GetZaxis().SetTitle("Amplitude [V]")
-    elif options.plot=='int' or options.plot=='fullint':
+    elif options.plot=='int' or options.plot=='intfull':
         h2p.GetZaxis().SetTitle("Charge [pC]")
     h2p.GetZaxis().SetTitleOffset(2)
-    h2p.SetMaximum(0.1)
+    if options.plot=='amp':
+        h2p.SetMaximum(0.1)
+    else:
+        h2p.SetMaximum(4)
     h2p.Draw("colztextsame")
     
     l = rt.TLatex()
