@@ -122,7 +122,7 @@ if __name__ == '__main__':
     if options.plot=='amp':
         h2p.SetMaximum(0.1)
     else:
-        h2p.SetMaximum(5)
+        h2p.SetMaximum(4)
     h2p.Draw("colztextsame")
     
     l = rt.TLatex()
