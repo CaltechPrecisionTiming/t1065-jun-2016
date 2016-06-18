@@ -25,7 +25,7 @@ double GetGaussTime( TGraphErrors* pulse );
 int FindMin( int n, short *a);
 float GausFit_MeanTime(TGraphErrors * pulse, const float index_first, const float index_last);
 float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, const float constantFraction, TString fname, bool makePlot = false );
-void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstamp, TString fname, bool makePlot = false );
+void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstamp, int event, TString fname, bool makePlot = false);
 float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last, TString fname);
 float GetBaseline( int peak, short *a );
 float GetPulseIntegral(int peak, short *a, std::string option = "");

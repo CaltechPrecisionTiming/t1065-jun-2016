@@ -154,11 +154,11 @@ float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, const float
 };
 
 
-void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstamp, TString fname, bool makePlot )
+void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstamp, int event, TString fname, bool makePlot )
 {
   double x_low, x_high, y, dummy;
-  pulse->GetPoint(index_min-6, x_low, y);
-  pulse->GetPoint(index_min-2, x_high, y);
+  pulse->GetPoint(index_min-10, x_low, y);
+  pulse->GetPoint(index_min-3, x_high, y);
   //pulse->GetPoint(index_min-12, x_low, y);
   //pulse->GetPoint(index_min-7, x_high, y);
   pulse->GetPoint(index_min, dummy, y);
@@ -172,8 +172,13 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
       if ( yy[i] > max ) max = yy[i];
     }
   //std::cout << "max: " << max << std::endl;
-  if( max < 42 || index_min < 10 || index_min > 1010 ) return;
-  
+
+  /*if( max < 10 || index_min < 0 || index_min > 1023 )
+    {
+      std::cout << "DEB: skipping event--> " << event << std::endl;
+      return;
+    }
+  */
   pulse->Fit("flinear","Q","", x_low, x_high );
   double slope = flinear->GetParameter(0);
   double b     = flinear->GetParameter(1);
