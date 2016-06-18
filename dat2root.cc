@@ -208,6 +208,7 @@ int main(int argc, char **argv){
   tree->Branch("t0",  t0, "t0[1024]/I");
   tree->Branch("time", time, "time[4][1024]/F");
   tree->Branch("amp", amp, "amp[36]/F");
+  tree->Branch("base", base, "base[36]/F");
   tree->Branch("int", integral, "int[36]/F");
   tree->Branch("intfull", integralFull, "intfull[36]/F");
   tree->Branch("gauspeak", gauspeak, "gauspeak[36]/F");
@@ -356,14 +357,27 @@ int main(int argc, char **argv){
 	
 	//Find Peak Location
 	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
+	
+
+	//Make Pulse shape Graph
+	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
+	TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
+	TGraphErrors* pulse = originalPulse;
 
 	//Estimate baseline
-	float baseline = GetBaseline( index_min, channel[realGroup[group]*9 + i]);
+	//float baseline = GetBaseline( index_min, channel[realGroup[group]*9 + i]);
+	// float baseline = GetBaseline( pulse, 5 ,30, pulseName);
+	// base[realGroup[group]*9 + i] = baseline;
+	float baseline;
+	if ( index_min < 105 ) { baseline = GetBaseline( pulse, 850, 1020, pulseName);}
+	else { baseline = GetBaseline( pulse, 5 ,index_min-50, pulseName);}
 	base[realGroup[group]*9 + i] = baseline;
+
 
 	//Correct pulse shape for baseline offset
 	for(int j = 0; j < 1024; j++) {
-	  channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]) - baseline);
+	  channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]) + baseline);
+	  //channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]));
 	  channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
 	}
 
@@ -375,9 +389,9 @@ int main(int argc, char **argv){
 	}
 
 	//Make Pulse shape Graph
-	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
-	TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
-	TGraphErrors* pulse = originalPulse;
+	//TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
+	//TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
+	//TGraphErrors* pulse = originalPulse;
 	if (doFilter) {
 	  pulse = GetTGraphFilter( channel[realGroup[group]*9 + i], time[realGroup[group]], pulseName , false);
 	}

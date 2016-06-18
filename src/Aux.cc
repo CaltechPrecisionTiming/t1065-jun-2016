@@ -211,6 +211,28 @@ double GetGaussTime( TGraphErrors* pulse )
 };
 
 
+float GetBaseline(TGraphErrors * pulse, int i_low, int i_high, TString fname )
+{
+  double x_low, x_high, y, dummy;
+  pulse->GetPoint(i_low, x_low, y);
+  pulse->GetPoint(i_high, x_high, y);
+  
+  TF1* flinear = new TF1("flinear","[0]", x_low, x_high );
+  
+  pulse->Fit("flinear","RQ","", x_low, x_high );
+  
+  /* std::cout << "make plot" << std::endl;
+  std::cout << x_low << x_high << fname << std::endl;
+  TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
+  pulse->GetXaxis()->SetLimits(x_low-3, x_high+3);
+  pulse->SetMarkerSize(1);
+  pulse->SetMarkerStyle(20);
+  pulse->Draw("AP");
+  c->SaveAs(fname+"LinearFit.pdf"); */
+  return flinear->GetParameter(0);
+  
+}
+
 float GetBaseline( int peak, short *a ) {
 
   float tmpsum = 0;
@@ -245,7 +267,7 @@ float GetPulseIntegral(int peak, short *a, std::string option)
     }
   }
   else {
-    for (int i=290; i < 360; i++) {
+    for (int i=peak-20; i < peak+25; i++) {
       integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
     }
   }
