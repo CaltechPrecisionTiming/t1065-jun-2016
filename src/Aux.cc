@@ -240,7 +240,7 @@ float GetPulseIntegral(int peak, short *a, std::string option)
   float integral = 0.;
 
   if (option == "full") {
-    for (int i=0; i < 1024; i++) {
+    for (int i=5; i < 1020; i++) {
       integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
     }
   }
