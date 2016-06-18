@@ -339,6 +339,7 @@ int main(int argc, char **argv){
 	samples[8][j*8+7] =  temp[2] >> 20;
       }
 
+      
       //************************************
       //Loop Over Channels 0 - 8
       //************************************      
@@ -365,6 +366,24 @@ int main(int argc, char **argv){
 	for(int j = 0; j < 1024; j++) {
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]) - baseline);
 	  channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
+	}
+	
+	// DRS-glitch finder: zero out bins which have very large difference
+	// with respect to neighbors in only one or two bins
+	for(int j = 0; j < 1024; j++) {
+	  short a0 = abs(channel[realGroup[group]*9 + i][j-1]);
+	  short a1 = abs(channel[realGroup[group]*9 + i][j]);
+	  short a2 = abs(channel[realGroup[group]*9 + i][j+1]);
+	  short a3 = abs(channel[realGroup[group]*9 + i][j+2]);
+	  
+	  if ( ( a1>5*a0 && a2>5*a0 && a2>3*a3 && a1>40) )
+	    {
+	      channel[realGroup[group]*9 + i][j] = 0;
+	      channel[realGroup[group]*9 + i][j+1] = 0;
+	    }
+	  
+	  if ( ( a1>5*a0 && a1>5*a2 && a1>40) )
+	    channel[realGroup[group]*9 + i][j] = 0;
 	}
 
 	//for the channel connected to the silicon sensor, make pulse shape correction for the amplifiers
