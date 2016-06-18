@@ -4,12 +4,15 @@ from array import array
 import numpy as np
 from math import sqrt
 import sys
+import json
 
 if __name__ == '__main__':
     parser = OptionParser()
 
     parser.add_option('-c','--cut',dest="cut",type="string",default='1',
                   help="cut to apply before averaging, e.g. to look only at event 101, do event==101; ring0int = 1 central hexagon, ring1int = 6 central hexagons, ring2int = 18 central hexagons")
+    parser.add_option('-w','--wire-mapping',dest="wireMapping",type="string",default='wireMapping_06182016_1230.txt',
+                  help="wire mapping text file")
     parser.add_option('-p','--plot',dest="plot",type="choice",action='store',default='amp',choices=['amp','int','intfull'],
                   help="plot varible on the z-axis: amp or int or intfull")
     
@@ -37,37 +40,45 @@ if __name__ == '__main__':
                        [3, -sqrt(3)], [3, 0], [3, sqrt(3)]
                        ]
 
-
+    wireMappingFile = open(options.wireMapping,'r')
+    indexValues = []
+    for l in wireMappingFile.readlines():
+        if l[0]!='#':
+            indexValues.append(l.replace('\n',''))
+    
     mapArrayToCenterPos = {
-        29: [-3, 0], 
-        16: [-3, -sqrt(3)], 
-        24: [-1.5, 5*sqrt(3)/2],   
-        6: [-1.5, sqrt(3)/2],
-        5: [-1.5, -sqrt(3)/2],  
-        15: [-1.5, -3*sqrt(3)/2],       
-        21: [-1.5, -5*sqrt(3)/2],  
-        25: [0, 3*sqrt(3)],        
-        7: [0, 2*sqrt(3)],   
-        31: [0, sqrt(3)],      
-        34: [0,0],        
-        30: [0,-sqrt(3)],      
-        14: [0,-2*sqrt(3)],   
-        22: [0,-3*sqrt(3)],        
-        28: [1.5, 5*sqrt(3)/2],   
-        3: [1.5, 3*sqrt(3)/2], 
-        11: [1.5, sqrt(3)/2],       
-        4: [1.5, -sqrt(3)/2],     
-        13: [1.5, -3*sqrt(3)/2], 
-        23: [1.5, -5*sqrt(3)/2],       
-        20: [3, sqrt(3)],   
-        19: [3, 0],
-        12: [3, -sqrt(3)]
+        indexValues[0]: [-3, sqrt(3)],      
+        indexValues[1]: [-3, 0],   
+        indexValues[2]: [-3, -sqrt(3)], 
+        indexValues[3]: [-1.5, 5*sqrt(3)/2],   
+        indexValues[4]: [-1.5, 3*sqrt(3)/2],   
+        indexValues[5]: [-1.5, sqrt(3)/2],
+        indexValues[6]: [-1.5, -sqrt(3)/2],  
+        indexValues[7]: [-1.5, -3*sqrt(3)/2],       
+        indexValues[8]: [-1.5, -5*sqrt(3)/2],  
+        indexValues[9]: [0, 3*sqrt(3)],        
+        indexValues[10]: [0, 2*sqrt(3)],   
+        indexValues[11]: [0, sqrt(3)],      
+        indexValues[12]: [0, 0],        
+        indexValues[13]: [0, -sqrt(3)],      
+        indexValues[14]: [0, -2*sqrt(3)],   
+        indexValues[15]: [0, -3*sqrt(3)],        
+        indexValues[16]: [1.5, 5*sqrt(3)/2],   
+        indexValues[17]: [1.5, 3*sqrt(3)/2], 
+        indexValues[18]: [1.5, sqrt(3)/2],       
+        indexValues[19]: [1.5, -sqrt(3)/2],     
+        indexValues[20]: [1.5, -3*sqrt(3)/2], 
+        indexValues[21]: [1.5, -5*sqrt(3)/2],       
+        indexValues[22]: [3, sqrt(3)],   
+        indexValues[23]: [3, 0],
+        indexValues[24]: [3, -sqrt(3)]
         }
 
     ring0Index = []
     ring1Index = []
     ring2Index = []
     for key, val in mapArrayToCenterPos.iteritems():
+        if key == '': continue
         if np.linalg.norm(np.array(val)) <= 0: ring0Index.append(key)
         if np.linalg.norm(np.array(val)) <= sqrt(3): ring1Index.append(key)
         if np.linalg.norm(np.array(val)) <= 2*sqrt(3): ring2Index.append(key)
@@ -79,17 +90,17 @@ if __name__ == '__main__':
         h2p.AddBin(6,x2,y2)
 
                         
-    options.cut = options.cut.replace('ring0intfull','+'.join(['intfull[%i]'%index for index in ring0Index]))
-    options.cut = options.cut.replace('ring1intfull','+'.join(['intfull[%i]'%index for index in ring1Index]))
-    options.cut = options.cut.replace('ring2intfull','+'.join(['intfull[%i]'%index for index in ring2Index]))
+    options.cut = options.cut.replace('ring0intfull','+'.join(['intfull[%s]'%index for index in ring0Index]))
+    options.cut = options.cut.replace('ring1intfull','+'.join(['intfull[%s]'%index for index in ring1Index]))
+    options.cut = options.cut.replace('ring2intfull','+'.join(['intfull[%s]'%index for index in ring2Index]))
     
-    options.cut = options.cut.replace('ring0int','+'.join(['int[%i]'%index for index in ring0Index]))
-    options.cut = options.cut.replace('ring1int','+'.join(['int[%i]'%index for index in ring1Index]))
-    options.cut = options.cut.replace('ring2int','+'.join(['int[%i]'%index for index in ring2Index]))
+    options.cut = options.cut.replace('ring0int','+'.join(['int[%s]'%index for index in ring0Index]))
+    options.cut = options.cut.replace('ring1int','+'.join(['int[%s]'%index for index in ring1Index]))
+    options.cut = options.cut.replace('ring2int','+'.join(['int[%s]'%index for index in ring2Index]))
                                         
-    options.cut = options.cut.replace('ring0amp','+'.join(['amp[%i]'%index for index in ring0Index]))
-    options.cut = options.cut.replace('ring1amp','+'.join(['amp[%i]'%index for index in ring1Index]))
-    options.cut = options.cut.replace('ring2amp','+'.join(['amp[%i]'%index for index in ring2Index]))
+    options.cut = options.cut.replace('ring0amp','+'.join(['amp[%s]'%index for index in ring0Index]))
+    options.cut = options.cut.replace('ring1amp','+'.join(['amp[%s]'%index for index in ring1Index]))
+    options.cut = options.cut.replace('ring2amp','+'.join(['amp[%s]'%index for index in ring2Index]))
                                     
     nevents = tree.Draw('>>elist',options.cut,'entrylist')
         
@@ -101,7 +112,8 @@ if __name__ == '__main__':
         if entry == -1: break
         tree.GetEntry(entry)
         for key, val in mapArrayToCenterPos.iteritems():
-            h2p.Fill(val[0],val[1], eval('tree.%s[%i]'%(options.plot,key)))
+            if key == '': continue
+            h2p.Fill(val[0],val[1], eval('tree.%s[%s]'%(options.plot,key)))
         #print tree.event
         
     h2p.Scale(1.0/nevents)
