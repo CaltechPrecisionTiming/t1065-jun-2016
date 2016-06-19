@@ -27,7 +27,7 @@
 //Normalize Hist
 //*************************************************************************************************
 TH1F* NormalizeHist(TH1F *originalHist) {
-  TH1F* hist = (TH1D*)originalHist->Clone((string(originalHist->GetName())+"_normalized").c_str());
+  TH1F* hist = (TH1F*)originalHist->Clone((string(originalHist->GetName())+"_normalized").c_str());
   Double_t norm = 0;
   hist->SetTitle("");
   for (UInt_t b=0; int(b)<hist->GetXaxis()->GetNbins()+2; ++b) {
@@ -49,11 +49,13 @@ void MultiChannelStudy() {
   // TFile *inputfile = TFile::Open("t1065-jun-2016-65To80.root","READ"); //lead 6X0, 3cm away, 32GeV
   // TFile *inputfile = TFile::Open("t1065-jun-2016-84To89.root","READ"); //lead 6X0, 0cm away, 32GeV
   // TFile *inputfile = TFile::Open("t1065-jun-2016-91.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, after turning off pixel telescope
-  TFile *inputfile = TFile::Open("t1065-jun-2016-90.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, before turning off pixel telescope
+  // TFile *inputfile = TFile::Open("t1065-jun-2016-90.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, before turning off pixel telescope
   // TFile *inputfile = TFile::Open("t1065-jun-2016-55To59.root","READ"); //tungsten 6X0, 3cm away, 32 GeV
   // TFile *inputfile = TFile::Open("t1065-jun-2016-34To35.root","READ"); //tungsten 6X0, 0cm away, 8 GeV
   //TFile *inputfile = TFile::Open("t1065-jun-2016-32To33.root","READ"); //tungsten 2X0, 0cm away, 32 GeV
-
+  //TFile *inputfile = TFile::Open("t1065-jun-2016-81.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, before turning off pixel telescope
+  TFile *inputfile = TFile::Open("t1065-jun-2016-94.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, before turning off pixel telescope
+ 
   TTree *tree = (TTree*)inputfile->Get("pulse");
 
   // get the variables from the ntuple

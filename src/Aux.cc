@@ -68,9 +68,13 @@ TGraphErrors* GetTGraph(  short* channel, float* time )
 
 ////////////////////////////////////////////
 // find minimum of the pulse
-// aa added protection against pulses with single high bin
 ////////////////////////////////////////////
 int FindMin( int n, short *a) {
+  return FindMinFirstPeakAboveNoise(n,a);
+}
+
+
+int FindMinAbsolute( int n, short *a) {
   
   if (n <= 0 || !a) return -1;
   float xmin = a[5];
@@ -81,9 +85,31 @@ int FindMin( int n, short *a) {
       loc = i;
     }
   }
+ 
+  return loc;
+}
+
+int FindMinFirstPeakAboveNoise( int n, short *a) {
+  
+  const float noise = 50;
+  if (n <= 0 || !a) return -1;
+  int loc = 0;
+  
+  for  (int i = 10; i < n-10; i++) {   
+    if (fabs(a[i]) > noise 
+	&& 
+	(a[i] < a[i-1] && a[i] < a[i-2] && a[i] < a[i-3] && a[i] < a[i-4] && a[i] < a[i-5] )
+	&&
+	(a[i] < a[i+1] && a[i] < a[i+2] && a[i] < a[i+3] && a[i] < a[i+4] && a[i] < a[i+5] )
+	)  {
+      loc = i;
+      break;
+    }
+  }
   
   return loc;
 }
+
 
 // find the mean time from gaus fit
 float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last)

@@ -356,34 +356,21 @@ int main(int argc, char **argv){
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
 	}
 	
-	//Find Peak Location
-	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
-	
-
 	//Make Pulse shape Graph
 	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
-	TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
-	TGraphErrors* pulse = originalPulse;
+	TGraphErrors* pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
 
-	//Estimate baseline
-	//float baseline = GetBaseline( index_min, channel[realGroup[group]*9 + i]);
-	// float baseline = GetBaseline( pulse, 5 ,30, pulseName);
-	// base[realGroup[group]*9 + i] = baseline;
+	//estimate baseline
 	float baseline;
-	if ( index_min < 105 ) { baseline = GetBaseline( pulse, 850, 1020, pulseName);}
-	else { baseline = GetBaseline( pulse, 5 ,index_min-50, pulseName);}
+	baseline = GetBaseline( pulse, 5 , 150, pulseName);
 	base[realGroup[group]*9 + i] = baseline;
-
-
+	
 	//Correct pulse shape for baseline offset
 	for(int j = 0; j < 1024; j++) {
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]) + baseline);
-	  //channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]));
 	  channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
 	}
 
-	 originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
-	 pulse = originalPulse;
 	// DRS-glitch finder: zero out bins which have very large difference
 	// with respect to neighbors in only one or two bins
 	for(int j = 0; j < 1024; j++) {
@@ -402,17 +389,10 @@ int main(int argc, char **argv){
 	    channel[realGroup[group]*9 + i][j] = 0;
 	}
 
-	//for the channel connected to the silicon sensor, make pulse shape correction for the amplifiers
-	if (doAmplificationCorrection) {
-	  for(int j = 0; j < 1024; j++) {
-	    channelCorrected[21][j] = channel[21][j] / GetAmplificationFactor( channel[21][j] * ( 1.0 / 4096 ) );
-	  }
-	}
-
-	//Make Pulse shape Graph
-	//TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
-	//TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
-	//TGraphErrors* pulse = originalPulse;
+	
+	//Find Peak Location
+	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
+	
 	if (doFilter) {
 	  pulse = GetTGraphFilter( channel[realGroup[group]*9 + i], time[realGroup[group]], pulseName , false);
 	}
