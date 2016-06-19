@@ -66,23 +66,95 @@ TGraphErrors* GetTGraph(  short* channel, float* time )
   return tg;
 };
 
-////////////////////////////////////////////
-// find minimum of the pulse
-// aa added protection against pulses with single high bin
-////////////////////////////////////////////
-int FindMin( int n, short *a) {
+
+int FindMin( int n, short *a) 
+{
   
   if (n <= 0 || !a) return -1;
   float xmin = a[5];
   int loc = 0;
-  for  (int i = 5; i < n-5; i++) {
-    if (xmin > a[i] && a[i+1] < 0.5*a[i])  {
-      xmin = a[i];
-      loc = i;
+  for  (int i = 5; i < n-10; i++) {
+    if (xmin > a[i] && a[i+1] < 0.5*a[i] && a[i] < -40. )  
+      {
+	//std::cout << i << " " << a[i] << std::endl;
+	xmin = a[i];
+	loc = i;
+	//if ( a[i+5]>a[i] && a[i+10]>a[i+5] ) {
+	//break;
+      }
+  }
+  //std::cout << "loc0: " << loc << std::endl;
+  return loc;
+}
+
+////////////////////////////////////////////
+// find minimum of the pulse
+// aa added protection against pulses with single high bin
+////////////////////////////////////////////
+int FindRealMin( int n, short *a) {
+  
+  if (n <= 0 || !a) return -1;
+  float xmin = a[5];
+  int loc = 0;
+  
+  float noise = 0;
+  
+  for ( int i = 5; i < 100; i++)
+    {
+      if( fabs(a[i]) > noise ) 
+	{
+	  noise = fabs(a[i]);
+	}
     }
+
+  for  (int i = 5; i < n-10; i++) {
+    if (xmin > a[i] && a[i+1] < 0.5*a[i] && a[i] < -3*noise )  
+      {
+	//std::cout << a[i] << std::endl;
+	xmin = a[i];
+	loc = i;
+	//if ( a[i+5]>a[i] && a[i+10]>a[i+5] ) {
+	//break;
+      }
   }
   
-  return loc;
+  float xmin_init = xmin;
+  float xmin_new = a[5];
+  int loc_new = loc;
+  
+  bool stop = false;
+  while( !stop )
+    {
+      for ( int i = 5; i < loc_new -25; i++ )
+	{
+	  if ( a[i] < xmin_new && 0.5*a[i] > a[i+1] && a[i] < 0.3* xmin_init && a[i] < -15 )
+	    {
+	      xmin_new = a[i];
+	      loc_new = i;
+	    }
+	}
+      xmin_init = xmin_new;
+      
+      if( loc_new == loc ) break;
+      if ( xmin_new > -2*noise ) loc_new = 0;
+      xmin_new = a[5];
+      loc = loc_new;
+    }
+  //std::cout << "LOC2: " << loc << std::endl;
+  /*
+  while ( xmin_init != xmin_new ) {
+
+    for (int i = 5; i < loc - 50; i++) {
+      if (xmin_new > a[i] && a[i+1] < 0.5*a[i] && a[i] < xmin_init*2/3 )  {
+	xmin_new = a[i];
+	loc = i;
+      }
+    }
+    xmin_init = xmin_new
+    xmin_new = a[5]
+  }
+  */
+  return loc_new;
 }
 
 // find the mean time from gaus fit
@@ -271,8 +343,8 @@ float GetPulseIntegral(int peak, short *a, std::string option)
       integral += a[i] * 0.2 * 1e-9 * (1.0/4096.0) * (1.0/50.0) * 1e12; //in units of pC, for 50Ohm termination
     }
   }
-
   return -1.0 * integral;
+
 }
 
 TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName, bool makePlot )
