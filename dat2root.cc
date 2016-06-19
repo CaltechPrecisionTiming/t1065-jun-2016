@@ -57,8 +57,6 @@ std::string ParseCommandLine( int argc, char* argv[], std::string opt )
 
 
 int graphic_init();
-//int FindMin( int n, short *a);
-//float GausFit_MeanTime(TGraphErrors * pulse, const float index_first, const float index_last);
 
 TStyle* style;
 
@@ -356,24 +354,24 @@ int main(int argc, char **argv){
 	  raw[realGroup[group]*9 + i][j] = (short)(samples[i][j]);
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
 	}
-	
 
-	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the minc
+	//Find the absolute minimum. This is only used as a rough determination to decide if we'll use the early time samples
+	//or the late time samples to do the baseline fit
+	int index_min = FindMinAbsolute(1024, channel[realGroup[group]*9 + i]); // return index of the minc
+
 	//Make Pulse shape Graph
 	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
-	TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
-	TGraphErrors* pulse = originalPulse;
+	TGraphErrors* pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
 
+	//estimate baseline
 	float baseline;
-	if ( index_min < 105 ) { baseline = GetBaseline( pulse, 850, 1020, pulseName);}
-	else { baseline = GetBaseline( pulse, 5 ,index_min-50, pulseName);}
-	base[realGroup[group]*9 + i] = baseline;
-	
+        if ( index_min < 105 ) { baseline = GetBaseline( pulse, 850, 1020, pulseName);}
+        else { baseline = GetBaseline( pulse, 5 ,150, pulseName);}
+        base[realGroup[group]*9 + i] = baseline;
 
 	//Correct pulse shape for baseline offset
 	for(int j = 0; j < 1024; j++) {
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]) + baseline);
-	  //channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]));
 	  channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
 	}
 
@@ -394,36 +392,13 @@ int main(int argc, char **argv){
 	  if ( ( a1>5*a0 && a1>5*a2 && a1>40) )
 	    channel[realGroup[group]*9 + i][j] = 0;
 	}
-
 	
-
+	//Find Peak Location using the improved algorithm
 	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
-	//Find Peak Location
-	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the minc	
+	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
 	xmin[realGroup[group]*9 + i] = index_min;
 	
 
-
-
-	//Estimate baseline
-	//float baseline = GetBaseline( index_min, channel[realGroup[group]*9 + i]);
-	// float baseline = GetBaseline( pulse, 5 ,30, pulseName);
-	// base[realGroup[group]*9 + i] = baseline;
-	
-	
-
-
-	//for the channel connected to the silicon sensor, make pulse shape correction for the amplifiers
-	if (doAmplificationCorrection) {
-	  for(int j = 0; j < 1024; j++) {
-	    channelCorrected[21][j] = channel[21][j] / GetAmplificationFactor( channel[21][j] * ( 1.0 / 4096 ) );
-	  }
-	}
-
-	//Make Pulse shape Graph
-	//TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
-	//TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
-	//TGraphErrors* pulse = originalPulse;
 	if (doFilter) {
 	  pulse = GetTGraphFilter( channel[realGroup[group]*9 + i], time[realGroup[group]], pulseName , false);
 	}
@@ -458,13 +433,7 @@ int main(int argc, char **argv){
 	  timecf15 = fs[1];
 	  timecf30 = fs[2];
 	  timecf45 = fs[3];
-	  timecf60 = fs[4];
-	  
-	  //timecf0   = RisingEdgeFitTime( pulse, index_min, 0.0, "linearFit_" + pulseName, true );
-	  //timecf15   = RisingEdgeFitTime( pulse, index_min, 0.15, "linearFit_" + pulseName, true );
-	  //timecf30   = RisingEdgeFitTime( pulse, index_min, 0.3, "linearFit_" + pulseName, true );
-	  //timecf45   = RisingEdgeFitTime( pulse, index_min, 0.45, "linearFit_" + pulseName, true );
-	  //timecf60   = RisingEdgeFitTime( pulse, index_min, 0.60, "linearFit_" + pulseName, true );
+	  timecf60 = fs[4];	 
 	} else {
 	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
 	  float fs[5];
@@ -474,11 +443,6 @@ int main(int argc, char **argv){
 	  timecf30 = fs[2];
 	  timecf45 = fs[3];
 	  timecf60 = fs[4];
-	  //timecf0   = RisingEdgeFitTime( pulse, index_min, 0.0, "" );
-	  //timecf15   = RisingEdgeFitTime( pulse, index_min, 0.15, "" );
-	  //timecf30   = RisingEdgeFitTime( pulse, index_min, 0.30, "" );
-	  //timecf45   = RisingEdgeFitTime( pulse, index_min, 0.45, "" );
-	  //timecf60   = RisingEdgeFitTime( pulse, index_min, 0.60, "" );
 	}
 	gauspeak[realGroup[group]*9 + i]   = timepeak;
 	linearTime0[realGroup[group]*9 + i] = timecf0;
@@ -569,35 +533,3 @@ graphic_init( void){
   return 0;
 }
 
-/*
-////////////////////////////////////////////
-// find minimum of the pulse
-// aa added protection against pulses with single high bin
-////////////////////////////////////////////
-int FindMin( int n, short *a) {
-  
-  if (n <= 0 || !a) return -1;
-  float xmin = a[5];
-  int loc = 0;
-  for  (int i = 5; i < n-5; i++) {
-    if (xmin > a[i] && a[i+1] < 0.5*a[i])  {
-      xmin = a[i];
-      loc = i;
-    }
-  }
-  
-  return loc;
-}
-
-// find the mean time from gaus fit
-float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last)
-{
-  TF1* fpeak = new TF1("fpeak","gaus", index_first, index_last);
-  pulse->Fit("fpeak","Q","", index_first, index_last);
-  
-  float timepeak = fpeak->GetParameter(1);
-  delete fpeak;
-  
-  return timepeak;
-}
-*/

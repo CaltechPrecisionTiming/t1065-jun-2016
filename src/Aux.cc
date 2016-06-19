@@ -66,9 +66,14 @@ TGraphErrors* GetTGraph(  short* channel, float* time )
   return tg;
 };
 
+////////////////////////////////////////////
+// find minimum of the pulse
+////////////////////////////////////////////
+int FindMin( int n, short *a) {
+  return FindRealMin(n,a);
+}
 
-int FindMin( int n, short *a) 
-{
+int FindMinAbsolute( int n, short *a) {
   
   if (n <= 0 || !a) return -1;
   float xmin = a[5];
@@ -87,12 +92,7 @@ int FindMin( int n, short *a)
   return loc;
 }
 
-////////////////////////////////////////////
-// find minimum of the pulse
-// aa added protection against pulses with single high bin
-////////////////////////////////////////////
-int FindRealMin( int n, short *a) {
-  
+int FindRealMin( int n, short *a) {  
   if (n <= 0 || !a) return -1;
   float xmin = a[5];
   int loc = 0;
@@ -117,37 +117,37 @@ int FindRealMin( int n, short *a) {
 	//break;
       }
   }
-  
+ 
   float xmin_init = xmin;
   float xmin_new = a[5];
   int loc_new = loc;
-  
+
   bool stop = false;
   while( !stop )
     {
       for ( int i = 5; i < loc_new -25; i++ )
-	{
-	  if ( a[i] < xmin_new && 0.5*a[i] > a[i+1] && a[i] < 0.3* xmin_init && a[i] < -15 )
-	    {
-	      xmin_new = a[i];
-	      loc_new = i;
-	    }
-	}
+        {
+          if ( a[i] < xmin_new && 0.5*a[i] > a[i+1] && a[i] < 0.3* xmin_init && a[i] < -15 )
+            {
+              xmin_new = a[i];
+              loc_new = i;
+            }
+        }
       xmin_init = xmin_new;
-      
+
       if( loc_new == loc ) break;
       if ( xmin_new > -2*noise ) loc_new = 0;
       xmin_new = a[5];
       loc = loc_new;
     }
-  //std::cout << "LOC2: " << loc << std::endl;
-  /*
-  while ( xmin_init != xmin_new ) {
 
+  //std::cout << "LOC2: " << loc << std::endl;                                                                                                                               
+  /*                                                                
+  while ( xmin_init != xmin_new ) {
     for (int i = 5; i < loc - 50; i++) {
       if (xmin_new > a[i] && a[i+1] < 0.5*a[i] && a[i] < xmin_init*2/3 )  {
-	xmin_new = a[i];
-	loc = i;
+        xmin_new = a[i];
+        loc = i;
       }
     }
     xmin_init = xmin_new
@@ -156,6 +156,27 @@ int FindRealMin( int n, short *a) {
   */
   return loc_new;
 }
+
+int FindMinFirstPeakAboveNoise( int n, short *a) {
+  
+  const float noise = 50;
+  if (n <= 0 || !a) return -1;
+  int loc = 0;
+  
+  for  (int i = 10; i < n-10; i++) {   
+    if (fabs(a[i]) > noise 
+	&& 
+	(a[i] < a[i-1] && a[i] < a[i-2] && a[i] < a[i-3] && a[i] < a[i-4] && a[i] < a[i-5] )
+	&&
+	(a[i] < a[i+1] && a[i] < a[i+2] && a[i] < a[i+3] && a[i] < a[i+4] && a[i] < a[i+5] )
+	)  {
+      loc = i;
+      break;
+    }
+  }  
+  return loc;
+}
+
 
 // find the mean time from gaus fit
 float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float index_last)
@@ -259,7 +280,7 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
     {
       std::cout << "make plot" << std::endl;
       TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
-      pulse->GetXaxis()->SetLimits(x_low-3, x_high+3);
+      pulse->GetXaxis()->SetLimits(x_low-100, x_high+100);
       pulse->SetMarkerSize(1);
       pulse->SetMarkerStyle(20);
       pulse->Draw("AP");
