@@ -119,7 +119,7 @@ void MultiChannelStudy() {
     TimeFlatAvg = TimeFlatAvg / NumberOfChannels;
     TimeChargeWeightedAvg = TimeChargeWeightedAvg / TotalCharge;
 
-    if (NumberOfChannelsInRingOne>0) {
+    if (NumberOfChannelsInRingOne==3) {
       histTOFRingOneFlatAvg->Fill( RingOneTimeFlatAvg - photekTimeGauss);
       histTOFRingOneChargeWeightedAvg->Fill( RingOneTimeChargeWeightedAvg - photekTimeGauss);      
     }
@@ -136,7 +136,7 @@ void MultiChannelStudy() {
     
   }
 
-  TFile *file = TFile::Open("output.root", "UPDATE");
+  TFile *file = TFile::Open("output.root", "RECREATE");
   file->cd();
   file->WriteTObject(histTOFCenter,"histTOFCenter", "WriteDelete");
   file->WriteTObject(histTOFFlatAvg,"histTOFFlatAvg", "WriteDelete");
