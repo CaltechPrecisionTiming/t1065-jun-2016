@@ -43,19 +43,21 @@ TH1F* NormalizeHist(TH1F *originalHist) {
 
 
 
-void MultiChannelStudy() {
+void DoMultiChannelStudy( string filename , string outputFilename) {
 
 
   // TFile *inputfile = TFile::Open("t1065-jun-2016-65To80.root","READ"); //lead 6X0, 3cm away, 32GeV
   // TFile *inputfile = TFile::Open("t1065-jun-2016-84To89.root","READ"); //lead 6X0, 0cm away, 32GeV
   // TFile *inputfile = TFile::Open("t1065-jun-2016-91.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, after turning off pixel telescope
-  // TFile *inputfile = TFile::Open("t1065-jun-2016-90.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, before turning off pixel telescope
-  // TFile *inputfile = TFile::Open("t1065-jun-2016-55To59.root","READ"); //tungsten 6X0, 3cm away, 32 GeV
+   // TFile *inputfile = TFile::Open("t1065-jun-2016-90.dat-full.root","READ"); //lead 6X0, 3.4cm away, 32GeV, before turning off pixel telescope
+  // TFile *inputfile = TFile::Open("t1065-jun-2016-55To59.root","READ"); //tungsten 6X0, 3.4cm away, 32 GeV
   // TFile *inputfile = TFile::Open("t1065-jun-2016-34To35.root","READ"); //tungsten 6X0, 0cm away, 8 GeV
   //TFile *inputfile = TFile::Open("t1065-jun-2016-32To33.root","READ"); //tungsten 2X0, 0cm away, 32 GeV
   //TFile *inputfile = TFile::Open("t1065-jun-2016-81.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, before turning off pixel telescope
-  TFile *inputfile = TFile::Open("t1065-jun-2016-94.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, before turning off pixel telescope
- 
+  //TFile *inputfile = TFile::Open("t1065-jun-2016-94.dat-full.root","READ"); //lead 6X0, 1cm away, 32GeV, before turning off pixel telescope
+  // TFile *inputfile = TFile::Open("t1065-jun-2016-59.dat-full.root","READ"); //tungsten 6X0, 3.4cm away, 32 GeV
+  TFile *inputfile = TFile::Open(filename.c_str(),"READ"); //tungsten 6X0, 3.4cm away, 32 GeV
+
   TTree *tree = (TTree*)inputfile->Get("pulse");
 
   // get the variables from the ntuple
@@ -74,6 +76,7 @@ void MultiChannelStudy() {
   tree->SetBranchAddress("amp",amp);
   tree->SetBranchAddress("intfull",integral);
 
+  TH1F *histTotalCharge;
   TH1F *histTOFCenter;
   TH1F *histTOFFlatAvg;
   TH1F *histTOFChargeWeightedAvg;
@@ -84,6 +87,7 @@ void MultiChannelStudy() {
   TH1F *histChargeCenterOverTotalCharge;
   TH1F *histChargeRingOneOverTotalCharge;
 
+  histTotalCharge = new TH1F("histTotalCharge","; Time [ns];Number of Events", 200, 0,100);
   histTOFCenter = new TH1F("histTOFCenter","; Time [ns];Number of Events", 200, -6,-4);
   histTOFFlatAvg = new TH1F("histTOFFlatAvg","; Time [ns];Number of Events", 200, -6,-4);
   histTOFChargeWeightedAvg = new TH1F("histTOFChargeWeightedAvg","; Time [ns];Number of Events", 200, -6,-4);
@@ -152,6 +156,7 @@ void MultiChannelStudy() {
     }
 
     //Fill histograms
+    histTotalCharge->Fill(TotalCharge);
     histNChannelRingOne->Fill(NumberOfChannelsInRingOne);
     histChargeRingOne->Fill(RingOneCharge);
     histChargeCenterOverTotalCharge->Fill(centerCharge / (centerCharge + RingOneCharge));
@@ -164,14 +169,16 @@ void MultiChannelStudy() {
   }
 
   //Normalize hists
+  histTotalCharge = NormalizeHist(histTotalCharge);
   histChargeRingOne = NormalizeHist(histChargeRingOne);
   histNChannelRingOne = NormalizeHist(histNChannelRingOne);
   histChargeCenterOverTotalCharge = NormalizeHist(histChargeCenterOverTotalCharge);
   histChargeRingOneOverTotalCharge = NormalizeHist(histChargeRingOneOverTotalCharge);
 
 
-  TFile *file = TFile::Open("output.root", "RECREATE");
+  TFile *file = TFile::Open(outputFilename.c_str(), "RECREATE");
   file->cd();
+  file->WriteTObject(histTotalCharge,"histTotalCharge", "WriteDelete");
   file->WriteTObject(histTOFCenter,"histTOFCenter", "WriteDelete");
   file->WriteTObject(histTOFFlatAvg,"histTOFFlatAvg", "WriteDelete");
   file->WriteTObject(histTOFChargeWeightedAvg,"histTOFChargeWeightedAvg", "WriteDelete");
@@ -183,6 +190,15 @@ void MultiChannelStudy() {
   file->WriteTObject(histChargeRingOneOverTotalCharge,"histChargeRingOneOverTotalCharge", "WriteDelete");
   file->Close();
   delete file;
+
+
+}
+
+void MultiChannelStudy() {
+
+  DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
+  DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
+  DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
 
 
 }
