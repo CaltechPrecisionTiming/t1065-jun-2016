@@ -101,9 +101,9 @@ int FindRealMin( int n, short *a) {
   
   for ( int i = 5; i < 100; i++)
     {
-      if( fabs(a[i]) > noise ) 
+      if( abs(a[i]) > noise ) 
 	{
-	  noise = fabs(a[i]);
+	  noise = abs(a[i]);
 	}
     }
 
@@ -164,7 +164,7 @@ int FindMinFirstPeakAboveNoise( int n, short *a) {
   int loc = 0;
   
   for  (int i = 10; i < n-10; i++) {   
-    if (fabs(a[i]) > noise 
+    if ( abs(a[i]) > noise 
 	&& 
 	(a[i] < a[i-1] && a[i] < a[i-2] && a[i] < a[i-3] && a[i] < a[i-4] && a[i] < a[i-5] )
 	&&
