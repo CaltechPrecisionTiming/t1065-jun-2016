@@ -119,9 +119,9 @@ if __name__ == '__main__':
             if key == '': continue
             h2p.Fill(val[0],val[1], eval('tree.%s[%s]'%(options.plot,key)))
             
-        ring0sum += eval('+'.join(['tree.%s[%s]'%(options.plot,index) for index in ring0Index]))
-        ring1sum += eval('+'.join(['tree.%s[%s]'%(options.plot,index) for index in ring1Index]))
-        ring2sum += eval('+'.join(['tree.%s[%s]'%(options.plot,index) for index in ring2Index]))
+        ring0sum += eval('+'.join(['max(tree.%s[%s],0)'%(options.plot,index) for index in ring0Index]))
+        ring1sum += eval('+'.join(['max(tree.%s[%s],0)'%(options.plot,index) for index in ring1Index]))
+        ring2sum += eval('+'.join(['max(tree.%s[%s],0)'%(options.plot,index) for index in ring2Index]))
             
         #print tree.event
         
@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
     print "ring0 sum: %.3f"%(ring0sum)
     print "ring1 sum: %.3f"%(ring1sum)
-    print "ring2 sum: %.3f"%(ring1sum)
+    print "ring2 sum: %.3f"%(ring2sum)
     
     c.Print('picosil.pdf')
     c.Print('picosil.C')
