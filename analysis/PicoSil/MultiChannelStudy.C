@@ -114,17 +114,15 @@ void MultiChannelStudy() {
       }
     }
     
-    if (NumberOfChannelsInRingOne>0) {
-      histTOFRingOneFlatAvg->Fill( RingOneTimeFlatAvg - photekTimeGauss);
-      histTOFRingOneChargeWeightedAvg->Fill( RingOneTimeChargeWeightedAvg - photekTimeGauss);
-      //cout << RingOneTimeFlatAvg << " " << RingOneTimeFlatAvg - photekTimeGauss << " " << NumberOfChannelsInRingOne << " " << RingOneCharge << "\n";
-    }
-
     RingOneTimeFlatAvg = RingOneTimeFlatAvg / NumberOfChannelsInRingOne;
     RingOneTimeChargeWeightedAvg = RingOneTimeChargeWeightedAvg / RingOneCharge;
     TimeFlatAvg = TimeFlatAvg / NumberOfChannels;
     TimeChargeWeightedAvg = TimeChargeWeightedAvg / TotalCharge;
 
+    if (NumberOfChannelsInRingOne>0) {
+      histTOFRingOneFlatAvg->Fill( RingOneTimeFlatAvg - photekTimeGauss);
+      histTOFRingOneChargeWeightedAvg->Fill( RingOneTimeChargeWeightedAvg - photekTimeGauss);      
+    }
 
     //Fill histograms
     histNChannelRingOne->Fill(NumberOfChannelsInRingOne);
