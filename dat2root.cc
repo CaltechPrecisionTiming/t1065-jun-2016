@@ -184,6 +184,7 @@ int main(int argc, char **argv){
   short raw[36][1024];
   short channel[36][1024];
   float channelCorrected[36][1024];
+  float xmin[36];
   float base[36];
   float amp[36];
   float integral[36];
@@ -207,6 +208,7 @@ int main(int argc, char **argv){
   tree->Branch("channel", channel, "channel[36][1024]/S");
   tree->Branch("t0",  t0, "t0[1024]/I");
   tree->Branch("time", time, "time[4][1024]/F");
+  tree->Branch("xmin", xmin, "xmin[36]/F");
   tree->Branch("amp", amp, "amp[36]/F");
   tree->Branch("base", base, "base[36]/F");
   tree->Branch("int", integral, "int[36]/F");
@@ -347,8 +349,7 @@ int main(int argc, char **argv){
       for(int i = 0; i < 9; i++) {
 
 	int totalIndex = realGroup[group]*9 + i;
-		
-	//std::cout << "total index --> " << totalIndex << std::endl;
+	
 	//Fill pulses
 	for(int j = 0; j < 1024; j++) {
 	  b_c[realGroup[group]][i][j] = (short)(samples[i][j]);
@@ -356,24 +357,18 @@ int main(int argc, char **argv){
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
 	}
 	
-	//Find Peak Location
-	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
-	
 
+	int index_min = FindMin (1024, channel[realGroup[group]*9 + i]); // return index of the minc
 	//Make Pulse shape Graph
 	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
 	TGraphErrors* originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
 	TGraphErrors* pulse = originalPulse;
 
-	//Estimate baseline
-	//float baseline = GetBaseline( index_min, channel[realGroup[group]*9 + i]);
-	// float baseline = GetBaseline( pulse, 5 ,30, pulseName);
-	// base[realGroup[group]*9 + i] = baseline;
 	float baseline;
 	if ( index_min < 105 ) { baseline = GetBaseline( pulse, 850, 1020, pulseName);}
 	else { baseline = GetBaseline( pulse, 5 ,index_min-50, pulseName);}
 	base[realGroup[group]*9 + i] = baseline;
-
+	
 
 	//Correct pulse shape for baseline offset
 	for(int j = 0; j < 1024; j++) {
@@ -381,7 +376,7 @@ int main(int argc, char **argv){
 	  //channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]));
 	  channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
 	}
-	
+
 	// DRS-glitch finder: zero out bins which have very large difference
 	// with respect to neighbors in only one or two bins
 	for(int j = 0; j < 1024; j++) {
@@ -399,6 +394,24 @@ int main(int argc, char **argv){
 	  if ( ( a1>5*a0 && a1>5*a2 && a1>40) )
 	    channel[realGroup[group]*9 + i][j] = 0;
 	}
+
+	
+
+	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
+	//Find Peak Location
+	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the minc	
+	xmin[realGroup[group]*9 + i] = index_min;
+	
+
+
+
+	//Estimate baseline
+	//float baseline = GetBaseline( index_min, channel[realGroup[group]*9 + i]);
+	// float baseline = GetBaseline( pulse, 5 ,30, pulseName);
+	// base[realGroup[group]*9 + i] = baseline;
+	
+	
+
 
 	//for the channel connected to the silicon sensor, make pulse shape correction for the amplifiers
 	if (doAmplificationCorrection) {
