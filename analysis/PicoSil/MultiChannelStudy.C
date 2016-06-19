@@ -23,12 +23,37 @@
 
 
 
+//*************************************************************************************************
+//Normalize Hist
+//*************************************************************************************************
+TH1F* NormalizeHist(TH1F *originalHist) {
+  TH1F* hist = (TH1D*)originalHist->Clone((string(originalHist->GetName())+"_normalized").c_str());
+  Double_t norm = 0;
+  hist->SetTitle("");
+  for (UInt_t b=0; int(b)<hist->GetXaxis()->GetNbins()+2; ++b) {
+    norm += hist->GetBinContent(b);
+  }
+  for (UInt_t b=0; int(b)<hist->GetXaxis()->GetNbins()+2; ++b) {
+    hist->SetBinContent(b,hist->GetBinContent(b) / norm);
+    hist->SetBinError(b,hist->GetBinError(b) / norm);
+  }
+
+  return hist;
+}
+
 
 
 void MultiChannelStudy() {
 
 
-  TFile *inputfile = TFile::Open("t1065-jun-2016-65To80.root","READ");
+  // TFile *inputfile = TFile::Open("t1065-jun-2016-65To80.root","READ"); //lead 6X0, 3cm away, 32GeV
+  // TFile *inputfile = TFile::Open("t1065-jun-2016-84To89.root","READ"); //lead 6X0, 0cm away, 32GeV
+  // TFile *inputfile = TFile::Open("t1065-jun-2016-91.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, after turning off pixel telescope
+  TFile *inputfile = TFile::Open("t1065-jun-2016-90.dat-full.root","READ"); //lead 6X0, 0cm away, 32GeV, before turning off pixel telescope
+  // TFile *inputfile = TFile::Open("t1065-jun-2016-55To59.root","READ"); //tungsten 6X0, 3cm away, 32 GeV
+  // TFile *inputfile = TFile::Open("t1065-jun-2016-34To35.root","READ"); //tungsten 6X0, 0cm away, 8 GeV
+  //TFile *inputfile = TFile::Open("t1065-jun-2016-32To33.root","READ"); //tungsten 2X0, 0cm away, 32 GeV
+
   TTree *tree = (TTree*)inputfile->Get("pulse");
 
   // get the variables from the ntuple
@@ -41,11 +66,11 @@ void MultiChannelStudy() {
   tree->SetBranchStatus("gauspeak",1);
   tree->SetBranchStatus("linearTime45",1);
   tree->SetBranchStatus("amp",1);
-  tree->SetBranchStatus("int",1);
+  tree->SetBranchStatus("intfull",1);
   tree->SetBranchAddress("gauspeak",gauspeak);
   tree->SetBranchAddress("linearTime45",linearTime45);
   tree->SetBranchAddress("amp",amp);
-  tree->SetBranchAddress("int",integral);
+  tree->SetBranchAddress("intfull",integral);
 
   TH1F *histTOFCenter;
   TH1F *histTOFFlatAvg;
@@ -135,6 +160,13 @@ void MultiChannelStudy() {
     histTOFChargeWeightedAvg->Fill( TimeChargeWeightedAvg - photekTimeGauss);
     
   }
+
+  //Normalize hists
+  histChargeRingOne = NormalizeHist(histChargeRingOne);
+  histNChannelRingOne = NormalizeHist(histNChannelRingOne);
+  histChargeCenterOverTotalCharge = NormalizeHist(histChargeCenterOverTotalCharge);
+  histChargeRingOneOverTotalCharge = NormalizeHist(histChargeRingOneOverTotalCharge);
+
 
   TFile *file = TFile::Open("output.root", "RECREATE");
   file->cd();
