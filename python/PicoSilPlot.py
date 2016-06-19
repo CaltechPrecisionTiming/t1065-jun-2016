@@ -107,6 +107,10 @@ if __name__ == '__main__':
     elist = rt.gDirectory.Get('elist')
     
     entry = -1
+
+    ring0sum = 0
+    ring1sum = 0
+    ring2sum = 0
     while True:
         entry = elist.Next()
         if entry == -1: break
@@ -114,9 +118,17 @@ if __name__ == '__main__':
         for key, val in mapArrayToCenterPos.iteritems():
             if key == '': continue
             h2p.Fill(val[0],val[1], eval('tree.%s[%s]'%(options.plot,key)))
+            
+        ring0sum += eval('+'.join(['max(tree.%s[%s],0)'%(options.plot,index) for index in ring0Index]))
+        ring1sum += eval('+'.join(['max(tree.%s[%s],0)'%(options.plot,index) for index in ring1Index]))
+        ring2sum += eval('+'.join(['max(tree.%s[%s],0)'%(options.plot,index) for index in ring2Index]))
+            
         #print tree.event
         
     h2p.Scale(1.0/nevents)
+    ring0sum/=nevents
+    ring1sum/=nevents
+    ring2sum/=nevents
     
     rt.gStyle.SetOptStat(0)
     rt.gStyle.SetOptTitle(0)
@@ -143,6 +155,15 @@ if __name__ == '__main__':
     l.SetTextFont(42)
     l.SetNDC()
     l.DrawLatex(0.5,0.94,"cut: %s #rightarrow %i events"%(options.cut,nevents))
+    
+    l.SetTextAlign(12)
+    l.DrawLatex(0.6,0.85,"ring0 sum: %.3f"%(ring0sum))
+    l.DrawLatex(0.6,0.80,"ring1 sum: %.3f"%(ring1sum))
+    l.DrawLatex(0.6,0.75,"ring2 sum: %.3f"%(ring2sum))
+
+    print "ring0 sum: %.3f"%(ring0sum)
+    print "ring1 sum: %.3f"%(ring1sum)
+    print "ring2 sum: %.3f"%(ring2sum)
     
     c.Print('picosil.pdf')
     c.Print('picosil.C')
