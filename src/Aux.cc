@@ -187,7 +187,7 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
     {
       std::cout << "make plot" << std::endl;
       TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
-      pulse->GetXaxis()->SetLimits(x_low-3, x_high+3);
+      pulse->GetXaxis()->SetLimits(x_low-100, x_high+100);
       pulse->SetMarkerSize(1);
       pulse->SetMarkerStyle(20);
       pulse->Draw("AP");

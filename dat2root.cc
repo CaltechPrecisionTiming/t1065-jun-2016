@@ -381,7 +381,9 @@ int main(int argc, char **argv){
 	  //channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]));
 	  channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
 	}
-	
+
+	 originalPulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
+	 pulse = originalPulse;
 	// DRS-glitch finder: zero out bins which have very large difference
 	// with respect to neighbors in only one or two bins
 	for(int j = 0; j < 1024; j++) {
