@@ -50,22 +50,22 @@ void MultiChannelStudy() {
   TH1F *histTOFCenter;
   TH1F *histTOFFlatAvg;
   TH1F *histTOFChargeWeightedAvg;
-  TH1F *histTOFRing1FlatAvg;
-  TH1F *histTOFRing1ChargeWeightedAvg;
-  TH1F *histNChannelRing1;
-  TH1F *histChargeRing1;
+  TH1F *histTOFRingOneFlatAvg;
+  TH1F *histTOFRingOneChargeWeightedAvg;
+  TH1F *histNChannelRingOne;
+  TH1F *histChargeRingOne;
   TH1F *histChargeCenterOverTotalCharge;
-  TH1F *histChargeRing1OverTotalCharge;
+  TH1F *histChargeRingOneOverTotalCharge;
 
   histTOFCenter = new TH1F("histTOFCenter","; Time [ns];Number of Events", 200, -6,-4);
   histTOFFlatAvg = new TH1F("histTOFFlatAvg","; Time [ns];Number of Events", 200, -6,-4);
   histTOFChargeWeightedAvg = new TH1F("histTOFChargeWeightedAvg","; Time [ns];Number of Events", 200, -6,-4);
-  histTOFRing1FlatAvg = new TH1F("histTOFRing1FlatAvg","; Time [ns];Number of Events", 200, -6,-4);
-  histTOFRing1ChargeWeightedAvg = new TH1F("histTOFRing1ChargeWeightedAvg","; Time [ns];Number of Events", 200, -6,-4);
-  histNChannelRing1 = new TH1F("histNChannelRing1","; Time [ns];Number of Events", 7, -0.5,6.5);
-  histChargeRing1 = new TH1F("histChargeRing1","; Time [ns];Number of Events", 200, 0,100);
+  histTOFRingOneFlatAvg = new TH1F("histTOFRingOneFlatAvg","; Time [ns];Number of Events", 200, -10,10);
+  histTOFRingOneChargeWeightedAvg = new TH1F("histTOFRingOneChargeWeightedAvg","; Time [ns];Number of Events", 200, -10,10);
+  histNChannelRingOne = new TH1F("histNChannelRingOne","; Time [ns];Number of Events", 7, -0.5,6.5);
+  histChargeRingOne = new TH1F("histChargeRingOne","; Time [ns];Number of Events", 200, 0,100);
   histChargeCenterOverTotalCharge = new TH1F("histChargeCenterOverTotalCharge","; Time [ns];Number of Events", 50, 0,1);
-  histChargeRing1OverTotalCharge = new TH1F("histChargeRing1OverTotalCharge","; Time [ns];Number of Events", 50, 0,1);
+  histChargeRingOneOverTotalCharge = new TH1F("histChargeRingOneOverTotalCharge","; Time [ns];Number of Events", 50, 0,1);
 
   //read all entries and fill the histograms
   Long64_t nentries = tree->GetEntries();
@@ -83,14 +83,21 @@ void MultiChannelStudy() {
     float centerCharge = integral[1];
     float centerTime = linearTime45[1];
 
-    float Ring1Charge = 0;
-    int NumberOfChannelsInRing1 = 0;
-    float Ring1TimeFlatAvg = 0;
-    float Ring1TimeChargeWeightedAvg = 0;
+    float RingOneCharge = 0;
+    int NumberOfChannelsInRingOne = 0;
+    float RingOneTimeFlatAvg = 0.0;
+    float RingOneTimeChargeWeightedAvg = 0.0;
     float TotalCharge = 0;
     int NumberOfChannels = 0;
     float TimeFlatAvg = 0;
     float TimeChargeWeightedAvg = 0;
+
+     //require photek (for electron selection)
+    if( !(photekAmp > 0.05 && photekCharge > 2)) continue;
+    
+    //require signal in the central pixel
+    if( !(centerAmp > 0.03 && centerCharge > 2)) continue;
+  
     for (int j=1; j <= 7; j++) {
       if (amp[j]>0.02 && integral[j]>1) {
 	NumberOfChannels++;
@@ -98,37 +105,37 @@ void MultiChannelStudy() {
 	TimeFlatAvg += linearTime45[j];
 	TimeChargeWeightedAvg += linearTime45[j]*integral[j];
 	if (j > 1) {
-	  NumberOfChannelsInRing1++;
-	  Ring1Charge += integral[j];
-	  Ring1TimeFlatAvg += linearTime45[j];
-	  Ring1TimeChargeWeightedAvg += linearTime45[j]*integral[j];
-	}      	
+	  //cout << j << " : " << linearTime45[j] << " " << integral[j] << " : " << RingOneTimeFlatAvg << " " << RingOneTimeChargeWeightedAvg << " " << TimeFlatAvg << " " << TimeChargeWeightedAvg << "\n";
+	  NumberOfChannelsInRingOne++;
+	  RingOneCharge += integral[j];
+	  RingOneTimeFlatAvg += linearTime45[j];
+	  RingOneTimeChargeWeightedAvg += linearTime45[j]*integral[j];
+	}
+      }
     }
-    Ring1TimeFlatAvg = Ring1TimeFlatAvg / NumberOfChannelsInRing1;
-    Ring1TimeChargeWeightedAvg = Ring1TimeChargeWeightedAvg / Ring1Charge;
+    
+    if (NumberOfChannelsInRingOne>0) {
+      histTOFRingOneFlatAvg->Fill( RingOneTimeFlatAvg - photekTimeGauss);
+      histTOFRingOneChargeWeightedAvg->Fill( RingOneTimeChargeWeightedAvg - photekTimeGauss);
+      //cout << RingOneTimeFlatAvg << " " << RingOneTimeFlatAvg - photekTimeGauss << " " << NumberOfChannelsInRingOne << " " << RingOneCharge << "\n";
+    }
+
+    RingOneTimeFlatAvg = RingOneTimeFlatAvg / NumberOfChannelsInRingOne;
+    RingOneTimeChargeWeightedAvg = RingOneTimeChargeWeightedAvg / RingOneCharge;
     TimeFlatAvg = TimeFlatAvg / NumberOfChannels;
     TimeChargeWeightedAvg = TimeChargeWeightedAvg / TotalCharge;
 
 
-    //require photek (for electron selection)
-    if( !(photekAmp > 0.05 && photekCharge > 2)) continue;
-    
-    //require signal in the central pixel
-    if( !(centerAmp > 0.03 && centerCharge > 2)) continue;
-
     //Fill histograms
-    histNChannelRing1->Fill(NumberOfChannelsInRing1);
-    histChargeRing1->Fill(Ring1Charge);
-    histChargeCenterOverTotalCharge->Fill(centerCharge / (centerCharge + Ring1Charge));
-    histChargeRing1OverTotalCharge->Fill(Ring1Charge / (centerCharge + Ring1Charge));
+    histNChannelRingOne->Fill(NumberOfChannelsInRingOne);
+    histChargeRingOne->Fill(RingOneCharge);
+    histChargeCenterOverTotalCharge->Fill(centerCharge / (centerCharge + RingOneCharge));
+    histChargeRingOneOverTotalCharge->Fill(RingOneCharge / (centerCharge + RingOneCharge));
 
     histTOFCenter->Fill(centerTime - photekTimeGauss);
     histTOFFlatAvg->Fill( TimeFlatAvg - photekTimeGauss);
     histTOFChargeWeightedAvg->Fill( TimeChargeWeightedAvg - photekTimeGauss);
-    histTOFRing1FlatAvg->Fill( Ring1TimeFlatAvg - photekTimeGauss);
-    histTOFRing1ChargeWeightedAvg->Fill( Ring1TimeChargeWeightedAvg - photekTimeGauss);
     
-    }
   }
 
   TFile *file = TFile::Open("output.root", "UPDATE");
@@ -136,12 +143,12 @@ void MultiChannelStudy() {
   file->WriteTObject(histTOFCenter,"histTOFCenter", "WriteDelete");
   file->WriteTObject(histTOFFlatAvg,"histTOFFlatAvg", "WriteDelete");
   file->WriteTObject(histTOFChargeWeightedAvg,"histTOFChargeWeightedAvg", "WriteDelete");
-  file->WriteTObject(histTOFRing1FlatAvg,"histTOFRing1FlatAvg", "WriteDelete");
-  file->WriteTObject(histTOFRing1ChargeWeightedAvg,"histTOFRing1ChargeWeightedAvg", "WriteDelete");
-  file->WriteTObject(histNChannelRing1,"histNChannelRing1", "WriteDelete");
-  file->WriteTObject(histChargeRing1,"histChargeRing1", "WriteDelete");
+  file->WriteTObject(histTOFRingOneFlatAvg,"histTOFRingOneFlatAvg", "WriteDelete");
+  file->WriteTObject(histTOFRingOneChargeWeightedAvg,"histTOFRingOneChargeWeightedAvg", "WriteDelete");
+  file->WriteTObject(histNChannelRingOne,"histNChannelRingOne", "WriteDelete");
+  file->WriteTObject(histChargeRingOne,"histChargeRingOne", "WriteDelete");
   file->WriteTObject(histChargeCenterOverTotalCharge,"histChargeCenterOverTotalCharge", "WriteDelete");
-  file->WriteTObject(histChargeRing1OverTotalCharge,"histChargeRing1OverTotalCharge", "WriteDelete");
+  file->WriteTObject(histChargeRingOneOverTotalCharge,"histChargeRingOneOverTotalCharge", "WriteDelete");
   file->Close();
   delete file;
 
