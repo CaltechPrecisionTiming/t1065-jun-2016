@@ -196,9 +196,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
 void MultiChannelStudy() {
 
-  DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
-  DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
-  DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
+  // DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
+  // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
+  // DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
+  DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.94.root");
 
 
 }
