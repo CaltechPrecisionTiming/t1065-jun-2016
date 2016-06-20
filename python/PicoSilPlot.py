@@ -15,6 +15,8 @@ if __name__ == '__main__':
                   help="wire mapping text file")
     parser.add_option('-p','--plot',dest="plot",type="choice",action='store',default='amp',choices=['amp','int','intfull'],
                   help="plot varible on the z-axis: amp or int or intfull")
+    parser.add_option('-d','--out-dir',dest="outDir",type="string",default='./',
+                  help="output directory to store ")
     
     (options,args) = parser.parse_args()
 
@@ -42,10 +44,19 @@ if __name__ == '__main__':
 
     wireMappingFile = open(options.wireMapping,'r')
     indexValues = []
+    attValues = {}
     for l in wireMappingFile.readlines():
         if l[0]!='#':
-            indexValues.append(l.replace('\n',''))
-    
+            l = l.replace('\n','')
+            lArray = l.split(' ')
+            indexValues.append(lArray[0])
+            if len(lArray)>1:
+                level = float(lArray[1].replace('db',''))
+                att = pow(10.,-level/20.)
+                attValues[lArray[0]] = att
+            else:
+                attValues[lArray[0]] = 1.0
+            
     mapArrayToCenterPos = {
         indexValues[0]: [-3, sqrt(3)],      
         indexValues[1]: [-3, 0],   
@@ -90,17 +101,17 @@ if __name__ == '__main__':
         h2p.AddBin(6,x2,y2)
 
                         
-    options.cut = options.cut.replace('ring0intfull','+'.join(['intfull[%s]'%index for index in ring0Index]))
-    options.cut = options.cut.replace('ring1intfull','+'.join(['intfull[%s]'%index for index in ring1Index]))
-    options.cut = options.cut.replace('ring2intfull','+'.join(['intfull[%s]'%index for index in ring2Index]))
+    options.cut = options.cut.replace('ring0intfull','+'.join(['%g*intfull[%s]'%(attValues[index],index) for index in ring0Index]))
+    options.cut = options.cut.replace('ring1intfull','+'.join(['%g*intfull[%s]'%(attValues[index],index) for index in ring1Index]))
+    options.cut = options.cut.replace('ring2intfull','+'.join(['%g*intfull[%s]'%(attValues[index],index) for index in ring2Index]))
     
-    options.cut = options.cut.replace('ring0int','+'.join(['int[%s]'%index for index in ring0Index]))
-    options.cut = options.cut.replace('ring1int','+'.join(['int[%s]'%index for index in ring1Index]))
-    options.cut = options.cut.replace('ring2int','+'.join(['int[%s]'%index for index in ring2Index]))
+    options.cut = options.cut.replace('ring0int','+'.join(['%g*int[%s]'%(attValues[index],index) for index in ring0Index]))
+    options.cut = options.cut.replace('ring1int','+'.join(['%g*int[%s]'%(attValues[index],index) for index in ring1Index]))
+    options.cut = options.cut.replace('ring2int','+'.join(['%g*int[%s]'%(attValues[index],index) for index in ring2Index]))
                                         
-    options.cut = options.cut.replace('ring0amp','+'.join(['amp[%s]'%index for index in ring0Index]))
-    options.cut = options.cut.replace('ring1amp','+'.join(['amp[%s]'%index for index in ring1Index]))
-    options.cut = options.cut.replace('ring2amp','+'.join(['amp[%s]'%index for index in ring2Index]))
+    options.cut = options.cut.replace('ring0amp','+'.join(['%g*amp[%s]'%(attValues[index],index) for index in ring0Index]))
+    options.cut = options.cut.replace('ring1amp','+'.join(['%g*amp[%s]'%(attValues[index],index) for index in ring1Index]))
+    options.cut = options.cut.replace('ring2amp','+'.join(['%g*amp[%s]'%(attValues[index],index) for index in ring2Index]))
                                     
     nevents = tree.Draw('>>elist',options.cut,'entrylist')
         
@@ -117,11 +128,11 @@ if __name__ == '__main__':
         tree.GetEntry(entry)
         for key, val in mapArrayToCenterPos.iteritems():
             if key == '': continue
-            h2p.Fill(val[0],val[1], eval('tree.%s[%s]'%(options.plot,key)))
+            h2p.Fill(val[0],val[1], eval('%g*tree.%s[%s]'%(attValues[index],options.plot,key)))
             
-        ring0sum += eval('+'.join(['max(tree.%s[%s],0)'%(options.plot,index) for index in ring0Index]))
-        ring1sum += eval('+'.join(['max(tree.%s[%s],0)'%(options.plot,index) for index in ring1Index]))
-        ring2sum += eval('+'.join(['max(tree.%s[%s],0)'%(options.plot,index) for index in ring2Index]))
+        ring0sum += eval('+'.join(['max(%g*tree.%s[%s],0)'%(attValues[index],options.plot,index) for index in ring0Index]))
+        ring1sum += eval('+'.join(['max(%g*tree.%s[%s],0)'%(attValues[index],options.plot,index) for index in ring1Index]))
+        ring2sum += eval('+'.join(['max(%g*tree.%s[%s],0)'%(attValues[index],options.plot,index) for index in ring2Index]))
             
         #print tree.event
         
@@ -165,7 +176,8 @@ if __name__ == '__main__':
     print "ring1 sum: %.3f"%(ring1sum)
     print "ring2 sum: %.3f"%(ring2sum)
     
-    c.Print('picosil.pdf')
-    c.Print('picosil.C')
+    c.Print('%s/picosil_%s.pdf'%(options.outDir,args[0].replace('.root','')))
+    c.Print('%s/picosil_%s.png'%(options.outDir,args[0].replace('.root','')))
+    c.Print('%s/picosil_%s.C'%(options.outDir,args[0].replace('.root','')))
     
     f.Close()
