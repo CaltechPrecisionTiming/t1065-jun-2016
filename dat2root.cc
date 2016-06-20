@@ -410,8 +410,16 @@ int main(int argc, char **argv){
 	amp[realGroup[group]*9 + i] = tmpAmp* (1.0 / 4096.0); 
 
 	//Get Pulse Integral
-	integral[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i]);
-	integralFull[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i], "full");
+	if ( xmin[realGroup[group]*9 + i] != 0 )
+	  {
+	    integral[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i]);
+	    integralFull[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i], "full");
+	  }
+	else
+	  {
+	    integral[realGroup[group]*9 + i] = 0.0;
+	    integralFull[realGroup[group]*9 + i] = 0.0;
+	  }
 
 	//Gauss Time-Stamping 
 	Double_t min = 0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.; 
@@ -425,25 +433,42 @@ int main(int argc, char **argv){
 	float timecf30   = 0;
 	float timecf45   = 0;
 	float timecf60   = 0;
-	if( drawDebugPulses) {
-	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
-	  float fs[5];
-	  RisingEdgeFitTime( pulse, index_min, fs, event, "linearFit_" + pulseName, true);
-	  timecf0  = fs[0];
-	  timecf15 = fs[1];
-	  timecf30 = fs[2];
-	  timecf45 = fs[3];
-	  timecf60 = fs[4];	 
-	} else {
-	  timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
-	  float fs[5];
-	  RisingEdgeFitTime( pulse, index_min, fs, event, "");
-	  timecf0  = fs[0];
-	  timecf15 = fs[1];
-	  timecf30 = fs[2];
-	  timecf45 = fs[3];
-	  timecf60 = fs[4];
-	}
+	if( drawDebugPulses)
+	  {
+	    timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
+	    float fs[5];
+	    if ( xmin[realGroup[group]*9 + i] != 0.0 )
+	      {
+		RisingEdgeFitTime( pulse, index_min, fs, event, "linearFit_" + pulseName, true);
+	      }
+	    else
+	      {
+		for ( int kk = 0; kk < 5; kk++ ) fs[kk] = -999;
+	      }
+	    timecf0  = fs[0];
+	    timecf15 = fs[1];
+	    timecf30 = fs[2];
+	    timecf45 = fs[3];
+	    timecf60 = fs[4];	 
+	  }
+	else
+	  {
+	    timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
+	    float fs[5];
+	    if ( xmin[realGroup[group]*9 + i] != 0.0 )
+	      {
+		RisingEdgeFitTime( pulse, index_min, fs, event, "");
+	      }
+	   else
+	     {
+	       for ( int kk = 0; kk < 5; kk++ ) fs[kk] = -999;
+	     }
+	    timecf0  = fs[0];
+	    timecf15 = fs[1];
+	    timecf30 = fs[2];
+	    timecf45 = fs[3];
+	    timecf60 = fs[4];
+	  }
 	gauspeak[realGroup[group]*9 + i]   = timepeak;
 	linearTime0[realGroup[group]*9 + i] = timecf0;
 	linearTime15[realGroup[group]*9 + i] = timecf15;
@@ -453,7 +478,6 @@ int main(int argc, char **argv){
       }
       
       dummy = fread( &event_header, sizeof(uint), 1, fpin);
-     
     }
     
     if ( ActiveGroupsN < 4 ) continue;
