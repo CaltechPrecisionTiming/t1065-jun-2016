@@ -176,8 +176,8 @@ if __name__ == '__main__':
     print "ring1 sum: %.3f"%(ring1sum)
     print "ring2 sum: %.3f"%(ring2sum)
     
-    c.Print('%s/picosil_%s.pdf'%(options.outDir,args[0].split('/')[0].replace('.root','')))
-    c.Print('%s/picosil_%s.png'%(options.outDir,args[0].split('/')[0].replace('.root','')))
-    c.Print('%s/picosil_%s.C'%(options.outDir,args[0].split('/')[0].replace('.root','')))
+    c.Print('%s/picosil_%s.pdf'%(options.outDir,args[0].split('/')[-1].replace('.root','')))
+    c.Print('%s/picosil_%s.png'%(options.outDir,args[0].split('/')[-1].replace('.root','')))
+    c.Print('%s/picosil_%s.C'%(options.outDir,args[0].split('/')[-1].replace('.root','')))
     
     f.Close()
