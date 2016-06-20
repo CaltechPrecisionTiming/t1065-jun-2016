@@ -132,6 +132,8 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
     float DeltaT[7] = {-99.};
 
+    
+    
      //require photek (for electron selection)
     if( !(photekAmp > 0.05 && photekCharge > 2)) continue;
     
@@ -198,6 +200,16 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   histChargeCenterOverTotalCharge = NormalizeHist(histChargeCenterOverTotalCharge);
   histChargeRingOneOverTotalCharge = NormalizeHist(histChargeRingOneOverTotalCharge);
 
+  // Do Gaussian fit of delta T distributions
+  for(int j=0; j<7; j++) {
+    double mean = histDeltaT[j]->GetMean();
+    double rms = histDeltaT[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histDeltaT[j]->Fit("gaus","MLES","",xmin,xmax);
+  }
+
 
   TFile *file = TFile::Open(outputFilename.c_str(), "RECREATE");
   file->cd();
@@ -226,7 +238,7 @@ void MultiChannelStudy_Timing() {
   // DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
   // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
   // DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
-  DoMultiChannelStudy("t1065-jun-2016-115-116.dat-full.root","output.115-116.root");
+  DoMultiChannelStudy("t1065-jun-2016-115.dat-full.root","output.115.root");
 
 
 }
