@@ -53,10 +53,10 @@ if __name__ == '__main__':
             if len(lArray)>1:
                 level = float(lArray[1].replace('db',''))
                 att = pow(10.,-level/20.)
-                attValues[lArray[0]] = att
+                attValues[lArray[0]] = 1.0/att
             else:
                 attValues[lArray[0]] = 1.0
-            
+
     mapArrayToCenterPos = {
         indexValues[0]: [-3, sqrt(3)],      
         indexValues[1]: [-3, 0],   
@@ -101,17 +101,17 @@ if __name__ == '__main__':
         h2p.AddBin(6,x2,y2)
 
                         
-    options.cut = options.cut.replace('ring0intfull','+'.join(['%g*intfull[%s]'%(attValues[index],index) for index in ring0Index]))
-    options.cut = options.cut.replace('ring1intfull','+'.join(['%g*intfull[%s]'%(attValues[index],index) for index in ring1Index]))
-    options.cut = options.cut.replace('ring2intfull','+'.join(['%g*intfull[%s]'%(attValues[index],index) for index in ring2Index]))
+    options.cut = options.cut.replace('ring0intfull','+'.join(['%f*intfull[%s]'%(attValues[index],index) for index in ring0Index]))
+    options.cut = options.cut.replace('ring1intfull','+'.join(['%f*intfull[%s]'%(attValues[index],index) for index in ring1Index]))
+    options.cut = options.cut.replace('ring2intfull','+'.join(['%f*intfull[%s]'%(attValues[index],index) for index in ring2Index]))
     
-    options.cut = options.cut.replace('ring0int','+'.join(['%g*int[%s]'%(attValues[index],index) for index in ring0Index]))
-    options.cut = options.cut.replace('ring1int','+'.join(['%g*int[%s]'%(attValues[index],index) for index in ring1Index]))
-    options.cut = options.cut.replace('ring2int','+'.join(['%g*int[%s]'%(attValues[index],index) for index in ring2Index]))
+    options.cut = options.cut.replace('ring0int','+'.join(['%f*int[%s]'%(attValues[index],index) for index in ring0Index]))
+    options.cut = options.cut.replace('ring1int','+'.join(['%f*int[%s]'%(attValues[index],index) for index in ring1Index]))
+    options.cut = options.cut.replace('ring2int','+'.join(['%f*int[%s]'%(attValues[index],index) for index in ring2Index]))
                                         
-    options.cut = options.cut.replace('ring0amp','+'.join(['%g*amp[%s]'%(attValues[index],index) for index in ring0Index]))
-    options.cut = options.cut.replace('ring1amp','+'.join(['%g*amp[%s]'%(attValues[index],index) for index in ring1Index]))
-    options.cut = options.cut.replace('ring2amp','+'.join(['%g*amp[%s]'%(attValues[index],index) for index in ring2Index]))
+    options.cut = options.cut.replace('ring0amp','+'.join(['%f*amp[%s]'%(attValues[index],index) for index in ring0Index]))
+    options.cut = options.cut.replace('ring1amp','+'.join(['%f*amp[%s]'%(attValues[index],index) for index in ring1Index]))
+    options.cut = options.cut.replace('ring2amp','+'.join(['%f*amp[%s]'%(attValues[index],index) for index in ring2Index]))
                                     
     nevents = tree.Draw('>>elist',options.cut,'entrylist')
         
@@ -128,11 +128,11 @@ if __name__ == '__main__':
         tree.GetEntry(entry)
         for key, val in mapArrayToCenterPos.iteritems():
             if key == '': continue
-            h2p.Fill(val[0],val[1], eval('%g*tree.%s[%s]'%(attValues[index],options.plot,key)))
+            h2p.Fill(val[0],val[1], eval('%f*tree.%s[%s]'%(attValues[key],options.plot,key)))
             
-        ring0sum += eval('+'.join(['max(%g*tree.%s[%s],0)'%(attValues[index],options.plot,index) for index in ring0Index]))
-        ring1sum += eval('+'.join(['max(%g*tree.%s[%s],0)'%(attValues[index],options.plot,index) for index in ring1Index]))
-        ring2sum += eval('+'.join(['max(%g*tree.%s[%s],0)'%(attValues[index],options.plot,index) for index in ring2Index]))
+        ring0sum += eval('+'.join(['max(%f*tree.%s[%s],0)'%(attValues[index],options.plot,index) for index in ring0Index]))
+        ring1sum += eval('+'.join(['max(%f*tree.%s[%s],0)'%(attValues[index],options.plot,index) for index in ring1Index]))
+        ring2sum += eval('+'.join(['max(%f*tree.%s[%s],0)'%(attValues[index],options.plot,index) for index in ring2Index]))
             
         #print tree.event
         
