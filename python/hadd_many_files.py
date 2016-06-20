@@ -9,9 +9,8 @@ def macro(name, a, b):
     e.g. macro('test.root', 1, 3) is combines runs 1, 2 and 3 into test.root'''
     
     rtfiles = str_compose(a,b) # this is a string
-    final = 'hadd ' + name + ' ' + rtfiles
-    os.system('')
-    return final
+    final = 'hadd -f ' + name + ' ' + rtfiles
+    os.system(final)
 
 def str_compose(a, b):
     '''Returns a string of the run titles separated by a space, 
@@ -23,3 +22,17 @@ def str_compose(a, b):
         final += temp
     return final
     
+
+if __name__ == '__main__':
+    
+    if len(sys.argv) < 4:
+        print "usage:"
+        print " to hadd run numbers 1-3 into test.root:"
+        print " python python/hadd_manyfiles.py test.root 1 3"
+        sys.exit()
+        
+    output = sys.argv[1]
+    beginRun = int(sys.argv[2])
+    endRun = int(sys.argv[3])
+    
+    macro(output, beginRun, endRun)
