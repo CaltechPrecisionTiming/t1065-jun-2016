@@ -258,7 +258,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 	  pixel.index = j;
 	  if ( j == 1 ) pixel.charge = 3.3*integral[j];
 	  else pixel.charge = integral[j];
-	  pixel.time = linearTime45[j] - meanT[j-1];
+	  pixel.time = gauspeak[0]-(linearTime45[j] + meanT[j-1]);
 	  vect.push_back( pixel ) ;
 	}
 
@@ -269,7 +269,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 	{
 	  //average2 = gauspeak[0] - ( vect[0].charge*vect[0].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[2].charge*vect[2].time)/(vect[0].charge+vect[3].charge+vect[4].charge+vect[2].charge);
 	  //average2 = gauspeak[0] - ( vect[0].charge*vect[0].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time )/(vect[0].charge+vect[3].charge+vect[4].charge);
-	  average2 = gauspeak[0] - (vect[0].charge*vect[0].time + vect[3].charge*vect[3].time )/(vect[0].charge+vect[3].charge);
+	  average2 = (vect[0].charge*vect[0].time + vect[3].charge*vect[3].time )/(vect[0].charge+vect[3].charge);
 	  histTOF2Pixel_C->Fill( average2 );
 	}
       std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
