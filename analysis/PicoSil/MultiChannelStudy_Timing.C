@@ -86,6 +86,12 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F *histChargeRingOne;
   TH1F *histChargeCenterOverTotalCharge;
   TH1F *histChargeRingOneOverTotalCharge;
+  TH1F *histDeltaTCombined;
+
+  TH1F *histDeltaT[7];
+
+  for(int j=0; j<7; j++)
+    histDeltaT[j]= new TH1F(Form("histDeltaT_%d",j),"; Time [ns];Number of Events", 100, 4,5.5);
 
   histTotalCharge = new TH1F("histTotalCharge","; Time [ns];Number of Events", 200, 0,100);
   histTOFCenter = new TH1F("histTOFCenter","; Time [ns];Number of Events", 200, -6,-4);
@@ -97,6 +103,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   histChargeRingOne = new TH1F("histChargeRingOne","; Time [ns];Number of Events", 200, 0,100);
   histChargeCenterOverTotalCharge = new TH1F("histChargeCenterOverTotalCharge","; Time [ns];Number of Events", 50, 0,1);
   histChargeRingOneOverTotalCharge = new TH1F("histChargeRingOneOverTotalCharge","; Time [ns];Number of Events", 50, 0,1);
+  histDeltaTCombined= new TH1F("histDeltaTCombined","; Time [ns];Number of Events", 100, 4,5.5);
 
   //read all entries and fill the histograms
   Long64_t nentries = tree->GetEntries();
@@ -123,6 +130,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     float TimeFlatAvg = 0;
     float TimeChargeWeightedAvg = 0;
 
+    float DeltaT[7] = {-99.};
+
+    
+    
      //require photek (for electron selection)
     if( !(photekAmp > 0.05 && photekCharge > 2)) continue;
     
@@ -131,6 +142,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   
     for (int j=1; j <= 7; j++) {
       if (amp[j]>0.02 && integral[j]>1) {
+	
+	DeltaT[j] = gauspeak[0] - linearTime45[j];
+
 	NumberOfChannels++;
 	TotalCharge += integral[j];
 	TimeFlatAvg += linearTime45[j];
@@ -144,6 +158,17 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 	}
       }
     }
+    
+    for(int jj=0; jj<7; jj++)
+      histDeltaT[jj]->Fill(DeltaT[jj]);
+    
+    // do the time averaging
+    float DeltaTCombined = -99.;
+    
+    if(amp[0]>0.03 && integral[0]>3. && integral[1]>3. && integral[5]>3. && integral[4]>3. && integral[3]>3)
+      DeltaTCombined = gauspeak[0]-(linearTime45[1] + linearTime45[4] + linearTime45[5]+ linearTime45[3])/4.;
+    
+    histDeltaTCombined->Fill(DeltaTCombined);    
     
     RingOneTimeFlatAvg = RingOneTimeFlatAvg / NumberOfChannelsInRingOne;
     RingOneTimeChargeWeightedAvg = RingOneTimeChargeWeightedAvg / RingOneCharge;
@@ -175,6 +200,16 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   histChargeCenterOverTotalCharge = NormalizeHist(histChargeCenterOverTotalCharge);
   histChargeRingOneOverTotalCharge = NormalizeHist(histChargeRingOneOverTotalCharge);
 
+  // Do Gaussian fit of delta T distributions
+  for(int j=0; j<7; j++) {
+    double mean = histDeltaT[j]->GetMean();
+    double rms = histDeltaT[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histDeltaT[j]->Fit("gaus","MLES","",xmin,xmax);
+  }
+
 
   TFile *file = TFile::Open(outputFilename.c_str(), "RECREATE");
   file->cd();
@@ -188,18 +223,22 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   file->WriteTObject(histChargeRingOne,"histChargeRingOne", "WriteDelete");
   file->WriteTObject(histChargeCenterOverTotalCharge,"histChargeCenterOverTotalCharge", "WriteDelete");
   file->WriteTObject(histChargeRingOneOverTotalCharge,"histChargeRingOneOverTotalCharge", "WriteDelete");
+  file->WriteTObject(histDeltaTCombined,"histDeltaTCombined", "WriteDelete");
+ 
+  for(int jj=0; jj<7; jj++)
+    file->WriteTObject(histDeltaT[jj],Form("histDeltaT_%d",jj), "WriteDelete");
   file->Close();
   delete file;
 
 
 }
 
-void MultiChannelStudy() {
+void MultiChannelStudy_Timing() {
 
   // DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
   // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
   // DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
-  DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.94.root");
+  DoMultiChannelStudy("t1065-jun-2016-115.dat-full.root","output.115.root");
 
 
 }
