@@ -108,7 +108,7 @@ int FindRealMin( int n, short *a) {
     }
 
   for  (int i = 5; i < n-10; i++) {
-    if (xmin > a[i] && a[i+1] < 0.5*a[i] && a[i] < -3*noise )  
+    if (xmin > a[i] && a[i+1] < 0.5*a[i] && a[i] < -3*noise && a[i] < -50.)  
       {
 	//std::cout << a[i] << std::endl;
 	xmin = a[i];
@@ -127,16 +127,18 @@ int FindRealMin( int n, short *a) {
     {
       for ( int i = 5; i < loc_new -25; i++ )
         {
-          if ( a[i] < xmin_new && 0.5*a[i] > a[i+1] && a[i] < 0.3* xmin_init && a[i] < -15 )
+          if ( a[i] < xmin_new && 0.5*a[i] > a[i+1] && a[i] < 0.15* xmin_init )
             {
               xmin_new = a[i];
               loc_new = i;
             }
         }
+
       xmin_init = xmin_new;
 
       if( loc_new == loc ) break;
-      if ( xmin_new > -2*noise ) loc_new = 0;
+      //std::cout << "new peak @ " << loc_new << ", ymin: " << xmin_new << std::endl;
+      if ( xmin_new > -2*noise || xmin_new > -40 ) loc_new = 0;
       xmin_new = a[5];
       loc = loc_new;
     }
@@ -207,7 +209,7 @@ float GausFit_MeanTime(TGraphErrors* pulse, const float index_first, const float
   TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
   float timepeak = fpeak->GetParameter(1);
   pulse->GetXaxis()->SetLimits( timepeak-10, timepeak+10);
-  pulse->SetMarkerSize(1);
+  pulse->SetMarkerSize(0.5);
   pulse->SetMarkerStyle(20);
   pulse->Draw("AP");
   c->SaveAs(fname+".pdf");
@@ -235,7 +237,7 @@ float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, const float
       std::cout << "make plot" << std::endl;
       TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
       pulse->GetXaxis()->SetLimits(x_low-3, x_high+3);
-      pulse->SetMarkerSize(1);
+      pulse->SetMarkerSize(0.3);
       pulse->SetMarkerStyle(20);
       pulse->Draw("AP");
       c->SaveAs(fname+"LinearFit.pdf");
@@ -281,7 +283,7 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
       std::cout << "make plot" << std::endl;
       TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
       pulse->GetXaxis()->SetLimits(x_low-100, x_high+100);
-      pulse->SetMarkerSize(1);
+      pulse->SetMarkerSize(0.3);
       pulse->SetMarkerStyle(20);
       pulse->Draw("AP");
       c->SaveAs(fname+"LinearFit.pdf");

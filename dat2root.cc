@@ -340,7 +340,7 @@ int main(int argc, char **argv){
 	samples[8][j*8+7] =  temp[2] >> 20;
       }
 
-      
+      //std::cout << "====Event: " << event << std::endl;
       //************************************
       //Loop Over Channels 0 - 8
       //************************************      
@@ -395,7 +395,8 @@ int main(int argc, char **argv){
 	
 	//Find Peak Location using the improved algorithm
 	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
-	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min	
+	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
+	//if ( index_min > 0 ) std::cout << "ch: " << totalIndex << std::endl;
 	xmin[realGroup[group]*9 + i] = index_min;
 	
 
@@ -435,11 +436,11 @@ int main(int argc, char **argv){
 	float timecf60   = 0;
 	if( drawDebugPulses)
 	  {
-	    timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
+	    if ( !(totalIndex == 8 || totalIndex == 17 || totalIndex == 26 || totalIndex == 35) ) timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
 	    float fs[5];
 	    if ( xmin[realGroup[group]*9 + i] != 0.0 )
 	      {
-		RisingEdgeFitTime( pulse, index_min, fs, event, "linearFit_" + pulseName, true);
+		if ( !(totalIndex == 8 || totalIndex == 17 || totalIndex == 26 || totalIndex == 35) ) RisingEdgeFitTime( pulse, index_min, fs, event, "linearFit_" + pulseName, true);
 	      }
 	    else
 	      {
