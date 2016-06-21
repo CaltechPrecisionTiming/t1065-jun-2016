@@ -252,8 +252,22 @@ float RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, const float
 void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstamp, int event, TString fname, bool makePlot )
 {
   double x_low, x_high, y, dummy;
-  pulse->GetPoint(index_min-10, x_low, y);
-  pulse->GetPoint(index_min-3, x_high, y);
+  double ymax;
+  pulse->GetPoint(index_min, x_low, ymax);
+  for ( int i = 1; i < 100; i++ )
+    {
+      pulse->GetPoint(index_min-i, x_low, y);
+      if ( y < 0.2*ymax ) break;
+    }
+  for ( int i = 1; i < 100; i++ )
+    {
+      pulse->GetPoint(index_min-i, x_high, y);
+      if ( y < 0.9*ymax ) break;
+    }
+  //pulse->GetPoint(index_min-8, x_low, y);
+  //pulse->GetPoint(index_min-3, x_high, y);
+
+
   //pulse->GetPoint(index_min-12, x_low, y);
   //pulse->GetPoint(index_min-7, x_high, y);
   pulse->GetPoint(index_min, dummy, y);
@@ -282,7 +296,7 @@ void RisingEdgeFitTime(TGraphErrors * pulse, const float index_min, float* tstam
     {
       std::cout << "make plot" << std::endl;
       TCanvas* c = new TCanvas("canvas","canvas",800,400) ;
-      pulse->GetXaxis()->SetLimits(x_low-100, x_high+100);
+      pulse->GetXaxis()->SetLimits(x_low-10, x_high+10);
       pulse->SetMarkerSize(0.3);
       pulse->SetMarkerStyle(20);
       pulse->Draw("AP");
