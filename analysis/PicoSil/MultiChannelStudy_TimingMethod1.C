@@ -229,6 +229,8 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F* histTOF2Pixel15_C = new TH1F("histTOF__Pixel4_C","; Time [ns];Number of Events", 200, -1,1);
   TH1F* histTOF2Pixel16_C = new TH1F("histTOF__Pixel5_C","; Time [ns];Number of Events", 200, -1,1);
   TH1F* histTOF2Pixel17_C = new TH1F("histTOF__Pixel6_C","; Time [ns];Number of Events", 200, -1,1);
+  TH1F* histTOF2Pixel_All_C = new TH1F("histTOF__Pixel_All_C","; Time [ns];Number of Events", 200, -1,1);
+
 
   histTOFFlatAvg_C = new TH1F("histTOFFlatAvg_C","; Time [ns];Number of Events", 200, -6,-4);
   histTOFChargeWeightedAvg_C = new TH1F("histTOFChargeWeightedAvg_C","; Time [ns];Number of Events", 200, -1,-1);
@@ -287,6 +289,8 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 	  histTOF2Pixel16_C->Fill( average  );
 	  average = (vect[0].charge*vect[0].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[6].charge);
 	  histTOF2Pixel17_C->Fill( average  );
+	  average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[5].charge*vect[5].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[1].charge +vect[2].charge+vect[3].charge +vect[4].charge+vect[5].charge + vect[6].charge );
+	  histTOF2Pixel_All_C->Fill( average  );
 	  // 1 is the center channel of the pico sil, 2-7 are the first ring
 	}
       std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
@@ -338,6 +342,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   file->WriteTObject(histTOF2Pixel15_C,"AveragePixels15", "WriteDelete");  
   file->WriteTObject(histTOF2Pixel16_C,"AveragePixels16", "WriteDelete");
   file->WriteTObject(histTOF2Pixel17_C,"AveragePixels17", "WriteDelete");
+  file->WriteTObject(histTOF2Pixel_All_C,"AveragePixels_All", "WriteDelete");
       
   for( int i = 0; i < 7; i++ )
     {
