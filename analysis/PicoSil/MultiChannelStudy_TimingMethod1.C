@@ -222,8 +222,16 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   for(int j=0; j < 7; j++) histDeltaT_C[j]= new TH1F(Form("histDeltaT_C_%d",j),"; Time [ns];Number of Events", 200, -1,1);
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
-  TH1F* histTOF2Pixel_C = new TH1F("histTOF__Pixel_C","; Time [ns];Number of Events", 200, -1,1);
-  
+  // these are histograms to compare channels pairwise
+  TH1F* histTOF2Pixel12_C = new TH1F("histTOF__Pixel_C","; Time [ns];Number of Events", 200, -1,1);
+  TH1F* histTOF2Pixel13_C = new TH1F("histTOF__Pixel2_C","; Time [ns];Number of Events", 200, -1,1);
+  TH1F* histTOF2Pixel14_C = new TH1F("histTOF__Pixel3_C","; Time [ns];Number of Events", 200, -1,1);
+  TH1F* histTOF2Pixel15_C = new TH1F("histTOF__Pixel4_C","; Time [ns];Number of Events", 200, -1,1);
+  TH1F* histTOF2Pixel16_C = new TH1F("histTOF__Pixel5_C","; Time [ns];Number of Events", 200, -1,1);
+  TH1F* histTOF2Pixel17_C = new TH1F("histTOF__Pixel6_C","; Time [ns];Number of Events", 200, -1,1);
+  TH1F* histTOF2Pixel_All_C = new TH1F("histTOF__Pixel_All_C","; Time [ns];Number of Events", 200, -1,1);
+
+
   histTOFFlatAvg_C = new TH1F("histTOFFlatAvg_C","; Time [ns];Number of Events", 200, -6,-4);
   histTOFChargeWeightedAvg_C = new TH1F("histTOFChargeWeightedAvg_C","; Time [ns];Number of Events", 200, -1,-1);
   histTOFRingOneFlatAvg_C = new TH1F("histTOFRingOneFlatAvg_C","; Time [ns];Number of Events", 200, -10,10);
@@ -235,7 +243,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     {
       if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
       tree->GetEntry(iEntry);    
-      float DeltaT[7] = {-99.};
+      //float DeltaT[7] = {-99.};
       //require photek (for electron selection)
       float photekTimeGauss = gauspeak[0];
       float photekAmp = amp[0];
@@ -264,13 +272,26 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
       auto sortPixel = []( Pixel a, Pixel b ) {return a.charge > b.charge ?  true : false;};
       //std::sort( vect.begin(), vect.end(), sortPixel );
-      float average2;
+      float average ;
       if ( vect[3].charge > 3 )
 	{
 	  //average2 = gauspeak[0] - ( vect[0].charge*vect[0].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[2].charge*vect[2].time)/(vect[0].charge+vect[3].charge+vect[4].charge+vect[2].charge);
 	  //average2 = gauspeak[0] - ( vect[0].charge*vect[0].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time )/(vect[0].charge+vect[3].charge+vect[4].charge);
-	  average2 = (vect[0].charge*vect[0].time + vect[3].charge*vect[3].time )/(vect[0].charge+vect[3].charge);
-	  histTOF2Pixel_C->Fill( average2 );
+	  average  = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time )/(vect[0].charge+vect[1].charge);
+	  histTOF2Pixel12_C->Fill( average  );
+	  average = (vect[0].charge*vect[0].time + vect[2].charge*vect[2].time )/(vect[0].charge+vect[2].charge);
+	  histTOF2Pixel13_C->Fill( average  );
+	  average  = (vect[0].charge*vect[0].time + vect[3].charge*vect[3].time )/(vect[0].charge+vect[3].charge);
+	  histTOF2Pixel14_C->Fill( average  );
+	  average = (vect[0].charge*vect[0].time + vect[4].charge*vect[4].time )/(vect[0].charge+vect[4].charge);
+	  histTOF2Pixel15_C->Fill( average  );
+	  average  = (vect[0].charge*vect[0].time + vect[5].charge*vect[5].time )/(vect[0].charge+vect[5].charge);
+	  histTOF2Pixel16_C->Fill( average  );
+	  average = (vect[0].charge*vect[0].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[6].charge);
+	  histTOF2Pixel17_C->Fill( average  );
+	  average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[5].charge*vect[5].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[1].charge +vect[2].charge+vect[3].charge +vect[4].charge+vect[5].charge + vect[6].charge );
+	  histTOF2Pixel_All_C->Fill( average  );
+	  // 1 is the center channel of the pico sil, 2-7 are the first ring
 	}
       std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
     }
@@ -300,7 +321,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     histDeltaT[j]->Fit("gaus","MLES","",xmin,xmax);
   }
 
-
+  // creates root file
   TFile *file = TFile::Open(outputFilename.c_str(), "RECREATE");
   file->cd();
   file->WriteTObject(histTotalCharge,"histTotalCharge", "WriteDelete");
@@ -315,12 +336,18 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   file->WriteTObject(histChargeRingOneOverTotalCharge,"histChargeRingOneOverTotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaTCombined,"histDeltaTCombined", "WriteDelete");
 
-  file->WriteTObject(histTOF2Pixel_C,"Average2Pixels", "WriteDelete");
+  file->WriteTObject(histTOF2Pixel12_C,"AveragePixels12", "WriteDelete");
+  file->WriteTObject(histTOF2Pixel13_C,"AveragePixels13", "WriteDelete");
+  file->WriteTObject(histTOF2Pixel14_C,"AveragePixels14", "WriteDelete");
+  file->WriteTObject(histTOF2Pixel15_C,"AveragePixels15", "WriteDelete");  
+  file->WriteTObject(histTOF2Pixel16_C,"AveragePixels16", "WriteDelete");
+  file->WriteTObject(histTOF2Pixel17_C,"AveragePixels17", "WriteDelete");
+  file->WriteTObject(histTOF2Pixel_All_C,"AveragePixels_All", "WriteDelete");
       
   for( int i = 0; i < 7; i++ )
     {
-      histDeltaT_C[i]->Write( Form("deltaT_%d_corr", i) );
-      histDeltaT[i]->Write( Form("deltaT_%d", i) );
+      histDeltaT_C[i]->Write( Form("deltaT_%d_corr", i+1) );
+      histDeltaT[i]->Write( Form("deltaT_%d", i+1) );
     }
   
   file->Close();
@@ -333,7 +360,7 @@ void MultiChannelStudy_TimingMethod1() {
   // DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
   // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
   // DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
-  DoMultiChannelStudy("test_timing.root","output.TungstenAll.root");
+  DoMultiChannelStudy("analysis/PicoSil/runs104-116except111-114.root","output104-116except111-114.root");
 
 
 }
