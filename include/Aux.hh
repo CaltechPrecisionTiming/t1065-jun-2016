@@ -20,7 +20,7 @@ static float amplificationFactor[nPoints] = { 27.9/1.37*10 , 26.8/1.37*10, 31.6/
 double GetAmplificationFactor ( double measuredAmplitude );
 TGraphErrors* GetTGraphFilter( short* channel, float* time, TString pulseName, bool makePlot = false );
 TGraphErrors* GetTGraph( float* channel, float* time );
-TGraphErrors* GetTGraph( short* channel, float* time );
+TGraphErrors GetTGraph( short* channel, float* time );
 double GetGaussTime( TGraphErrors* pulse );
 int FindMin( int n, short *a);
 int FindRealMin( int n, short *a);
