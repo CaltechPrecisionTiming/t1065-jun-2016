@@ -361,7 +361,7 @@ int main(int argc, char **argv){
 
 	//Make Pulse shape Graph
 	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
-	TGraphErrors* pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
+	TGraphErrors* pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
 
 	//estimate baseline
 	float baseline;
@@ -393,8 +393,11 @@ int main(int argc, char **argv){
 	    channel[realGroup[group]*9 + i][j] = 0;
 	}
 	
-	//Find Peak Location using the improved algorithm
-	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );	
+	delete pulse;
+
+	// Find Peak Location using the improved algorithm
+	pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
+	//	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
 	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
 	//if ( index_min > 0 ) std::cout << "ch: " << totalIndex << std::endl;
 	xmin[realGroup[group]*9 + i] = index_min;
@@ -476,6 +479,8 @@ int main(int argc, char **argv){
 	linearTime30[realGroup[group]*9 + i] = timecf30;
 	linearTime45[realGroup[group]*9 + i] = timecf45;
 	linearTime60[realGroup[group]*9 + i] = timecf60;
+
+	delete pulse;
       }
       
       dummy = fread( &event_header, sizeof(uint), 1, fpin);
