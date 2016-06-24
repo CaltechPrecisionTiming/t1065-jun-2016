@@ -51,7 +51,7 @@ TGraphErrors* GetTGraph(  float* channel, float* time )
 };
 
 
-TGraphErrors* GetTGraph(  short* channel, float* time )
+TGraphErrors GetTGraph(  short* channel, float* time )
 {		
   //Setting Errors
   float errorX[1024], errorY[1024], channelFloat[1024];
@@ -62,7 +62,8 @@ TGraphErrors* GetTGraph(  short* channel, float* time )
       errorY[i]       = _errorY*channel[i];
       channelFloat[i] = -channel[i];
     }
-  TGraphErrors* tg = new TGraphErrors( 1024, time, channelFloat, errorX, errorY );
+  //TGraphErrors* tg = new TGraphErrors( 1024, time, channelFloat, errorX, errorY );
+  TGraphErrors tg( 1024, time, channelFloat, errorX, errorY );
   return tg;
 };
 
@@ -338,8 +339,11 @@ float GetBaseline(TGraphErrors * pulse, int i_low, int i_high, TString fname )
   pulse->SetMarkerStyle(20);
   pulse->Draw("AP");
   c->SaveAs(fname+"LinearFit.pdf"); */
-  return flinear->GetParameter(0);
   
+  float a = flinear->GetParameter(0);
+  delete flinear;
+  
+  return a;
 }
 
 float GetBaseline( int peak, short *a ) {

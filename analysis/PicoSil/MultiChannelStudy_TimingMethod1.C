@@ -24,7 +24,6 @@
 
 
 
-
 //*************************************************************************************************
 //Normalize Hist
 //*************************************************************************************************
@@ -223,13 +222,14 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
   // these are histograms to compare channels pairwise
-  TH1F* histTOF2Pixel12_C = new TH1F("histTOF__Pixel_C","; Time [ns];Number of Events", 200, -1,1);
-  TH1F* histTOF2Pixel13_C = new TH1F("histTOF__Pixel2_C","; Time [ns];Number of Events", 200, -1,1);
-  TH1F* histTOF2Pixel14_C = new TH1F("histTOF__Pixel3_C","; Time [ns];Number of Events", 200, -1,1);
-  TH1F* histTOF2Pixel15_C = new TH1F("histTOF__Pixel4_C","; Time [ns];Number of Events", 200, -1,1);
-  TH1F* histTOF2Pixel16_C = new TH1F("histTOF__Pixel5_C","; Time [ns];Number of Events", 200, -1,1);
-  TH1F* histTOF2Pixel17_C = new TH1F("histTOF__Pixel6_C","; Time [ns];Number of Events", 200, -1,1);
-  TH1F* histTOF2Pixel_All_C = new TH1F("histTOF__Pixel_All_C","; Time [ns];Number of Events", 200, -1,1);
+  TH1F* histTOF2Pixel12_C = new TH1F("histTOF__Pixel12_C","; Time [ns];Number of Events", 300, -0.5,0.5);
+  TH1F* histTOF2Pixel13_C = new TH1F("histTOF__Pixel13_C","; Time [ns];Number of Events", 300, -0.5,0.5);
+  TH1F* histTOF2Pixel14_C = new TH1F("histTOF__Pixel14_C","; Time [ns];Number of Events", 300, -0.5,0.5);
+  TH1F* histTOF2Pixel15_C = new TH1F("histTOF__Pixel15_C","; Time [ns];Number of Events", 300, -0.5,0.5);
+  TH1F* histTOF2Pixel16_C = new TH1F("histTOF__Pixel16_C","; Time [ns];Number of Events", 300, -0.5,0.5);
+  TH1F* histTOF2Pixel17_C = new TH1F("histTOF__Pixel17_C","; Time [ns];Number of Events", 300, -0.5,0.5);
+  TH1F* histTOF2Pixel_All_C = new TH1F("histTOF__Pixel_All_C","; Time [ns];Number of Events", 300, -0.5,0.5);
+  TH1F* histTOF2Pixel_167_C = new TH1F("histTOF__Pixel_167_C","; Time [ns];Number of Events", 300, -0.5,0.5);
 
 
   histTOFFlatAvg_C = new TH1F("histTOFFlatAvg_C","; Time [ns];Number of Events", 200, -6,-4);
@@ -291,7 +291,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 	  histTOF2Pixel17_C->Fill( average  );
 	  average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[5].charge*vect[5].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[1].charge +vect[2].charge+vect[3].charge +vect[4].charge+vect[5].charge + vect[6].charge );
 	  histTOF2Pixel_All_C->Fill( average  );
-	  // 1 is the center channel of the pico sil, 2-7 are the first ring
+    average = (vect[0].charge*vect[0].time + vect[5].charge*vect[5].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[5].charge + vect[6].charge );
+    histTOF2Pixel_167_C->Fill( average  );
+	  // 1 is the center channel of the pico sil, 2-7 are the first ring, but 0 indexed here
 	}
       std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
     }
@@ -339,17 +341,19 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   file->WriteTObject(histTOF2Pixel12_C,"AveragePixels12", "WriteDelete");
   file->WriteTObject(histTOF2Pixel13_C,"AveragePixels13", "WriteDelete");
   file->WriteTObject(histTOF2Pixel14_C,"AveragePixels14", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel15_C,"AveragePixels15", "WriteDelete");  
+  file->WriteTObject(histTOF2Pixel15_C,"AveragePixels15", "WriteDelete");
   file->WriteTObject(histTOF2Pixel16_C,"AveragePixels16", "WriteDelete");
   file->WriteTObject(histTOF2Pixel17_C,"AveragePixels17", "WriteDelete");
   file->WriteTObject(histTOF2Pixel_All_C,"AveragePixels_All", "WriteDelete");
-      
+  file->WriteTObject(histTOF2Pixel_167_C,"AveragePixels_167", "WriteDelete");
+
+
   for( int i = 0; i < 7; i++ )
     {
       histDeltaT_C[i]->Write( Form("deltaT_%d_corr", i+1) );
       histDeltaT[i]->Write( Form("deltaT_%d", i+1) );
     }
-  
+
   file->Close();
   delete file;
   
@@ -360,7 +364,8 @@ void MultiChannelStudy_TimingMethod1() {
   // DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
   // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
   // DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
-  DoMultiChannelStudy("analysis/PicoSil/runs104-116except111-114.root","output104-116except111-114.root");
+  DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
+  DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
 
 
 }
