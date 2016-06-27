@@ -95,6 +95,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F *histChargeRingOneOverTotalCharge;
   TH1F *histDeltaTCombined;
 
+
   TH1F *histDeltaT[7];
 
   for(int j=0; j<7; j++) histDeltaT[j]= new TH1F(Form("histDeltaT_%d",j),"; Time [ns];Number of Events", 100, 4,5.5);
@@ -238,12 +239,17 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F* histTOF2Pixel_134_C = new TH1F("histTOF__Pixel_134_C","; Time [ns];Number of Events", 300, -0.5,0.5);
   TH1F* histTOF2Pixel_145_C = new TH1F("histTOF__Pixel_145_C","; Time [ns];Number of Events", 300, -0.5,0.5);
   TH1F* histTOF2Pixel_156_C = new TH1F("histTOF__Pixel_156_C","; Time [ns];Number of Events", 300, -0.5,0.5);
+  TH1F* histTOFPixellargest_C = new TH1F("histTOF__Pixellargest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
   TH1F* histTOFPixel2largest_C = new TH1F("histTOF__Pixel2largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
   TH1F* histTOFPixel3largest_C = new TH1F("histTOF__Pixel3largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
   TH1F* histTOFPixel4largest_C = new TH1F("histTOF__Pixel4largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
   TH1F* histTOFPixel5largest_C = new TH1F("histTOF__Pixel5largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
   TH1F* histTOFPixel6largest_C = new TH1F("histTOF__Pixel6largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
   TH1F* histTOFPixel7largest_C = new TH1F("histTOF__Pixel7largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
+  TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, -.5,6.5);
+
+
+
 
 
   histTOFFlatAvg_C = new TH1F("histTOFFlatAvg_C","; Time [ns];Number of Events", 200, -6,-4);
@@ -262,6 +268,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       float photekTimeGauss = gauspeak[0];
       float photekAmp = amp[0];
       float photekCharge = integral[0];
+
+      float largestIndex = 0;
+      float largestIndexIntegral = 0;
 
       float centerAmp = amp[1];
       float centerCharge = integral[1];
@@ -318,15 +327,29 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         average = (vect[0].charge*vect[0].time + vect[5].charge*vect[5].time + vect[4].charge*vect[4].time )/(vect[0].charge+vect[5].charge + vect[4].charge );
         histTOF2Pixel_156_C->Fill( average );
 	      // 1 is the center channel of the pico sil, 2-7 are the first ring, but 0 indexed here
+
+
       }
+
+      //this will find which channel has the maximum charge and plot the results in the MaxIndex histogram. largestIndex and largestIndexIntegral starts as 0
+      for ( int j = 0; j < 7; j++)
+        {
+          if ( integral[j] > largestIndexIntegral )
+            {
+              largestIndexIntegral = integral[j];
+              largestIndex = j;
+            }
+        }
+        histMaxIndex_C->Fill( largestIndex );
 
 
       // Sort the vect and plot the combination of the largest energy pixels
 
-      if ( vect[3].charge > 3 )
       {
         std::sort( vect.begin(), vect.end(), sortPixel );
         // make histogram with three pixels with largest charges
+        average = (vect[0].charge*vect[0].time )/(vect[0].charge );
+        histTOFPixellargest_C->Fill( average );
         average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time )/(vect[0].charge+vect[1].charge );
         histTOFPixel2largest_C->Fill( average );
         average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time )/(vect[0].charge+vect[1].charge + vect[2].charge );
@@ -397,12 +420,14 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   file->WriteTObject(histTOF2Pixel_134_C,"AveragePixels_134", "WriteDelete");
   file->WriteTObject(histTOF2Pixel_145_C,"AveragePixels_145", "WriteDelete");
   file->WriteTObject(histTOF2Pixel_156_C,"AveragePixels_156", "WriteDelete");
+  file->WriteTObject(histTOFPixellargest_C,"AveragePixels_largest", "WriteDelete");
   file->WriteTObject(histTOFPixel2largest_C,"AveragePixels_2largest", "WriteDelete");
   file->WriteTObject(histTOFPixel3largest_C,"AveragePixels_3largest", "WriteDelete");
   file->WriteTObject(histTOFPixel4largest_C,"AveragePixels_4largest", "WriteDelete");
   file->WriteTObject(histTOFPixel5largest_C,"AveragePixels_5largest", "WriteDelete");
   file->WriteTObject(histTOFPixel6largest_C,"AveragePixels_6largest", "WriteDelete");
   file->WriteTObject(histTOFPixel7largest_C,"AveragePixels_7largest", "WriteDelete");
+  file->WriteTObject(histMaxIndex_C,"MaxIndex", "WriteDelete");
 
   for( int i = 0; i < 7; i++ )
     {
@@ -416,7 +441,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 }
 
 
-void MultiChannelStudy_TimingMethod1() {
+void MultiChannelStudy_TimingMethod1_GillianEdits() {
 
   // DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
   // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
