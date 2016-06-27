@@ -485,13 +485,14 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 }
 
 
-void MultiChannelStudy_TimingMethod1_GillianEdits() {
+void MultiChannelStudy_TimingMethod1() {
 
   // DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
   // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
   // DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
   DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
   DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
+  DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
 
 
 }
