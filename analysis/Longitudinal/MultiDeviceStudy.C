@@ -161,6 +161,10 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   TH1F *histDeltaTWeightsCorrected = new TH1F("histDeltaTWeightsCorrected","; Time [ns];Number of Events", 50, -2,2);//Corrects for histograms not initially centered at 0.
   TH1F *histDeltaTWeightsCorrected_totalcharge = new TH1F("histDeltaTWeightsCorrected_totalcharge","; Time [ns];Number of Events", 50, -2,2);
 
+  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0","; Time [ns];Number of Events", 50, -0.3, 0.3); //shifted to be centered at zero
+  TH1F *histDeltaTSiPadAt0 = new TH1F("histDeltaTSiPadAt0","; Time [ns];Number of Events", 50, -1.5, 1.5); //shifted to be centered at zero
+  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0","; Time [ns];Number of Events", 50, -0.3, 0.3); //shifted to be centered at zero
+
 
   //Loop through again. This time, subtracting the respective means. Process is almost the same.
   for (Long64_t iEntry=0; iEntry<nentries; iEntry++) {
@@ -200,6 +204,10 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
 
     histDeltaTWeightsCorrected->Fill(DeltaTWeighted); // Uses charge in each device over each individual event as weighting.
     histDeltaTWeightsCorrected_totalcharge->Fill(DeltaTWeightsCorrected_totalcharge); // Uses total charge in each device over whole run as weighting.
+
+    histDeltaTCenterAt0->Fill(DeltaTCenter);
+    histDeltaTSiPadAt0->Fill(DeltaTSiPad);
+    histDeltaTMCPAt0->Fill(DeltaTMCP);
   }
 
   mean = histDeltaTWeightsCorrected->GetMean();
@@ -214,15 +222,33 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   xmax = mean+2.0*rms;
   histDeltaTWeightsCorrected_totalcharge->Fit("gaus","MLES","",xmin,xmax);
 
+  mean = histDeltaTCenterAt0->GetMean();
+  rms = histDeltaTCenterAt0->GetRMS();
+  xmin = mean-2.0*rms;
+  xmax = mean+2.0*rms;
+  histDeltaTCenterAt0->Fit("gaus","MLES","",xmin,xmax);
+
+  mean = histDeltaTSiPadAt0->GetMean();
+  rms = histDeltaTSiPadAt0->GetRMS();
+  xmin = mean-2.0*rms;
+  xmax = mean+2.0*rms;
+  histDeltaTSiPadAt0->Fit("gaus","MLES","",xmin,xmax);
+
+  mean = histDeltaTMCPAt0->GetMean();
+  rms = histDeltaTMCPAt0->GetRMS();
+  xmin = mean-2.0*rms;
+  xmax = mean+2.0*rms;
+  histDeltaTMCPAt0->Fit("gaus","MLES","",xmin,xmax);
+
 
   // Creates output root file
   TFile *file = TFile::Open(outputFilename.c_str(), "RECREATE");
   file->cd();
   file->WriteTObject(histDeltaT,"histDeltaT", "WriteDelete");
   file->WriteTObject(histDeltaTWeighted,"histDeltaTWeighted", "WriteDelete");
-  file->WriteTObject(histDeltaTCenter,"histDeltaTCenter", "WriteDelete");
-  file->WriteTObject(histDeltaTSiPad,"histDeltaTSiPad", "WriteDelete");
-  file->WriteTObject(histDeltaTMCP,"histDeltaTMCP", "WriteDelete");
+  file->WriteTObject(histDeltaTCenterAt0,"histDeltaTCenter", "WriteDelete"); //Uses hist centered near 0
+  file->WriteTObject(histDeltaTSiPadAt0,"histDeltaTSiPad", "WriteDelete"); //Uses hist centered near 0
+  file->WriteTObject(histDeltaTMCPAt0,"histDeltaTMCP", "WriteDelete"); //Uses hist centered near 0
   file->WriteTObject(histDeltaTWeightsCorrected,"histDeltaTWeightsCorrected", "WriteDelete");
   file->WriteTObject(histDeltaTWeightsCorrected_totalcharge,"histDeltaTWeightsCorrected_totalcharge", "WriteDelete");
 
@@ -232,6 +258,88 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
 
 }
 
+
+
+
+
+
+void makeTimeResolution( string filename ) {
+
+  TFile *_file = TFile::Open( filename.c_str() ); //Should be .root file
+
+  //Create variables containing hists:
+  TH1F* histDeltaT = (TH1F*)_file->Get("histDeltaT"); // each device weighted equally
+  // Not doing histDeltaTWeighted, since it gives bad results.
+  TH1F* histDeltaTCenter = (TH1F*)_file->Get("histDeltaTCenter"); //Picosil center pixel
+  TH1F* histDeltaTSiPad = (TH1F*)_file->Get("histDeltaTSiPad"); // MCP
+  TH1F* histDeltaTMCP = (TH1F*)_file->Get("histDeltaTMCP"); // MCP
+  TH1F* histDeltaTWeightsCorrected = (TH1F*)_file->Get("histDeltaTWeightsCorrected"); //Combination of device Delta T's after shifting distributions around 0 and then weighting event by event.
+  TH1F* histDeltaTWeightsCorrected_totalcharge = (TH1F*)_file->Get("histDeltaTWeightsCorrected_totalcharge"); //Combination after shifting around 0 and weighting with total charge.
+
+  TCanvas *c = new TCanvas ("c","c",800, 600); 
+  TLatex *tex = new TLatex();
+  tex->SetNDC(); // Sets coords such that (0,0) is bottom left & (1,1) is top right.
+  tex->SetTextSize(0.060);
+  tex->SetTextFont(42);
+  tex->SetTextColor(kBlack);
+
+  c->cd();
+  gStyle->SetOptStat(0); // Hides the parameter box
+
+
+  histDeltaT->Draw();
+  TF1* fgausEqual = new TF1("fgausEqual","gaus", histDeltaT->GetMean() - 2.0*histDeltaT->GetRMS(), histDeltaT->GetMean() + 2.0*histDeltaT->GetRMS()); // 1-D gaus func defined around hist peak
+  histDeltaT->Fit("fgausEqual","QMLE","", histDeltaT->GetMean() - 2.0*histDeltaT->GetRMS(), histDeltaT->GetMean() + 2.0*histDeltaT->GetRMS()); // Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
+  histDeltaT->GetXaxis()->SetTitle("Time Resolution [ps]");
+  histDeltaT->SetTitle("");
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausEqual->GetParameter(2), 1000*fgausEqual->GetParError(2)));
+  c->SaveAs("deltaTEqual.pdf");
+
+  histDeltaTCenter->Draw();
+  TF1* fgausCenter = new TF1("fgausCenter","gaus", histDeltaTCenter->GetMean() - 2.0*histDeltaTCenter->GetRMS(), histDeltaTCenter->GetMean() + 2.0*histDeltaTCenter->GetRMS()); 
+  histDeltaTCenter->Fit("fgausCenter","QMLE","", histDeltaTCenter->GetMean() - 2.0*histDeltaTCenter->GetRMS(), histDeltaTCenter->GetMean() + 2.0*histDeltaTCenter->GetRMS());
+  histDeltaTCenter->GetXaxis()->SetTitle("Time Resolution [ps]");
+  histDeltaTCenter->SetTitle("");
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausCenter->GetParameter(2), 1000*fgausCenter->GetParError(2)));
+  c->SaveAs("deltaTCenter.pdf");
+
+  histDeltaTSiPad->Draw();
+  TF1* fgausSiPad = new TF1("fgausSiPad","gaus", histDeltaTSiPad->GetMean() - 2.0*histDeltaTSiPad->GetRMS(), histDeltaTSiPad->GetMean() + 2.0*histDeltaTSiPad->GetRMS()); 
+  histDeltaTSiPad->Fit("fgausSiPad","QMLE","", histDeltaTSiPad->GetMean() - 2.0*histDeltaTSiPad->GetRMS(), histDeltaTSiPad->GetMean() + 2.0*histDeltaTSiPad->GetRMS());
+  histDeltaTSiPad->GetXaxis()->SetTitle("Time Resolution [ps]");
+  histDeltaTSiPad->SetTitle("");
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausSiPad->GetParameter(2), 1000*fgausSiPad->GetParError(2)));
+  c->SaveAs("deltaTSiPad.pdf");
+
+  histDeltaTMCP->Draw();
+  TF1* fgausMCP = new TF1("fgausMCP","gaus", histDeltaTMCP->GetMean() - 2.0*histDeltaTMCP->GetRMS(), histDeltaTMCP->GetMean() + 2.0*histDeltaTMCP->GetRMS()); 
+  histDeltaTMCP->Fit("fgausMCP","QMLE","", histDeltaTMCP->GetMean() - 2.0*histDeltaTMCP->GetRMS(), histDeltaTMCP->GetMean() + 2.0*histDeltaTMCP->GetRMS());
+  histDeltaTMCP->GetXaxis()->SetTitle("Time Resolution [ps]");
+  histDeltaTMCP->SetTitle("");
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausMCP->GetParameter(2), 1000*fgausMCP->GetParError(2)));
+  c->SaveAs("deltaTMCP.pdf");
+  
+  histDeltaTWeightsCorrected->Draw();
+  TF1* fgausWC = new TF1("fgausWC","gaus", histDeltaTWeightsCorrected->GetMean() - 2.0*histDeltaTWeightsCorrected->GetRMS(), histDeltaTWeightsCorrected->GetMean() + 2.0*histDeltaTWeightsCorrected->GetRMS()); 
+  histDeltaTWeightsCorrected->Fit("fgausWC","QMLE","", histDeltaTWeightsCorrected->GetMean() - 2.0*histDeltaTWeightsCorrected->GetRMS(), histDeltaTWeightsCorrected->GetMean() + 2.0*histDeltaTWeightsCorrected->GetRMS());
+  histDeltaTWeightsCorrected->GetXaxis()->SetTitle("Time Resolution [ps]");
+  histDeltaTWeightsCorrected->SetTitle("");
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausWC->GetParameter(2), 1000*fgausWC->GetParError(2)));
+  c->SaveAs("deltaTWeightsCorrected.pdf");
+
+  histDeltaTWeightsCorrected_totalcharge->Draw();
+  TF1* fgausWCtc = new TF1("fgausWCtc","gaus", histDeltaTWeightsCorrected_totalcharge->GetMean() - 2.0*histDeltaTWeightsCorrected_totalcharge->GetRMS(), histDeltaTWeightsCorrected_totalcharge->GetMean() + 2.0*histDeltaTWeightsCorrected_totalcharge->GetRMS()); 
+  histDeltaTWeightsCorrected_totalcharge->Fit("fgausWCtc","QMLE","", histDeltaTWeightsCorrected_totalcharge->GetMean() - 2.0*histDeltaTWeightsCorrected_totalcharge->GetRMS(), histDeltaTWeightsCorrected_totalcharge->GetMean() + 2.0*histDeltaTWeightsCorrected_totalcharge->GetRMS());
+  histDeltaTWeightsCorrected_totalcharge->GetXaxis()->SetTitle("Time Resolution [ps]");
+  histDeltaTWeightsCorrected_totalcharge->SetTitle("");
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausWCtc->GetParameter(2), 1000*fgausWCtc->GetParError(2)));
+  c->SaveAs("deltaTWeightsCorrected_totalcharge.pdf");
+
+  
+}
+
+
 void MultiDeviceStudy() {
   DoMultiDeviceStudy("t1065-jun-2016-66.dat-full.root","output66.root");
+  makeTimeResolution( "output66.root" );
 }
