@@ -281,49 +281,61 @@ void makeTimeResolution( string filename ) {
 
 
   histDeltaT->Draw();
-  TF1* fgausEqual = new TF1("fgausEqual","gaus", histDeltaT->GetMean() - 2.0*histDeltaT->GetRMS(), histDeltaT->GetMean() + 2.0*histDeltaT->GetRMS()); // 1-D gaus func defined around hist peak
-  histDeltaT->Fit("fgausEqual","QMLE","", histDeltaT->GetMean() - 2.0*histDeltaT->GetRMS(), histDeltaT->GetMean() + 2.0*histDeltaT->GetRMS()); // Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
-  histDeltaT->GetXaxis()->SetTitle("Time Resolution [ps]");
+  double mean = histDeltaT->GetMean();
+  double rms = histDeltaT->GetRMS();
+  TF1* fgausEqual = new TF1("fgausEqual","gaus", mean - 2.0*rms, mean + 2.0*rms); // 1-D gaus func defined around hist peak
+  histDeltaT->Fit("fgausEqual","QMLE","", mean - 2.0*rms, mean + 2.0*rms); // Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
+  histDeltaT->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaT->SetTitle("");
   tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausEqual->GetParameter(2), 1000*fgausEqual->GetParError(2)));
   c->SaveAs("deltaTEqual.pdf");
 
   histDeltaTCenter->Draw();
-  TF1* fgausCenter = new TF1("fgausCenter","gaus", histDeltaTCenter->GetMean() - 2.0*histDeltaTCenter->GetRMS(), histDeltaTCenter->GetMean() + 2.0*histDeltaTCenter->GetRMS()); 
-  histDeltaTCenter->Fit("fgausCenter","QMLE","", histDeltaTCenter->GetMean() - 2.0*histDeltaTCenter->GetRMS(), histDeltaTCenter->GetMean() + 2.0*histDeltaTCenter->GetRMS());
-  histDeltaTCenter->GetXaxis()->SetTitle("Time Resolution [ps]");
+  mean = histDeltaTCenter->GetMean();
+  rms = histDeltaTCenter->GetRMS();
+  TF1* fgausCenter = new TF1("fgausCenter","gaus", mean - 2.0*rms, mean + 2.0*rms); 
+  histDeltaTCenter->Fit("fgausCenter","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
+  histDeltaTCenter->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaTCenter->SetTitle("");
   tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausCenter->GetParameter(2), 1000*fgausCenter->GetParError(2)));
   c->SaveAs("deltaTCenter.pdf");
 
   histDeltaTSiPad->Draw();
-  TF1* fgausSiPad = new TF1("fgausSiPad","gaus", histDeltaTSiPad->GetMean() - 2.0*histDeltaTSiPad->GetRMS(), histDeltaTSiPad->GetMean() + 2.0*histDeltaTSiPad->GetRMS()); 
-  histDeltaTSiPad->Fit("fgausSiPad","QMLE","", histDeltaTSiPad->GetMean() - 2.0*histDeltaTSiPad->GetRMS(), histDeltaTSiPad->GetMean() + 2.0*histDeltaTSiPad->GetRMS());
-  histDeltaTSiPad->GetXaxis()->SetTitle("Time Resolution [ps]");
+  mean = histDeltaTSiPad->GetMean();
+  rms = histDeltaTSiPad->GetRMS();
+  TF1* fgausSiPad = new TF1("fgausSiPad","gaus", mean - 2.0*rms, mean + 2.0*rms); 
+  histDeltaTSiPad->Fit("fgausSiPad","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
+  histDeltaTSiPad->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaTSiPad->SetTitle("");
   tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausSiPad->GetParameter(2), 1000*fgausSiPad->GetParError(2)));
   c->SaveAs("deltaTSiPad.pdf");
 
   histDeltaTMCP->Draw();
-  TF1* fgausMCP = new TF1("fgausMCP","gaus", histDeltaTMCP->GetMean() - 2.0*histDeltaTMCP->GetRMS(), histDeltaTMCP->GetMean() + 2.0*histDeltaTMCP->GetRMS()); 
-  histDeltaTMCP->Fit("fgausMCP","QMLE","", histDeltaTMCP->GetMean() - 2.0*histDeltaTMCP->GetRMS(), histDeltaTMCP->GetMean() + 2.0*histDeltaTMCP->GetRMS());
-  histDeltaTMCP->GetXaxis()->SetTitle("Time Resolution [ps]");
+  mean = histDeltaTMCP->GetMean();
+  rms = histDeltaTMCP->GetRMS();
+  TF1* fgausMCP = new TF1("fgausMCP","gaus", mean - 2.0*rms, mean + 2.0*rms); 
+  histDeltaTMCP->Fit("fgausMCP","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
+  histDeltaTMCP->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaTMCP->SetTitle("");
   tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausMCP->GetParameter(2), 1000*fgausMCP->GetParError(2)));
   c->SaveAs("deltaTMCP.pdf");
   
   histDeltaTWeightsCorrected->Draw();
-  TF1* fgausWC = new TF1("fgausWC","gaus", histDeltaTWeightsCorrected->GetMean() - 2.0*histDeltaTWeightsCorrected->GetRMS(), histDeltaTWeightsCorrected->GetMean() + 2.0*histDeltaTWeightsCorrected->GetRMS()); 
-  histDeltaTWeightsCorrected->Fit("fgausWC","QMLE","", histDeltaTWeightsCorrected->GetMean() - 2.0*histDeltaTWeightsCorrected->GetRMS(), histDeltaTWeightsCorrected->GetMean() + 2.0*histDeltaTWeightsCorrected->GetRMS());
-  histDeltaTWeightsCorrected->GetXaxis()->SetTitle("Time Resolution [ps]");
+  mean = histDeltaTWeightsCorrected->GetMean();
+  rms = histDeltaTWeightsCorrected->GetRMS();
+  TF1* fgausWC = new TF1("fgausWC","gaus", mean - 2.0*rms, mean + 2.0*rms); 
+  histDeltaTWeightsCorrected->Fit("fgausWC","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
+  histDeltaTWeightsCorrected->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaTWeightsCorrected->SetTitle("");
   tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausWC->GetParameter(2), 1000*fgausWC->GetParError(2)));
   c->SaveAs("deltaTWeightsCorrected.pdf");
 
   histDeltaTWeightsCorrected_totalcharge->Draw();
-  TF1* fgausWCtc = new TF1("fgausWCtc","gaus", histDeltaTWeightsCorrected_totalcharge->GetMean() - 2.0*histDeltaTWeightsCorrected_totalcharge->GetRMS(), histDeltaTWeightsCorrected_totalcharge->GetMean() + 2.0*histDeltaTWeightsCorrected_totalcharge->GetRMS()); 
-  histDeltaTWeightsCorrected_totalcharge->Fit("fgausWCtc","QMLE","", histDeltaTWeightsCorrected_totalcharge->GetMean() - 2.0*histDeltaTWeightsCorrected_totalcharge->GetRMS(), histDeltaTWeightsCorrected_totalcharge->GetMean() + 2.0*histDeltaTWeightsCorrected_totalcharge->GetRMS());
-  histDeltaTWeightsCorrected_totalcharge->GetXaxis()->SetTitle("Time Resolution [ps]");
+  mean = histDeltaTWeightsCorrected_totalcharge->GetMean();
+  rms = histDeltaTWeightsCorrected_totalcharge->GetRMS();
+  TF1* fgausWCtc = new TF1("fgausWCtc","gaus", mean - 2.0*rms, mean + 2.0*rms); 
+  histDeltaTWeightsCorrected_totalcharge->Fit("fgausWCtc","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
+  histDeltaTWeightsCorrected_totalcharge->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaTWeightsCorrected_totalcharge->SetTitle("");
   tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausWCtc->GetParameter(2), 1000*fgausWCtc->GetParError(2)));
   c->SaveAs("deltaTWeightsCorrected_totalcharge.pdf");
