@@ -386,8 +386,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         std::sort( vect.begin(), vect.end(), sortPixel );
 
         // histogram of the percentage of the total energy contained in the most energetic x pixels
-        // 2* to account for the 6db attenuator on the center pixel
-        // this sometimes multiplies the wrong channel by 2 to account for the attenuator, largest energy is not always in the center
+        // 6db attenuator on the center pixel already accounted for
         Energy = energy0;
         percent = Energy/totalEnergy * 100;
         histEnergy1_C->Fill( percent );
