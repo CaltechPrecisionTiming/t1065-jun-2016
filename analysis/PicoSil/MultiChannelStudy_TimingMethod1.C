@@ -248,11 +248,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F* histTOFPixel7largest_C = new TH1F("histTOF__Pixel7largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
   TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, 0.5,7.5);
   TH1F* histEnergy1_C = new TH1F("histEnergy1","; Percentage of total energy in event with most energy;Number of Events", 200, 0.5,100);
-  TH1F* histEnergy2_C = new TH1F("histEnergy2","; Percentage of total energy in two events with most energy;Number of Events", 200, 0.5,100);
-  TH1F* histEnergy3_C = new TH1F("histEnergy3","; Percentage of total energy in three events with most energy;Number of Events", 200, 0.5,100);
-  TH1F* histEnergy4_C = new TH1F("histEnergy4","; Percentage of total energy in four events with most energy;Number of Events", 200, 0.5,100);
-  TH1F* histEnergy5_C = new TH1F("histEnergy5","; Percentage of total energy in five events with most energy;Number of Events", 200, 0.5,100);
-  TH1F* histEnergy6_C = new TH1F("histEnergy6","; Percentage of total energy in six events with most energy;Number of Events", 200, 0.5,100);
+  TH1F* histEnergy2_C = new TH1F("histEnergy2","; Percentage of total energy in two events with most energy;Number of Events", 200, 0.5,110);
+  TH1F* histEnergy3_C = new TH1F("histEnergy3","; Percentage of total energy in three events with most energy;Number of Events", 200, 0.5,110);
+  TH1F* histEnergy4_C = new TH1F("histEnergy4","; Percentage of total energy in four events with most energy;Number of Events", 200, 0.5,110);
+  TH1F* histEnergy5_C = new TH1F("histEnergy5","; Percentage of total energy in five events with most energy;Number of Events", 200, 0.5,110);
+  TH1F* histEnergy6_C = new TH1F("histEnergy6","; Percentage of total energy in six events with most energy;Number of Events", 200, 0.5,110);
   TH1F* histEnergy7_C = new TH1F("histEnergy7","; Percentage of total energy in seven events with most energy;Number of Events", 200, 90,110);
   TH1F* histEnergySecond_C = new TH1F("histEnergy7","; Percentage of total energy in second event with most energy;Number of Events", 200, 0.5,100);
   TH1F* histTimeDiff_C = new TH1F("histTimeDiff","; Time [ns] difference between pixels;Number of Events", 300, -0.5 , 1);
@@ -372,18 +372,21 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         }
       } 
 
-      float energy0 = vect[0].charge;  // 6db attenuator on the center pixel already accounted for
-      float energy1 = vect[1].charge;
-      float energy2 = vect[2].charge;
-      float energy3 = vect[3].charge;
-      float energy4 = vect[4].charge;
-      float energy5 = vect[5].charge;
-      float energy6 = vect[6].charge;
-      totalEnergy = energy0 + energy1 + energy2 + energy3 + energy4 + energy5 + energy6;
+      float energy_center = vect[0].charge;
+      float time_center = vect[0].time;
 
       // Sort the vect and plot the combination of the largest energy pixels
       {
         std::sort( vect.begin(), vect.end(), sortPixel );
+
+        float energy0 = vect[0].charge;  // 6db attenuator on the center pixel already accounted for
+        float energy1 = vect[1].charge;
+        float energy2 = vect[2].charge;
+        float energy3 = vect[3].charge;
+        float energy4 = vect[4].charge;
+        float energy5 = vect[5].charge;
+        float energy6 = vect[6].charge;
+        totalEnergy = energy0 + energy1 + energy2 + energy3 + energy4 + energy5 + energy6;
 
         // histogram of the percentage of the total energy contained in the most energetic x pixels
         // 6db attenuator on the center pixel already accounted for
@@ -429,15 +432,16 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         histTOFPixel7largest_C->Fill( average );
 
         // make histogram of charge (or energy) vs. number of events with this charge
-        histChargeContained_C->Fill( energy0 );
+        histChargeContained_C->Fill( energy_center );
+        //histChargeContained_C->Fill( totalEnergy );
 
         // make histogram of time vs number of events (to determine time resolution) using all pixels
         // but apply cuts such that only a specific energy (or charge) range is used for the events plotted
         // time is weighted by charge in the pixel, same as the histTOFPixel_largest above
-        if ( energy0 >= 80 && energy0 <= 90 )
-        //if ( totalEnergy >= 80 && totalEnergy <= 90 )
+        if ( energy_center >= 10 && energy_center <= 20 )
+        //if ( totalEnergy >= 20 && totalEnergy <= 30 )
         {
-          average = (vect[0].charge*vect[0].time )/(vect[0].charge );
+          average = time_center;
           //average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[5].charge*vect[5].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[1].charge +vect[2].charge+vect[3].charge +vect[4].charge+vect[5].charge + vect[6].charge );
           histTOFEnergyCut_C->Fill( average );
         }
@@ -539,6 +543,7 @@ void MultiChannelStudy_TimingMethod1() {
   DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
   DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
   DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
+  DoMultiChannelStudy("../../raw/combine_8gev_1mm.root","output_8gev_1mm.root");
 
 
 }
