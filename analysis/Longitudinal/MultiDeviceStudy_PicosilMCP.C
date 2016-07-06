@@ -73,6 +73,11 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   float totalCenterCharge = 0; // Should be same value as totalPicoSilCharge[0]
   float totalMCPCharge = 0;
 
+  float photekAmpCut = 0.05;
+  float photekChargeCut = 2;
+  float centerAmpCut = 0.03;
+  float centerChargeCut = 2;
+  float MCPAmpCut = 0.03;
 
   //read all entries and fill the histogram
   Long64_t nentries = tree->GetEntries();
@@ -102,11 +107,11 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
 
     // APPLY EVENT CUTS:
     //require photek (for electron selection)
-    if( !(photekAmp0 > 0.05 && photekCharge0 > 2) ) continue;
+    if( !(photekAmp0 > photekAmpCut && photekCharge0 > photekChargeCut) ) continue;
     //require signal in the central pixel
-    if( !(centerAmp > 0.03 && centerCharge > 2) ) continue;
+    if( !(centerAmp > centerAmpCut && centerCharge > centerChargeCut) ) continue;
     //require Si Pad and MCP minimum amplitude. Possibly will include cut for charge at some point...
-    if( !( MCPAmp > 0.03) ) continue;
+    if( !( MCPAmp > MCPAmpCut) ) continue;
 
     //Calculates the Delta T's if the event passes the cuts:
     // (Will be used to fill the histogram at every event)
@@ -186,9 +191,9 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     float MCPCharge = integral[11];
     float MCPTime = linearTime45[11];
 
-    if( !(photekAmp0 > 0.05 && photekCharge0 > 2) ) continue;
-    if( !(centerAmp > 0.03 && centerCharge > 2) ) continue;
-    if( !( MCPAmp > 0.03) ) continue;
+    if( !(photekAmp0 > photekAmpCut && photekCharge0 > photekChargeCut) ) continue;
+    if( !(centerAmp > centerAmpCut && centerCharge > centerChargeCut) ) continue;
+    if( !( MCPAmp > MCPAmpCut) ) continue;
 
     float DeltaTPicoSil[7] = {0.}; 
     for ( int j = 1; j <= 7; j++){
@@ -343,6 +348,41 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   file->WriteTObject(histDeltaT_PicoSil_MCP_EventCharge,"histDeltaT_PicoSil_MCP_EventCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_MCP_TotalCharge,"histDeltaT_PicoSil_MCP_TotalCharge", "WriteDelete");
 
+  TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 100, 0, 0.75);
+  TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge;Number of Events", 100, 0, 10);
+  TH1F *histCenterAmpCut = new TH1F("histCenterAmpCut","; Amp;Number of Events", 100, 0, 0.75);
+  TH1F *histCenterChargeCut = new TH1F("histCenterChargeCut","; Charge;Number of Events", 100, 0, 10);
+  TH1F *histMCPAmpCut = new TH1F("histMCPAmpCut","; Amp;Number of Events", 100, 0, 0.75);
+
+  tree->Draw("amp[0]>>histPhotekAmpCut", Form("amp[0]>%f",photekAmpCut) );
+  tree->Draw("int[0]>>histPhotekChargeCut", Form("int[0]>%f",photekChargeCut));
+  tree->Draw("amp[1]>>histCenterAmpCut", Form("amp[1]>%f",centerAmpCut));
+  tree->Draw("int[1]>>histCenterChargeCut", Form("int[1]>%f",centerChargeCut));
+  tree->Draw("amp[11]>>histMCPAmpCut", Form("amp[11]>%f",MCPAmpCut));
+
+  TH1F *histPhotekAmp = new TH1F("histPhotekAmp","; Amp;Number of Events", 100, 0, 0.75);
+  TH1F *histPhotekCharge = new TH1F("histPhotekCharge","; Charge;Number of Events", 100, 0, 10);
+  TH1F *histCenterAmp = new TH1F("histCenterAmp","; Amp;Number of Events", 100, 0, 0.75);
+  TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge;Number of Events", 100, 0, 10);
+  TH1F *histMCPAmp = new TH1F("histMCPAmp","; Amp;Number of Events", 100, 0, 0.75);
+
+  tree->Draw("amp[0]>>histPhotekAmp" );
+  tree->Draw("int[0]>>histPhotekCharge");
+  tree->Draw("amp[1]>>histCenterAmp");
+  tree->Draw("int[1]>>histCenterCharge");
+  tree->Draw("amp[11]>>histMCPAmp");
+
+  file->WriteTObject(histPhotekAmp, "Photek Amp", "WriteDelete");
+  file->WriteTObject(histPhotekAmpCut, "Cut on Photek Amp", "WriteDelete");
+  file->WriteTObject(histPhotekCharge, "Photek Charge", "WriteDelete");
+  file->WriteTObject(histPhotekChargeCut, "Cut on Photek Charge", "WriteDelete");
+  file->WriteTObject(histCenterAmp, "Center Amp", "WriteDelete");
+  file->WriteTObject(histCenterAmpCut, "Cut on Center Amp", "WriteDelete");
+  file->WriteTObject(histCenterCharge, "Center Charge", "WriteDelete");
+  file->WriteTObject(histCenterChargeCut, "Cut on Center Charge", "WriteDelete");
+  file->WriteTObject(histMCPAmp, "MCP Amp", "WriteDelete");
+  file->WriteTObject(histMCPAmpCut, "Cut on MCP Amp", "WriteDelete");
+
   file->Close();
   delete file;
 
@@ -493,6 +533,6 @@ void makeTimeResolution( string filename ) {
 
 
 void MultiDeviceStudy_PicosilMCP() {
-  DoMultiDeviceStudy("65-83.root","output65-83.root");
-  makeTimeResolution("output65-83.root"); // Outputs PDFs with histograms
+  DoMultiDeviceStudy("104-116except111-114.root","output104-116except111-114.root");
+  makeTimeResolution("output104-116except111-114.root"); // Outputs PDFs with histograms
 }
