@@ -73,11 +73,11 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   float totalCenterCharge = 0; // Should be same value as totalPicoSilCharge[0]
   float totalMCPCharge = 0;
 
-  float photekAmpCut = 0.05;
-  float photekChargeCut = 2;
-  float centerAmpCut = 0.03;
-  float centerChargeCut = 2;
-  float MCPAmpCut = 0.03;
+  float photekAmpCut = 0.1; //THESE ARE THE CUT VALUES
+  float photekChargeCut = 2.5;
+  float centerAmpCut = 0.1;
+  float centerChargeCut = 7;
+  float MCPAmpCut = 0.05;
 
   //read all entries and fill the histogram
   Long64_t nentries = tree->GetEntries();
@@ -351,7 +351,7 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 100, 0, 0.75);
   TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge;Number of Events", 100, 0, 10);
   TH1F *histCenterAmpCut = new TH1F("histCenterAmpCut","; Amp;Number of Events", 100, 0, 0.75);
-  TH1F *histCenterChargeCut = new TH1F("histCenterChargeCut","; Charge;Number of Events", 100, 0, 10);
+  TH1F *histCenterChargeCut = new TH1F("histCenterChargeCut","; Charge;Number of Events", 200, 0, 30);
   TH1F *histMCPAmpCut = new TH1F("histMCPAmpCut","; Amp;Number of Events", 100, 0, 0.75);
 
   tree->Draw("amp[0]>>histPhotekAmpCut", Form("amp[0]>%f",photekAmpCut) );
@@ -363,7 +363,7 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   TH1F *histPhotekAmp = new TH1F("histPhotekAmp","; Amp;Number of Events", 100, 0, 0.75);
   TH1F *histPhotekCharge = new TH1F("histPhotekCharge","; Charge;Number of Events", 100, 0, 10);
   TH1F *histCenterAmp = new TH1F("histCenterAmp","; Amp;Number of Events", 100, 0, 0.75);
-  TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge;Number of Events", 100, 0, 10);
+  TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge;Number of Events", 200, 0, 30);
   TH1F *histMCPAmp = new TH1F("histMCPAmp","; Amp;Number of Events", 100, 0, 0.75);
 
   tree->Draw("amp[0]>>histPhotekAmp" );
@@ -533,6 +533,6 @@ void makeTimeResolution( string filename ) {
 
 
 void MultiDeviceStudy_PicosilMCP() {
-  DoMultiDeviceStudy("104-116except111-114.root","output104-116except111-114.root");
-  makeTimeResolution("output104-116except111-114.root"); // Outputs PDFs with histograms
+  DoMultiDeviceStudy("94-103.root","output94-103.root");
+  makeTimeResolution("output94-103.root"); // Outputs PDFs with histograms
 }
