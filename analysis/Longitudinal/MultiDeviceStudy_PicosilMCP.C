@@ -81,10 +81,10 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   float totalCenterCharge = 0; // Should be same value as totalPicoSilCharge[0]
   float totalMCPCharge = 0;
 
-  float photekAmpCut = 0.1; //THESE ARE THE CUT VALUES
-  float photekChargeCut = 2;
-  float centerAmpCut = 0.15;
-  float centerChargeCut = 11;
+  float photekAmpCut = 0.3; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
+  float photekChargeCut = 6.3;
+  float centerAmpCut = 0.3;
+  float centerChargeCut = 22;
   float MCPAmpCut = 0.08;
 
   //read all entries and fill the histogram
@@ -97,15 +97,15 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     tree->GetEntry(iEntry);    
   
     float photekTimeGauss0 = gauspeak[0];
-    float photekAmp0 = amp[0];
-    float photekCharge0 = integral[0];
+    float photekAmp0 = sqrt(10)*amp[0]; //accounts for 10dB attenuator
+    float photekCharge0 = sqrt(10)*integral[0];
 
     float photekTimeGauss1 = gauspeak[9];
-    float photekAmp1 = amp[9];
-    float photekCharge1 = integral[9];
+    float photekAmp1 = sqrt(10)*amp[9];
+    float photekCharge1 = sqrt(10)*integral[9];
 
-    float centerAmp = amp[1];
-    float centerCharge = integral[1];
+    float centerAmp = 2*amp[1]; //accounts for 6dB attenuator
+    float centerCharge = 2*integral[1];
     float centerTime = linearTime45[1];
 
     float MCPAmp = amp[11];
@@ -128,10 +128,11 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     float DeltaTPicoSil[7] = {-99.}; 
     float DeltaTPicoSil_vs_MCP[7] = {-99.};
     for ( int j = 1; j <= 7; j++){
-      if ( amp[j] > 0.02 && integral[j] > 1 ) {
+      if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
 	DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j];
 	DeltaTPicoSil_vs_MCP[j-1] = (linearTime45[j] - photekTimeGauss0) - (MCPTime - photekTimeGauss1); //subtracting photek accts for MCP and HGC in diff groups
-	totalPicoSilCharge[j-1] += integral[j];
+	if ( j == 1 ) totalPicoSilCharge[j-1] += centerCharge;
+	else totalPicoSilCharge[j-1] += integral[j];
       }
     }
 
@@ -152,8 +153,6 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     }
   }
 
-  totalPicoSilCharge[0] *= 2; //Account for 6dB attenuator
-  totalCenterCharge *= 2;
 
   float ringChargeTotal = 0;
   for(int i=1; i<=6; i++) ringChargeTotal += totalPicoSilCharge[i];
@@ -192,15 +191,15 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     tree->GetEntry(iEntry);    
   
     float photekTimeGauss0 = gauspeak[0];
-    float photekAmp0 = amp[0];
-    float photekCharge0 = integral[0];
+    float photekAmp0 = sqrt(10)*amp[0]; //accounts for 10dB attenuator
+    float photekCharge0 = sqrt(10)*integral[0];
 
     float photekTimeGauss1 = gauspeak[9];
-    float photekAmp1 = amp[9];
-    float photekCharge1 = integral[9];
+    float photekAmp1 = sqrt(10)*amp[9];
+    float photekCharge1 = sqrt(10)*integral[9];
 
-    float centerAmp = amp[1];
-    float centerCharge = integral[1];
+    float centerAmp = 2*amp[1]; //accounts for 6dB attenuator
+    float centerCharge = 2*integral[1];
     float centerTime = linearTime45[1];
 
     float MCPAmp = amp[11];
@@ -214,7 +213,7 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     float DeltaTPicoSil[7] = {0.}; 
     float DeltaTPicoSil_vs_MCP[7] = {0.};
     for ( int j = 1; j <= 7; j++){
-      if ( amp[j] > 0.02 && integral[j] > 1 ) {
+      if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
 	DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j] - meanPicoSil[j-1];
 	DeltaTPicoSil_vs_MCP[j-1] = (linearTime45[j] - photekTimeGauss0) - (MCPTime - photekTimeGauss1) - meanPicoSil_vs_MCP[j-1];
       }
@@ -237,9 +236,11 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     float PicoSil_vs_MCP_ChargeEvent = 0;
     for (int jj = 1; jj <= 7; jj++) {
       PicoSil_vs_MCP_WeightTotal += totalPicoSilCharge[jj-1] * DeltaTPicoSil_vs_MCP[jj-1];
-      PicoSil_vs_MCP_WeightEvent += integral[jj] * DeltaTPicoSil_vs_MCP[jj-1];
+      if (jj != 1) PicoSil_vs_MCP_WeightEvent += integral[jj] * DeltaTPicoSil_vs_MCP[jj-1];
+      else PicoSil_vs_MCP_WeightEvent += centerCharge * DeltaTPicoSil_vs_MCP[jj-1];
       if (DeltaTPicoSil_vs_MCP[jj-1] != 0.) {
-	PicoSil_vs_MCP_ChargeEvent += integral[jj];
+	if ( jj != 1 ) PicoSil_vs_MCP_ChargeEvent += integral[jj];
+	else PicoSil_vs_MCP_ChargeEvent += centerCharge;
 	PicoSil_vs_MCP_ChargeTotal += totalPicoSilCharge[jj];
       }
     }
@@ -262,9 +263,11 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
 
     float DeltaT_PicoSilEventCharge_MCP_Equal = 0.5*DeltaTMCP;
     float temp_pseventweight = 0;
-    for (int j = 0; j <= 6; j++) temp_pseventweight += DeltaTPicoSil[j]*integral[j+1];
+    for (int j = 1; j <= 6; j++) temp_pseventweight += DeltaTPicoSil[j]*integral[j+1];
+    temp_pseventweight += DeltaTPicoSil[0]*centerCharge;
     float temp_pseventcharge = 0;
-    for (int j = 0; j <= 6; j++) {if (DeltaTPicoSil[j] != 0) temp_pseventcharge += integral[j+1];}
+    for (int j = 1; j <= 6; j++) {if (DeltaTPicoSil[j] != 0) temp_pseventcharge += integral[j+1];}
+    if (DeltaTPicoSil[0] != 0) temp_pseventcharge += centerCharge;
     DeltaT_PicoSilEventCharge_MCP_Equal += 0.5*temp_pseventweight/temp_pseventcharge;
 
     float DeltaT_PicoSil_MCP_Equal = DeltaTMCP;
@@ -409,28 +412,28 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   file->WriteTObject(histDeltaT_PicoSil_vs_MCP[3],"histDeltaT_PicoSil_vs_MCP[3]","WriteDelete");
 
 
-  TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 100, 0, 0.75);
-  TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge;Number of Events", 100, 0, 10);
-  TH1F *histCenterAmpCut = new TH1F("histCenterAmpCut","; Amp;Number of Events", 100, 0, 0.75);
-  TH1F *histCenterChargeCut = new TH1F("histCenterChargeCut","; Charge;Number of Events", 200, 0, 30);
+  TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 400, 0, 2.5);
+  TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge;Number of Events", 400, 0, 30);
+  TH1F *histCenterAmpCut = new TH1F("histCenterAmpCut","; Amp;Number of Events", 200, 0, 1.5);
+  TH1F *histCenterChargeCut = new TH1F("histCenterChargeCut","; Charge;Number of Events", 400, 0, 60);
   TH1F *histMCPAmpCut = new TH1F("histMCPAmpCut","; Amp;Number of Events", 100, 0, 0.75);
 
-  tree->Draw("amp[0]>>histPhotekAmpCut", Form("amp[0]>%f",photekAmpCut) );
-  tree->Draw("int[0]>>histPhotekChargeCut", Form("int[0]>%f",photekChargeCut));
-  tree->Draw("amp[1]>>histCenterAmpCut", Form("amp[1]>%f",centerAmpCut));
-  tree->Draw("int[1]>>histCenterChargeCut", Form("int[1]>%f",centerChargeCut));
+  tree->Draw("sqrt(10)*amp[0]>>histPhotekAmpCut", Form("sqrt(10)*amp[0]>%f",photekAmpCut) );
+  tree->Draw("sqrt(10)*int[0]>>histPhotekChargeCut", Form("sqrt(10)*int[0]>%f",photekChargeCut));
+  tree->Draw("2*amp[1]>>histCenterAmpCut", Form("2*amp[1]>%f",centerAmpCut));
+  tree->Draw("2*int[1]>>histCenterChargeCut", Form("2*int[1]>%f",centerChargeCut));
   tree->Draw("amp[11]>>histMCPAmpCut", Form("amp[11]>%f",MCPAmpCut));
 
-  TH1F *histPhotekAmp = new TH1F("histPhotekAmp","; Amp;Number of Events", 100, 0, 0.75);
-  TH1F *histPhotekCharge = new TH1F("histPhotekCharge","; Charge;Number of Events", 100, 0, 10);
-  TH1F *histCenterAmp = new TH1F("histCenterAmp","; Amp;Number of Events", 100, 0, 0.75);
-  TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge;Number of Events", 200, 0, 30);
+  TH1F *histPhotekAmp = new TH1F("histPhotekAmp","; Amp;Number of Events", 400, 0, 2.5);
+  TH1F *histPhotekCharge = new TH1F("histPhotekCharge","; Charge;Number of Events", 400, 0, 30);
+  TH1F *histCenterAmp = new TH1F("histCenterAmp","; Amp;Number of Events", 200, 0, 1.5);
+  TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge;Number of Events", 400, 0, 60);
   TH1F *histMCPAmp = new TH1F("histMCPAmp","; Amp;Number of Events", 100, 0, 0.75);
 
-  tree->Draw("amp[0]>>histPhotekAmp" );
-  tree->Draw("int[0]>>histPhotekCharge");
-  tree->Draw("amp[1]>>histCenterAmp");
-  tree->Draw("int[1]>>histCenterCharge");
+  tree->Draw("sqrt(10)*amp[0]>>histPhotekAmp" );
+  tree->Draw("sqrt(10)*int[0]>>histPhotekCharge");
+  tree->Draw("2*amp[1]>>histCenterAmp");
+  tree->Draw("2*int[1]>>histCenterCharge");
   tree->Draw("amp[11]>>histMCPAmp");
 
   file->WriteTObject(histPhotekAmp, "Photek Amp", "WriteDelete");
