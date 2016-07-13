@@ -241,7 +241,7 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
       if (DeltaTPicoSil_vs_MCP[jj-1] != 0.) {
 	if ( jj != 1 ) PicoSil_vs_MCP_ChargeEvent += integral[jj];
 	else PicoSil_vs_MCP_ChargeEvent += centerCharge;
-	PicoSil_vs_MCP_ChargeTotal += totalPicoSilCharge[jj];
+	PicoSil_vs_MCP_ChargeTotal += totalPicoSilCharge[jj-1];
       }
     }
 
