@@ -97,10 +97,8 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F *histChargeRingOneOverTotalCharge;
   TH1F *histDeltaTCombined;
 
-
   TH1F *histDeltaT[7];
-
-  for(int j=0; j<7; j++) histDeltaT[j]= new TH1F(Form("histDeltaT_%d",j),"; Time [ns];Number of Events", 200, 4,5.5);
+  for(int j=0; j<7; j++) histDeltaT[j]= new TH1F(Form("histDeltaT_%d",j),"; Time [ns];Number of Events", 200, 3,7);
   
   histTotalCharge = new TH1F("histTotalCharge","; Time [ns];Number of Events", 200, 0,100);
   histTOFCenter = new TH1F("histTOFCenter","; Time [ns];Number of Events", 200, -6,-4);
@@ -144,17 +142,34 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     
     
     //require photek (for electron selection)
-    if( !(photekAmp > 0.05 && photekCharge > 2) ) continue;
+    //if( !(photekAmp > 0.05 && photekCharge > 2) ) continue;
     
     //require signal in the central pixel
-    if( !(centerAmp > 0.03 && centerCharge > 2) ) continue;
+    //if( !(centerAmp > 0.03 && centerCharge > 2) ) continue;
+
+
+    // 8GeV cuts
+    //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
+
+    // 16GeV cuts
+    //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
+
+    // 32GeV cuts
+    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    //require signal in the central pixel
+    if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
     
+
     for ( int j = 1; j <= 7; j++)
       {
-        if ( amp[j] > 0.02 && integral[j] > 1 )
+        if ( amp[j] > 0.01 && integral[j] > 1 ) 
         {
           DeltaT[j-1] = gauspeak[0] - linearTime45[j];
-      
+          histDeltaT[j-1]->Fill(DeltaT[j-1]);
           NumberOfChannels++;
           TotalCharge += integral[j];
           TimeFlatAvg += linearTime45[j];
@@ -172,8 +187,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       }
 
     
-    for(int jj=0; jj<7; jj++) histDeltaT[jj]->Fill(DeltaT[jj]);
-    
+    /*for(int jj=0; jj<7; jj++) 
+    {
+      histDeltaT[jj]->Fill(DeltaT[jj]);
+    }*/
+  
     // do the time averaging
     float DeltaTCombined = -99.;
 
@@ -223,52 +241,34 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F *histDeltaTCombined_C;
 
   TH1F *histDeltaT_C[7];
-
   for(int j=0; j < 7; j++) histDeltaT_C[j]= new TH1F(Form("histDeltaT_C_%d",j),"; Time [ns];Number of Events", 200, -1,1);
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
-  // these are histograms to compare channels pairwise
-  TH1F* histTOF2Pixel12_C = new TH1F("histTOF__Pixel12_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel13_C = new TH1F("histTOF__Pixel13_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel14_C = new TH1F("histTOF__Pixel14_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel15_C = new TH1F("histTOF__Pixel15_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel16_C = new TH1F("histTOF__Pixel16_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel17_C = new TH1F("histTOF__Pixel17_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel_All_C = new TH1F("histTOF__Pixel_All_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel_167_C = new TH1F("histTOF__Pixel_167_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel_172_C = new TH1F("histTOF__Pixel_172_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel_123_C = new TH1F("histTOF__Pixel_123_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel_134_C = new TH1F("histTOF__Pixel_134_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel_145_C = new TH1F("histTOF__Pixel_145_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOF2Pixel_156_C = new TH1F("histTOF__Pixel_156_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOFPixellargest_C = new TH1F("histTOF__Pixellargest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOFPixel2largest_C = new TH1F("histTOF__Pixel2largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOFPixel3largest_C = new TH1F("histTOF__Pixel3largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOFPixel4largest_C = new TH1F("histTOF__Pixel4largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOFPixel5largest_C = new TH1F("histTOF__Pixel5largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOFPixel6largest_C = new TH1F("histTOF__Pixel6largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histTOFPixel7largest_C = new TH1F("histTOF__Pixel7largest_C","; Time [ns];Number of Events", 300, -0.5,0.5);
-  TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, 0.5,7.5);
-  TH1F* histEnergy1_C = new TH1F("histEnergy1","; Percentage of total energy in event with most energy;Number of Events", 200, 0.5,100);
-  TH1F* histEnergy2_C = new TH1F("histEnergy2","; Percentage of total energy in two events with most energy;Number of Events", 200, 0.5,110);
-  TH1F* histEnergy3_C = new TH1F("histEnergy3","; Percentage of total energy in three events with most energy;Number of Events", 200, 0.5,110);
-  TH1F* histEnergy4_C = new TH1F("histEnergy4","; Percentage of total energy in four events with most energy;Number of Events", 200, 0.5,110);
-  TH1F* histEnergy5_C = new TH1F("histEnergy5","; Percentage of total energy in five events with most energy;Number of Events", 200, 0.5,110);
-  TH1F* histEnergy6_C = new TH1F("histEnergy6","; Percentage of total energy in six events with most energy;Number of Events", 200, 0.5,110);
-  TH1F* histEnergy7_C = new TH1F("histEnergy7","; Percentage of total energy in seven events with most energy;Number of Events", 200, 90,110);
-  TH1F* histTimeDiff_C = new TH1F("histTimeDiff","; Time [ns] difference between pixels;Number of Events", 300, -0.5 , 1);
-  TH1F* histChargeContained_C = new TH1F("histChargeContained","; Charge (pC);Number of Events", 300, -10 , 150);
-  TH1F* histTOFEnergyCut_C = new TH1F("histTOFEnergyCut","; Time (ns);Number of Events", 300, -0.5 , 0.5);
-  
-  TH2F* histDeltaTCharge_C = new TH2F("histDeltaTCharge","; Time (ns);Charge (pC);Number of Events", 300, -0.5 , 0.5, 300, -5, 100);
 
-  // histograms to plot the distibution of the variable being cut on
+  TH1F *histTOF_largest[7];
+  for(int j=0; j < 7; j++) histTOF_largest[j]= new TH1F(Form("histTOF_largest_%d",j),"; Time [ns];Number of Events", 300, -0.3, 0.3);
+
+  TH1F *histTOF_largest_C[7];
+  for(int j=0; j < 7; j++) histTOF_largest_C[j]= new TH1F(Form("histTOF_largest_C_%d",j),"; Time [ns];Number of Events", 300, -0.3, 0.3);
+
+  TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, 0.5,7.5);
+  TH1F* histTimeDiff_C = new TH1F("histTimeDiff","; Time [ns] difference between pixels;Number of Events", 300, -0.5 , 1);
+
+  TH1F* histTotalChargeContained_C = new TH1F("histTotalChargeContained","; Charge (pC);Number of Events", 100, -10 , 150);
+  TH1F* histChargeCenterContained_C = new TH1F("histChargeCenterContained","; Charge (pC);Number of Events", 100, -10, 150);
+
+  TH1F *histChargeContained[7];
+  for(int j=0; j < 7; j++) histChargeContained[j]= new TH1F(Form("histChargeContained_%d",j),"; Charge (pC);Number of Events", 100, -10, 150);
+
+  TH1F* histTOFEnergyCut_C = new TH1F("histTOFEnergyCut","; Time (ns);Number of Events", 300, -0.5 , 0.5);
+  TH1F* histTOFEnergyCutCenter_C = new TH1F("histTOFEnergyCutCenter","; Time (ns);Number of Events", 300, -0.5 , 0.5);
+  
+  TH2F* histDeltaTCharge_C = new TH2F("histDeltaTCharge","; Charge (pC);Time (ns);Number of Events", 300, -5, 100, 300, -0.5 , 0.5 );
+
+  // histograms to plot the distibution of the variable being cut on. Cuts change based on the beam energy.
   TH1F* histPhotekAmpCut_C = new TH1F("histPhotekAmpCut","; Photek Amplitude;Number of Events", 300, -0.5 , 0.5);
-  // cut is amplitude > 0.03
   TH1F* histPhotekChargeCut_C = new TH1F("histPhotekChargeCut","; Photek Charge (pC);Number of Events", 300, -0.5 , 20);
-  // cut is charge > 3
   TH1F* histCenterChargeCut_C = new TH1F("histCenterChargeCut","; Center Charge (pC);Number of Events", 300, -0.5 , 100);
-  // cut is charge > 3
   TH1F* histCenterAmpCut_C = new TH1F("histCenterAmplitudeCut","; Center Amplitude;Number of Events", 300, -0.5 , 1);
 
 
@@ -278,12 +278,12 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   histTOFRingOneChargeWeightedAvg_C = new TH1F("histTOFRingOneChargeWeightedAvg_C","; Time [ns];Number of Events", 200, -10,10);
   histDeltaTCombined_C = new TH1F("histDeltaTCombined_C","; Time [ns];Number of Events", 100, 4,5.5);
 
-
+std::cout<<"Number of events in Sample: "<<nentries<<std::endl; 
   for (Long64_t iEntry=0;iEntry<nentries;iEntry++)
     {
       if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
-      tree->GetEntry(iEntry);    
-      //float DeltaT[7] = {-99.};
+      tree->GetEntry(iEntry);  
+
       //require photek (for electron selection)
       float photekTimeGauss = gauspeak[0];
       float photekAmp = amp[0];
@@ -311,9 +311,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       histCenterChargeCut_C->Fill( centerCharge );
       
       // 8GeV cuts
-      if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
+      //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
       //require signal in the central pixel
-      if( !(centerCharge > 2.5 && centerAmp > 0.01 ) ) continue;
+      //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
 
       // 16GeV cuts
       //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
@@ -321,17 +321,23 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
 
       // 32GeV cuts
-      //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+      if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
       //require signal in the central pixel
-      //if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
+      if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
 
       std::vector< Pixel > vect;
       Pixel pixel;
       for ( int j = 1; j <= 7; j++)
       {
-        if ( integral[j] > 3 ) histDeltaT_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
+        if ( amp[j] > 0.01 && integral[j] > 1 )
+        {
+          histDeltaT_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
+        } 
         pixel.index = j;
-        if ( j == 1 ) pixel.charge = 2*integral[j]; // 2* to account for the 6db attenuation
+        if ( j == 1 )
+        {
+          pixel.charge = 2*integral[j]; // 2* to account for the 6db attenuation
+        }
         else pixel.charge = integral[j];
         pixel.time = gauspeak[0]-(linearTime45[j] + meanT[j-1]);
         pixel.amp = amp[j];
@@ -340,42 +346,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
       auto sortPixel = []( Pixel a, Pixel b ) {return a.charge > b.charge ?  true : false;};
       //std::sort( vect.begin(), vect.end(), sortPixel );
-      float average ;
-      if ( vect[3].charge > 3 )
-      {
-        //average2 = gauspeak[0] - ( vect[0].charge*vect[0].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[2].charge*vect[2].time)/(vect[0].charge+vect[3].charge+vect[4].charge+vect[2].charge);
-        //average2 = gauspeak[0] - ( vect[0].charge*vect[0].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time )/(vect[0].charge+vect[3].charge+vect[4].charge);
-        average  = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time )/(vect[0].charge+vect[1].charge);
-        histTOF2Pixel12_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[2].charge*vect[2].time )/(vect[0].charge+vect[2].charge);
-        histTOF2Pixel13_C->Fill( average );
-        average  = (vect[0].charge*vect[0].time + vect[3].charge*vect[3].time )/(vect[0].charge+vect[3].charge);
-        histTOF2Pixel14_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[4].charge*vect[4].time )/(vect[0].charge+vect[4].charge);
-        histTOF2Pixel15_C->Fill( average );
-        average  = (vect[0].charge*vect[0].time + vect[5].charge*vect[5].time )/(vect[0].charge+vect[5].charge);
-        histTOF2Pixel16_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[6].charge);
-        histTOF2Pixel17_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[5].charge*vect[5].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[1].charge +vect[2].charge+vect[3].charge +vect[4].charge+vect[5].charge + vect[6].charge );
-        histTOF2Pixel_All_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[5].charge*vect[5].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[5].charge + vect[6].charge );
-        histTOF2Pixel_167_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[1].charge + vect[6].charge );
-        histTOF2Pixel_172_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time )/(vect[0].charge+vect[1].charge + vect[2].charge );
-        histTOF2Pixel_123_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[3].charge*vect[3].time + vect[2].charge*vect[2].time )/(vect[0].charge+vect[3].charge + vect[2].charge );
-        histTOF2Pixel_134_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time )/(vect[0].charge+vect[3].charge + vect[4].charge );
-        histTOF2Pixel_145_C->Fill( average );
-        average = (vect[0].charge*vect[0].time + vect[5].charge*vect[5].time + vect[4].charge*vect[4].time )/(vect[0].charge+vect[5].charge + vect[4].charge );
-        histTOF2Pixel_156_C->Fill( average );
-        // 1 is the center channel of the pico sil, 2-7 are the first ring, but 0 indexed here
-      }
 
+      float average;
 
-      // this will find which channel has the maximum charge and plot the results in the MaxIndex histogram. largestIndex and largestIndexIntegral starts as 0
+      // this will find which pixel has the maximum charge and plot the results in the MaxIndex histogram. largestIndex and largestIndexIntegral starts as 0
       // channels are 1 indexed for this
       for ( int j = 0; j <= 7; j++)
       {
@@ -405,105 +379,140 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       float time_center = vect[0].time;
 
       // Sort the vect and plot the combination of the largest energy pixels
+      
+      std::sort( vect.begin(), vect.end(), sortPixel );
+
+      // These values will be used to determine if the pixel passes the required cuts
+      float energy1 = vect[0].charge;           // 6db attenuator on the center pixel already accounted for
+      float energy2 = vect[1].charge;
+      float energy3 = vect[2].charge;
+      float energy4 = vect[3].charge;
+      float energy5 = vect[4].charge;
+      float energy6 = vect[5].charge;
+      float energy7 = vect[6].charge;
+
+      float amp1 = vect[0].amp;
+      float amp2 = vect[1].amp;
+      float amp3 = vect[2].amp;
+      float amp4 = vect[3].amp;
+      float amp5 = vect[4].amp;
+      float amp6 = vect[5].amp;
+      float amp7 = vect[6].amp;
+
+      float weight1 = 0;    // If the pixel passes the cuts, these weights will be changed to the charge of the pixel (and time will be charge weighted) 
+      float weight2 = 0;
+      float weight3 = 0;
+      float weight4 = 0;
+      float weight5 = 0;
+      float weight6 = 0;
+      float weight7 = 0;
+
+      // This makes the TOF histogram with pixels with the largest charges, weighting the pixel time by the pixel charge. This is done event by event, so the TOF_largest_x will not necissarily have x pixels combined in every event.
+      // Also makes histograms of the total energy contained in the pixels used for the TOF histogram.
+      // 6db attenuator on the center pixel already accounted for
+
+      // For an additional pixel to be added, it must have a charge > 1 pC and an amplitude > 0.01 V. If the pixel does not pass these cuts, then it is added with a weight of 0.
+        
+      if ( energy1 > 1 && amp1 > 0.01 )
       {
-        std::sort( vect.begin(), vect.end(), sortPixel );
+        weight1 = energy1;
+      }
 
-        float energy0 = vect[0].charge;  // 6db attenuator on the center pixel already accounted for
-        float energy1 = vect[1].charge;
-        float energy2 = vect[2].charge;
-        float energy3 = vect[3].charge;
-        float energy4 = vect[4].charge;
-        float energy5 = vect[5].charge;
-        float energy6 = vect[6].charge;
-        float amp0 = vect[0].amp;
-        float amp1 = vect[1].amp;
-        float amp2 = vect[2].amp;
-        float amp3 = vect[3].amp;
-        float amp4 = vect[4].amp;
-        float amp5 = vect[5].amp;
-        float amp6 = vect[6].amp;
+      Energy = weight1;
+      average = vect[0].time;
+      histTOF_largest[0]->Fill( average );
+      histTOF_largest_C[0]->Fill( average );
+      histChargeContained[0]->Fill( Energy );
 
-        totalEnergy = energy0 + energy1 + energy2 + energy3 + energy4 + energy5 + energy6;
+      if ( energy2 > 1 && amp2 > 0.01 )
+      {
+        weight2 = energy2;
+      }
 
-        // make histogram with pixels with largest charges, weighting time by the charge in the pixel
-        // if statements to check that the pixel has a charge greater than 2 pC before it is added to histogram
+      Energy = weight1 + weight2;
+      average = ( weight1*vect[0].time + weight2*vect[1].time )/( Energy );
+      histTOF_largest[1]->Fill( average );
+      histTOF_largest_C[1]->Fill( average );  
+      histChargeContained[1]->Fill( Energy );
 
-        // histogram of the percentage of the total energy contained in the most energetic x pixels
-        // 6db attenuator on the center pixel already accounted for
-        if ( energy0 > 1 && amp0 > 0.02 )
-        {
-          average = (vect[0].charge*vect[0].time )/(vect[0].charge );
-          histTOFPixellargest_C->Fill( average );
-          Energy = energy0;
-          percent = Energy/totalEnergy * 100;
-          histEnergy1_C->Fill( percent );
-        }
-        if ( energy0 > 1 && energy1 > 1 && amp0 > 0.02 && amp1 > 0.02 )
-        {
-          average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time )/(vect[0].charge+vect[1].charge );
-          histTOFPixel2largest_C->Fill( average );
-          Energy = energy0 + energy1;
-          percent = Energy/totalEnergy * 100;
-          histEnergy2_C->Fill( percent );
-        }
-        if ( energy0 > 1 && energy1 > 1 && energy2 > 1 && amp0 > 0.02 && amp1 > 0.02 && amp2 > 0.02 )
-        {
-          average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time )/(vect[0].charge+vect[1].charge + vect[2].charge );
-          histTOFPixel3largest_C->Fill( average );
-          Energy = energy0 + energy1 + energy2;
-          percent = Energy/totalEnergy * 100;
-          histEnergy3_C->Fill( percent );
-        }
-        if ( energy0 > 1 && energy1 > 1 && energy2 > 1 && energy3 > 1 && amp0 > 0.02 && amp1 > 0.02 && amp2 > 0.02 && amp3 > 0.02 )
-        {
-          average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time )/(vect[0].charge+vect[1].charge + vect[2].charge + vect[3].charge );
-          histTOFPixel4largest_C->Fill( average );
-          Energy = energy0 + energy1 + energy2 + energy3;
-          percent = Energy/totalEnergy * 100;
-          histEnergy4_C->Fill( percent );
-        }
-        if ( energy0 > 1 && energy1 > 1 && energy2 > 1 && energy3 > 1 && energy4 > 1 && amp0 > 0.02 && amp1 > 0.02 && amp2 > 0.02 && amp3 > 0.02 && amp4 > 0.02 )
-        {
-          average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time )/(vect[0].charge+vect[1].charge + vect[2].charge + vect[3].charge + vect[4].charge );
-          histTOFPixel5largest_C->Fill( average );
-          Energy = energy0 + energy1 + energy2 + energy3 + energy4;
-          percent = Energy/totalEnergy * 100;
-          histEnergy5_C->Fill( percent );
-        }
-        if ( energy0 > 1 && energy1 > 1 && energy2 > 1 && energy3 > 1 && energy4 > 1 && energy5 > 1 && amp0 > 0.02 && amp1 > 0.02 && amp2 > 0.02 && amp3 > 0.02 && amp4 > 0.02 && amp5 > 0.02 )
-        {
-          average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[5].charge*vect[5].time )/(vect[0].charge+vect[1].charge + vect[2].charge + vect[3].charge + vect[4].charge + vect[5].charge );
-          histTOFPixel6largest_C->Fill( average );
-          Energy = energy0 + energy1 + energy2 + energy3 + energy4 + energy5;
-          percent = Energy/totalEnergy * 100;
-          histEnergy6_C->Fill( percent );
-        }
-        if ( energy0 > 1 && energy1 > 1 && energy2 > 1 && energy3 > 1 && energy4 > 1 && energy5 > 1 && energy6 > 1 && amp0 > 0.02 && amp1 > 0.02 && amp2 > 0.02 && amp3 > 0.02 && amp4 > 0.02 && amp5 > 0.02 && amp6 > 0.02 )
-        {
-          average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[5].charge*vect[5].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[1].charge +vect[2].charge+vect[3].charge +vect[4].charge+vect[5].charge + vect[6].charge );
-          histTOFPixel7largest_C->Fill( average );
-          Energy = energy0 + energy1 + energy2 + energy3 + energy4 + energy5 + energy6;
-          percent = Energy/totalEnergy * 100;
-          histEnergy7_C->Fill( percent );
-        }
+      if ( energy3 > 1 && amp3 > 0.01 )
+      {
+        weight3 = energy3;
+      }
+        
+      Energy = weight1 + weight2 + weight3;
+      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time )/( Energy );
+      histTOF_largest[2]->Fill( average );
+      histTOF_largest_C[2]->Fill( average );
+      histChargeContained[2]->Fill( Energy );
 
-        // make 2D histogram with delta t and charge for event, using overall cuts on Photek and center pixel (charge and amplitude)
-        histDeltaTCharge_C->Fill( vect[0].time, vect[0].charge );
+      if ( energy4 > 1 && amp4 > 0.01 )
+      {
+        weight4 = energy4;
+      }
+        
+      Energy = weight1 + weight2 + weight3 + weight4;
+      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time )/( Energy );
+      histTOF_largest[3]->Fill( average );
+      histTOF_largest_C[3]->Fill( average );     
+      histChargeContained[3]->Fill( Energy );
 
-        // make histogram of charge (or energy) vs. number of events with this charge
-        //histChargeContained_C->Fill( energy_center );
-        histChargeContained_C->Fill( totalEnergy );
+      if ( energy5 > 1 && amp5 > 0.01 )
+      {
+        weight5 = energy5;
+      }
+        
+      Energy = weight1 + weight2 + weight3 + weight4 + weight5;
+      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time )/( Energy );
+      histTOF_largest[4]->Fill( average );
+      histTOF_largest_C[4]->Fill( average );
+      histChargeContained[4]->Fill( Energy );
 
-        // make histogram of time vs number of events (to determine time resolution) using all pixels
-        // but apply cuts such that only a specific energy (or charge) range is used for the events plotted
-        // time is weighted by charge in the pixel, same as the histTOFPixel_largest above
-        //if ( energy_center >= 10 && energy_center <= 20 )
-        if ( totalEnergy >= 30 && totalEnergy <= 40 )
-        {
-          //average = time_center;
-          average = (vect[0].charge*vect[0].time + vect[1].charge*vect[1].time + vect[2].charge*vect[2].time + vect[3].charge*vect[3].time + vect[4].charge*vect[4].time + vect[5].charge*vect[5].time + vect[6].charge*vect[6].time )/(vect[0].charge+vect[1].charge +vect[2].charge+vect[3].charge +vect[4].charge+vect[5].charge + vect[6].charge );
-          histTOFEnergyCut_C->Fill( average );
-        }
+      if ( energy6 > 1 && amp6 > 0.01 )
+      {
+        weight6 = energy6;
+      }
+        
+      Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6;
+      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time )/( Energy );
+      histTOF_largest[5]->Fill( average );
+      histTOF_largest_C[5]->Fill( average );
+      histChargeContained[5]->Fill( Energy );
+
+      if ( energy7 > 1 && amp7 > 0.01 )
+      {
+        weight7 = energy7;
+      }
+        
+      Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
+      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time + weight7*vect[6].time )/( Energy );
+      histTOF_largest[6]->Fill( average );
+      histTOF_largest_C[6]->Fill( average ); 
+      histChargeContained[6]->Fill( Energy );
+
+      totalEnergy = energy1 + energy2 + energy3 + energy4 + energy5 + energy6 + energy7;
+
+      // Makes 2D histogram with delta t and charge for event, using overall cuts on Photek and center pixel (charge and amplitude)
+      histDeltaTCharge_C->Fill( totalEnergy , average );
+
+      // make histogram of charge (or energy) vs. number of events with this charge
+      histTotalChargeContained_C->Fill( totalEnergy );
+
+      // make a histogram with the charge contained in the center pixel
+      histChargeCenterContained_C->Fill( energy_center );
+
+      // make histogram of time vs number of events (to determine time resolution) using all pixels that have passed charge and amplitude cuts
+      // but apply cuts such that only a specific energy (or charge) range is used for the events plotted
+      // time is weighted by charge in the pixel, same as the histTOF_largest above
+      if ( Energy >= 30 && Energy <= 40 )
+      {
+        histTOFEnergyCut_C->Fill( average );
+      }
+      // same but only use center pixel
+      if ( energy_center >= 30 && energy_center <= 40 )
+      {
+        average = time_center ;
+        histTOFEnergyCutCenter_C->Fill( average );
       }
 
       std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
@@ -524,15 +533,32 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   histChargeCenterOverTotalCharge = NormalizeHist(histChargeCenterOverTotalCharge);
   histChargeRingOneOverTotalCharge = NormalizeHist(histChargeRingOneOverTotalCharge);
 
-  // Do Gaussian fit of delta T distributions
-  for(int j=0; j<7; j++) {
+  // Do Gaussian fit of delta T distributions for each pixel alone
+  TF1* f1_g1[7];
+  for(int j=0; j<7; j++)
+  {
     double mean = histDeltaT[j]->GetMean();
     double rms = histDeltaT[j]->GetRMS();
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
+    f1_g1[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax);
     cout << "\nFitting Channel #" << j << ":\n" << endl;
-    histDeltaT[j]->Fit("gaus","MLES","",xmin,xmax);
+    histDeltaT[j]->Fit(Form("g_fit_%d",j),"MLES","",xmin,xmax);
   }
+
+  // Do Gaussian fit of time resolution largest pixel distributions
+  TF1* f1_g[7];
+  for(int j=0; j<7; j++) 
+  {
+    double mean = histTOF_largest_C[j]->GetMean();
+    double rms = histTOF_largest_C[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    f1_g[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histTOF_largest_C[j]->Fit(Form("g_fit_%d",j),"R","", xmin,xmax);
+  }
+
 
   // creates root file
   TFile *file = TFile::Open(outputFilename.c_str(), "RECREATE");
@@ -549,37 +575,26 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   file->WriteTObject(histChargeRingOneOverTotalCharge,"histChargeRingOneOverTotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaTCombined,"histDeltaTCombined", "WriteDelete");
 
-  file->WriteTObject(histTOF2Pixel12_C,"AveragePixels12", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel13_C,"AveragePixels13", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel14_C,"AveragePixels14", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel15_C,"AveragePixels15", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel16_C,"AveragePixels16", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel17_C,"AveragePixels17", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel_All_C,"AveragePixels_All", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel_167_C,"AveragePixels_167", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel_172_C,"AveragePixels_172", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel_123_C,"AveragePixels_123", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel_134_C,"AveragePixels_134", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel_145_C,"AveragePixels_145", "WriteDelete");
-  file->WriteTObject(histTOF2Pixel_156_C,"AveragePixels_156", "WriteDelete");
-  file->WriteTObject(histTOFPixellargest_C,"AveragePixels_largest", "WriteDelete");
-  file->WriteTObject(histTOFPixel2largest_C,"AveragePixels_2largest", "WriteDelete");
-  file->WriteTObject(histTOFPixel3largest_C,"AveragePixels_3largest", "WriteDelete");
-  file->WriteTObject(histTOFPixel4largest_C,"AveragePixels_4largest", "WriteDelete");
-  file->WriteTObject(histTOFPixel5largest_C,"AveragePixels_5largest", "WriteDelete");
-  file->WriteTObject(histTOFPixel6largest_C,"AveragePixels_6largest", "WriteDelete");
-  file->WriteTObject(histTOFPixel7largest_C,"AveragePixels_7largest", "WriteDelete");
+
+  for( int i = 0; i < 7; i++ )
+  {
+    histTOF_largest_C[i]->Write( Form("TOF_largest_%d_corr", i+1) );
+    histTOF_largest[i]->Write( Form("TOF_largest_%d", i+1) );
+  }
+
+  for ( int i = 0; i < 7; i++ )
+  {
+    histChargeContained[i]->Write( Form("Charge_Contained_%d", i+1) );
+  }
+
   file->WriteTObject(histMaxIndex_C,"MaxIndex", "WriteDelete");
-  file->WriteTObject(histEnergy1_C,"PercentTotalEnergy1", "WriteDelete");
-  file->WriteTObject(histEnergy2_C,"PercentTotalEnergy2", "WriteDelete");
-  file->WriteTObject(histEnergy3_C,"PercentTotalEnergy3", "WriteDelete");
-  file->WriteTObject(histEnergy4_C,"PercentTotalEnergy4", "WriteDelete");
-  file->WriteTObject(histEnergy5_C,"PercentTotalEnergy5", "WriteDelete");
-  file->WriteTObject(histEnergy6_C,"PercentTotalEnergy6", "WriteDelete");
-  file->WriteTObject(histEnergy7_C,"PercentTotalEnergy7", "WriteDelete");
+
   file->WriteTObject(histTimeDiff_C,"PixelTimeDifference", "WriteDelete");
-  file->WriteTObject(histChargeContained_C,"ChargeContained", "WriteDelete");
+  file->WriteTObject(histTotalChargeContained_C,"Total Charge Contained", "WriteDelete");
+
+  file->WriteTObject(histChargeCenterContained_C,"ChargeCenterContained", "WriteDelete");
   file->WriteTObject(histTOFEnergyCut_C,"TOF with energy cut", "WriteDelete");
+  file->WriteTObject(histTOFEnergyCutCenter_C,"TOF with energy cut for center pixel", "WriteDelete");
 
   file->WriteTObject(histDeltaTCharge_C,"Delta T vs Charge", "WriteDelete");
 
@@ -606,10 +621,10 @@ void MultiChannelStudy_TimingMethod1() {
   // DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
   // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
   // DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
+  //DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
   DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
-  DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
-  DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
-  DoMultiChannelStudy("../../raw/combine_8gev_1mm.root","output_8gev_1mm.root");
+  //DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
+  //DoMultiChannelStudy("../../raw/combine_8gev_1mm.root","output_8gev_1mm.root");
 
 
 }
