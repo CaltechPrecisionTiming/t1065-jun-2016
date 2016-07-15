@@ -75,7 +75,12 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_TotalCharge","; Time [ns];Number of Events",150,-1,1);
   TH1F *histDeltaT_PicoSil_vs_MCP[7];
   for(int i=0; i<7; i++) histDeltaT_PicoSil_vs_MCP[i] = new TH1F(Form("histDeltaT_PicoSil_vs_MCP_%d",i),"; Time [ns];Number of Events", 1000, -4, -1); // DeltaT between PicoSil and MCP instead of Photek.
-  
+
+  TH1F *histCharges[7]; // collects charge values for picosil pixels in every event in which they pass the cuts.
+  for(int i=0; i<7; i++) histCharges[i] = new TH1F( Form("histCharges_%d",i),"; Time [ns];Number of Events", 80, 0, 80);
+ 
+  TH2F *histDeltaT_vs_Charge = new TH2F("histDeltaT_vs_Charge","; PicoSil Event Charge [pC]; Time [ns];Number of Events", 200, 0.1, 80, 300, -0.3, 0.3);
+ 
 
   float totalPicoSilCharge[7] = {0.};
   float totalCenterCharge = 0; // Should be same value as totalPicoSilCharge[0]
@@ -131,8 +136,14 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
       if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
 	DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j];
 	DeltaTPicoSil_vs_MCP[j-1] = (linearTime45[j] - photekTimeGauss0) - (MCPTime - photekTimeGauss1); //subtracting photek accts for MCP and HGC in diff groups
-	if ( j == 1 ) totalPicoSilCharge[j-1] += centerCharge;
-	else totalPicoSilCharge[j-1] += integral[j];
+	if ( j == 1 ) {
+	  totalPicoSilCharge[j-1] += centerCharge;
+	  histCharges[j-1]->Fill(centerCharge);
+	}
+	else {
+	  totalPicoSilCharge[j-1] += integral[j];
+	  histCharges[j-1]->Fill(integral[j]);
+	}
       }
     }
 
@@ -405,11 +416,12 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   file->WriteTObject(histDeltaT_PicoSil_MCP_TotalCharge,"histDeltaT_PicoSil_MCP_TotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_vs_MCP_TotalCharge,"histDeltaT_PicoSil_vs_MCP_TotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_vs_MCP_EventCharge,"histDeltaT_PicoSil_vs_MCP_EventCharge", "WriteDelete");
-
-  file->WriteTObject(histDeltaT_PicoSil_vs_MCP[0],"histDeltaT_PicoSil_vs_MCP[0]","WriteDelete");
-  file->WriteTObject(histDeltaT_PicoSil_vs_MCP[1],"histDeltaT_PicoSil_vs_MCP[1]","WriteDelete");
-  file->WriteTObject(histDeltaT_PicoSil_vs_MCP[2],"histDeltaT_PicoSil_vs_MCP[2]","WriteDelete");
-  file->WriteTObject(histDeltaT_PicoSil_vs_MCP[3],"histDeltaT_PicoSil_vs_MCP[3]","WriteDelete");
+  for(int i=0; i<=6; i++) {
+    file->WriteTObject(histDeltaT_PicoSil_vs_MCP[i],Form("histDeltaT_PicoSil_vs_MCP[%d]",i),"WriteDelete");
+  }  
+  for(int i=0; i<=6; i++) {
+    file->WriteTObject(histCharges[i],Form("histCharges[%d]",i),"WriteDelete");
+  }
 
 
   TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 400, 0, 2.5);
