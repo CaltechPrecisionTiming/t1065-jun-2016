@@ -314,8 +314,8 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     for (int j = 0; j <= 6; j++) {
       temp_pslandauweight += DeltaTPicoSil[j]*MPVlandau[j];
       if (DeltaTPicoSil[j] != 0) temp_pslandaucharge += MPVlandau[j];
-      DeltaT_PicoSilLandauCharge_MCP_Equal += 0.5*temp_pslandauweight/temp_pslandaucharge;
     }
+    DeltaT_PicoSilLandauCharge_MCP_Equal += 0.5*temp_pslandauweight/temp_pslandaucharge;
 
     float DeltaT_PicoSil_MCP_Equal = DeltaTMCP;
     int inc = 1; //Divide by inc at the end, because some PicoSil pixels may not have passed cuts.
