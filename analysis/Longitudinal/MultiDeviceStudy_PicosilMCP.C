@@ -54,28 +54,37 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   tree->SetBranchAddress("int",integral);
 
   //Create histograms
-  TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal","; Time [ns];Number of Events", 100, -.3, .3); // Weights MCP and PicoSil center pixel 50-50
-  TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal","; Time [ns];Number of Events", 100, -.3, .3);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
-  TH1F *histDeltaT_PicoSilTotalCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilTotalCharge_MCP_Equal","; Time [ns];Number of Events", 100, -.3, .3);// Picosil delta T found by weighting with total pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
-  TH1F *histDeltaT_PicoSilEqual_MCP_Equal = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal","; Time [ns];Number of Events", 100, -.3, .3);//Picosil delta T found by weighting pixels equally, and then overall delta T fund by weighting PicoSil and MCP equally. Thus MCP is weighted by 1/2 and each pixel is weighted 1/14.
-  TH1F *histDeltaT_PicoSil_MCP_Equal = new TH1F("histDeltaT_PicoSil_MCP_Equal","; Time [ns];Number of Events", 100, -.3, .3);// delta T found by placing equal emphasis on the pixels as on the MCP. Thus everything is weighted 1/8.
-  TH1F *histDeltaT_PicoSil_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_MCP_EventCharge","; Time [ns];Number of Events", 100, -.3, .3);// delta T found by weighting with event charge in each device.
-  TH1F *histDeltaT_PicoSil_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_MCP_TotalCharge","; Time [ns];Number of Events", 100, -.3, .3);// delta T found by constant weighting with charge in device over entire run.
+  TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3); // Weights MCP and PicoSil center pixel 50-50
+  TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
+  TH1F *histDeltaT_PicoSilTotalCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilTotalCharge_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);// Picosil delta T found by weighting with total pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
+  TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);
+  TH1F *histDeltaT_PicoSilEqual_MCP_Equal = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);//Picosil delta T found by weighting pixels equally, and then overall delta T fund by weighting PicoSil and MCP equally. Thus MCP is weighted by 1/2 and each pixel is weighted 1/14.
+  TH1F *histDeltaT_PicoSil_MCP_Equal = new TH1F("histDeltaT_PicoSil_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);// delta T found by placing equal emphasis on the pixels as on the MCP. Thus everything is weighted 1/8.
+  TH1F *histDeltaT_PicoSil_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_MCP_EventCharge","; Time [ns];Number of Events", 150, -.3, .3);// delta T found by weighting with event charge in each device.
+  TH1F *histDeltaT_PicoSil_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_MCP_TotalCharge","; Time [ns];Number of Events", 150, -.3, .3);// delta T found by constant weighting with charge in device over entire run.
   TH1F *histDeltaT_Center_MCP_EventCharge_NoShift = new TH1F("histDeltaT_Center_MCP_EventCharge_NoShift","; Time [ns];Number of Events", 100, 2, 6); //Weights each event based on charge. Poor resolution.
   TH1F *histDeltaTPicoSil[7];
   for(int i=0; i<7; i++) histDeltaTPicoSil[i] = new TH1F(Form("histDeltaTPicoSil_%d",i),"; Time [ns];Number of Events", 50, 3, 6); //DeltaT of PicoSil pixels
   TH1F *histDeltaTCenter = new TH1F("histDeltaTCenter","; Time [ns];Number of Events", 50, 4, 5); //DeltaT of center picosil pixel
   TH1F *histDeltaTMCP = new TH1F("histDeltaTMCP","; Time [ns];Number of Events", 50, 2, 3); //DeltaT of MCP
-  TH1F *histDeltaTPicoSilAt0TotalCharge = new TH1F("histDeltaTPicoSilAt0TotalCharge","; Time [ns];Number of Events", 100, -0.3, 0.3); //All pixels combined
-  TH1F *histDeltaTPicoSilAt0EventCharge = new TH1F("histDeltaTPicoSilAt0EventCharge","; Time [ns];Number of Events", 100, -0.3, 0.3);
-  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0","; Time [ns];Number of Events", 100, -0.3, 0.3); //shifted to be centered at zero
-  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0","; Time [ns];Number of Events", 100, -0.3, 0.3); //shifted to be centered at zero
+  TH1F *histDeltaTPicoSilAt0TotalCharge = new TH1F("histDeltaTPicoSilAt0TotalCharge","; Time [ns];Number of Events", 150, -0.3, 0.3); //All pixels combined
+  TH1F *histDeltaTPicoSilAt0EventCharge = new TH1F("histDeltaTPicoSilAt0EventCharge","; Time [ns];Number of Events", 150, -0.3, 0.3);
+  TH1F *histDeltaTPicoSilAt0LandauCharge = new TH1F("histDeltaTPicoSilAt0LandauCharge","; Time [ns];Number of Events", 150, -0.3, 0.3);// NEW: uses charge MPV
+  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
+  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
 
-  TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_EventCharge","; Time [ns];Number of Events",150,-1,1);
-  TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_TotalCharge","; Time [ns];Number of Events",150,-1,1);
+  TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_EventCharge","; Time [ns];Number of Events",150,-0.3,0.3);
+  TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_TotalCharge","; Time [ns];Number of Events",150,-0.3,0.3);
   TH1F *histDeltaT_PicoSil_vs_MCP[7];
-  for(int i=0; i<7; i++) histDeltaT_PicoSil_vs_MCP[i] = new TH1F(Form("histDeltaT_PicoSil_vs_MCP_%d",i),"; Time [ns];Number of Events", 1000, -4, -1); // DeltaT between PicoSil and MCP instead of Photek.
-  
+  for(int i=0; i<7; i++) histDeltaT_PicoSil_vs_MCP[i] = new TH1F(Form("histDeltaT_PicoSil_vs_MCP_%d",i),"; Time [ns];Number of Events", 300, -3.5, -1.5); // DeltaT between PicoSil and MCP instead of Photek.
+
+  TH1F *histCharges[7]; // collects charge values for picosil pixels in every event in which they pass the cuts.
+  for(int i=0; i<7; i++) histCharges[i] = new TH1F( Form("histCharges_%d",i),"; Charge [pC];Number of Events", 160, 0, 80);
+ 
+  TH2F *histDeltaT_vs_Charge_PicoSil = new TH2F("histDeltaT_vs_Charge_PicoSil","; Event Charge [pC]; Time [ns];Number of Events", 200, 0.1, 80, 300, -0.3, 0.3);
+  TH2F *histDeltaT_vs_Charge_MCP = new TH2F("histDeltaT_vs_Charge_MCP","; Event Charge [pC]; Time [ns];Number of Events", 200, 0.1, 80, 300, -0.3, 0.3);
+  // THE ABOVE TWO HISTOGRAMS ARE INITIALIZED BUT UNUSED CURRENTLY.
+
 
   float totalPicoSilCharge[7] = {0.};
   float totalCenterCharge = 0; // Should be same value as totalPicoSilCharge[0]
@@ -131,8 +140,14 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
       if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
 	DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j];
 	DeltaTPicoSil_vs_MCP[j-1] = (linearTime45[j] - photekTimeGauss0) - (MCPTime - photekTimeGauss1); //subtracting photek accts for MCP and HGC in diff groups
-	if ( j == 1 ) totalPicoSilCharge[j-1] += centerCharge;
-	else totalPicoSilCharge[j-1] += integral[j];
+	if ( j == 1 ) {
+	  totalPicoSilCharge[j-1] += centerCharge;
+	  histCharges[j-1]->Fill(centerCharge);
+	}
+	else {
+	  totalPicoSilCharge[j-1] += integral[j];
+	  histCharges[j-1]->Fill(integral[j]);
+	}
       }
     }
 
@@ -162,19 +177,42 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   double rms = histDeltaT_Center_MCP_EventCharge_NoShift->GetRMS();
   double xmin = mean-2.0*rms;
   double xmax = mean+2.0*rms;
-  histDeltaT_Center_MCP_EventCharge_NoShift->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_Center_MCP_EventCharge_NoShift->Fit("gaus","QMLES","",xmin,xmax); // Q suppresses fit results
 
   double meanCenter = histDeltaTCenter->GetMean();
   rms = histDeltaTCenter->GetRMS();
   xmin = meanCenter-2.0*rms;
   xmax = meanCenter+2.0*rms;
-  histDeltaTCenter->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaTCenter->Fit("gaus","QMLES","",xmin,xmax);
 
   double meanMCP = histDeltaTMCP->GetMean();
   rms = histDeltaTMCP->GetRMS();
   xmin = meanMCP-2.0*rms;
   xmax = meanMCP+2.0*rms;
-  histDeltaTMCP->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaTMCP->Fit("gaus","QMLES","",xmin,xmax);
+
+
+  TF1 *flandau[7];
+  double MPVlandau[7]; // Seeing if we can get better results by using Landau mean as weighting charge value.
+  for(int i=1; i<=6; i++) {
+  mean = histCharges[i]->GetMean();
+  rms = histCharges[i]->GetRMS();
+  xmin = mean-2.0*rms;
+  xmax = mean+2.0*rms;
+  flandau[i] = new TF1( Form("flandau_%d",i), "landau", xmin, xmax); // 1-D landau func
+  histCharges[i]->Fit( Form("flandau_%d",i), "QMLE","", xmin, xmax);
+  MPVlandau[i] = flandau[i]->GetMaximumX(); // In order to find MPV.
+  }
+  mean = histCharges[0]->GetMean();
+  rms = histCharges[0]->GetRMS();
+  xmin = mean-2.0*rms;
+  xmax = mean+2.0*rms;
+  flandau[0] = new TF1("flandau_0","gaus", xmin, xmax); // storing a Gaus fit for the central pixel with the other landau fits
+  histCharges[0]->Fit("flandau_0","QMLE","", xmin, xmax);
+  MPVlandau[0] = flandau[0]->GetParameter(1);
+  for(int i=0; i<=6; i++) {
+    cout<<MPVlandau[i]<<endl;
+  }
 
 
   double meanPicoSil[7];
@@ -239,9 +277,9 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
       if (jj != 1) PicoSil_vs_MCP_WeightEvent += integral[jj] * DeltaTPicoSil_vs_MCP[jj-1];
       else PicoSil_vs_MCP_WeightEvent += centerCharge * DeltaTPicoSil_vs_MCP[jj-1];
       if (DeltaTPicoSil_vs_MCP[jj-1] != 0.) {
-	if ( jj != 1 ) PicoSil_vs_MCP_ChargeEvent += integral[jj];
-	else PicoSil_vs_MCP_ChargeEvent += centerCharge;
-	PicoSil_vs_MCP_ChargeTotal += totalPicoSilCharge[jj-1];
+      	if ( jj != 1 ) PicoSil_vs_MCP_ChargeEvent += integral[jj];
+      	else PicoSil_vs_MCP_ChargeEvent += centerCharge;
+      	PicoSil_vs_MCP_ChargeTotal += totalPicoSilCharge[jj-1];
       }
     }
 
@@ -270,6 +308,15 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     if (DeltaTPicoSil[0] != 0) temp_pseventcharge += centerCharge;
     DeltaT_PicoSilEventCharge_MCP_Equal += 0.5*temp_pseventweight/temp_pseventcharge;
 
+    float DeltaT_PicoSilLandauCharge_MCP_Equal = 0.5*DeltaTMCP;
+    float temp_pslandauweight = 0;
+    float temp_pslandaucharge = 0;
+    for (int j = 0; j <= 6; j++) {
+      temp_pslandauweight += DeltaTPicoSil[j]*MPVlandau[j];
+      if (DeltaTPicoSil[j] != 0) temp_pslandaucharge += MPVlandau[j];
+    }
+    DeltaT_PicoSilLandauCharge_MCP_Equal += 0.5*temp_pslandauweight/temp_pslandaucharge;
+
     float DeltaT_PicoSil_MCP_Equal = DeltaTMCP;
     int inc = 1; //Divide by inc at the end, because some PicoSil pixels may not have passed cuts.
     for (int j = 0; j <= 6; j++) {
@@ -297,11 +344,13 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     histDeltaT_PicoSil_MCP_TotalCharge->Fill(DeltaT_PicoSil_MCP_TotalCharge); 
     histDeltaT_PicoSilTotalCharge_MCP_Equal->Fill(DeltaT_PicoSilTotalCharge_MCP_Equal);
     histDeltaT_PicoSilEventCharge_MCP_Equal->Fill(DeltaT_PicoSilEventCharge_MCP_Equal);
+    histDeltaT_PicoSilLandauCharge_MCP_Equal->Fill(DeltaT_PicoSilLandauCharge_MCP_Equal);
     histDeltaT_PicoSil_MCP_Equal->Fill(DeltaT_PicoSil_MCP_Equal);
     histDeltaT_PicoSilEqual_MCP_Equal->Fill(DeltaT_PicoSilEqual_MCP_Equal);
 
     histDeltaTPicoSilAt0TotalCharge->Fill(temp_pstotalweight/temp_pstotalcharge);
     histDeltaTPicoSilAt0EventCharge->Fill(temp_pseventweight/temp_pseventcharge);
+    histDeltaTPicoSilAt0LandauCharge->Fill(temp_pslandauweight/temp_pslandaucharge);
     histDeltaTCenterAt0->Fill(DeltaTCenter);
     histDeltaTMCPAt0->Fill(DeltaTMCP);
 
@@ -313,79 +362,91 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   rms = histDeltaT_Center_MCP_Equal->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaT_Center_MCP_Equal->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_Center_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaT_PicoSil_MCP_Equal->GetMean();
   rms = histDeltaT_PicoSil_MCP_Equal->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_MCP_Equal->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_PicoSil_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaT_PicoSilEqual_MCP_Equal->GetMean();
   rms = histDeltaT_PicoSilEqual_MCP_Equal->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaT_PicoSilEqual_MCP_Equal->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_PicoSilEqual_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaT_PicoSil_MCP_EventCharge->GetMean();
   rms = histDeltaT_PicoSil_MCP_EventCharge->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_MCP_EventCharge->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_PicoSil_MCP_EventCharge->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaT_PicoSil_MCP_TotalCharge->GetMean();
   rms = histDeltaT_PicoSil_MCP_TotalCharge->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_MCP_TotalCharge->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_PicoSil_MCP_TotalCharge->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaT_PicoSilTotalCharge_MCP_Equal->GetMean();
   rms = histDeltaT_PicoSilTotalCharge_MCP_Equal->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaT_PicoSilTotalCharge_MCP_Equal->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_PicoSilTotalCharge_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaT_PicoSilEventCharge_MCP_Equal->GetMean();
   rms = histDeltaT_PicoSilEventCharge_MCP_Equal->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaT_PicoSilEventCharge_MCP_Equal->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_PicoSilEventCharge_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
+
+  mean = histDeltaT_PicoSilLandauCharge_MCP_Equal->GetMean();
+  rms = histDeltaT_PicoSilLandauCharge_MCP_Equal->GetRMS();
+  xmin = mean-2.0*rms;
+  xmax = mean+2.0*rms;
+  histDeltaT_PicoSilLandauCharge_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaTCenterAt0->GetMean();
   rms = histDeltaTCenterAt0->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaTCenterAt0->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaTCenterAt0->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaTMCPAt0->GetMean();
   rms = histDeltaTMCPAt0->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaTMCPAt0->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaTMCPAt0->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaTPicoSilAt0TotalCharge->GetMean();
   rms = histDeltaTPicoSilAt0TotalCharge->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaTPicoSilAt0TotalCharge->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaTPicoSilAt0TotalCharge->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaTPicoSilAt0EventCharge->GetMean();
   rms = histDeltaTPicoSilAt0EventCharge->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaTPicoSilAt0EventCharge->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaTPicoSilAt0EventCharge->Fit("gaus","QMLES","",xmin,xmax);
+
+  mean = histDeltaTPicoSilAt0LandauCharge->GetMean();
+  rms = histDeltaTPicoSilAt0LandauCharge->GetRMS();
+  xmin = mean-2.0*rms;
+  xmax = mean+2.0*rms;
+  histDeltaTPicoSilAt0LandauCharge->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaT_PicoSil_vs_MCP_TotalCharge->GetMean();
   rms = histDeltaT_PicoSil_vs_MCP_TotalCharge->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_vs_MCP_TotalCharge->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_PicoSil_vs_MCP_TotalCharge->Fit("gaus","QMLES","",xmin,xmax);
 
   mean = histDeltaT_PicoSil_vs_MCP_EventCharge->GetMean();
   rms = histDeltaT_PicoSil_vs_MCP_EventCharge->GetRMS();
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_vs_MCP_EventCharge->Fit("gaus","MLES","",xmin,xmax);
+  histDeltaT_PicoSil_vs_MCP_EventCharge->Fit("gaus","QMLES","",xmin,xmax);
 
 
   // Creates output root file
@@ -394,6 +455,7 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   file->WriteTObject(histDeltaTCenterAt0,"histDeltaTCenter", "WriteDelete");
   file->WriteTObject(histDeltaTPicoSilAt0EventCharge,"histDeltaTPicoSilEventCharge", "WriteDelete");
   file->WriteTObject(histDeltaTPicoSilAt0TotalCharge,"histDeltaTPicoSilTotalCharge", "WriteDelete");
+  file->WriteTObject(histDeltaTPicoSilAt0LandauCharge,"histDeltaTPicoSilLandauCharge", "WriteDelete");
   file->WriteTObject(histDeltaTMCPAt0,"histDeltaTMCP", "WriteDelete");
   file->WriteTObject(histDeltaT_Center_MCP_EventCharge_NoShift,"histDeltaT_Center_MCP_EventCharge_NoShift", "WriteDelete");
   file->WriteTObject(histDeltaT_Center_MCP_Equal,"histDeltaT_Center_MCP_Equal", "WriteDelete");
@@ -401,15 +463,17 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   file->WriteTObject(histDeltaT_PicoSilEqual_MCP_Equal,"histDeltaT_PicoSilEqual_MCP_Equal", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSilEventCharge_MCP_Equal,"histDeltaT_PicoSilEventCharge_MCP_Equal", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSilTotalCharge_MCP_Equal,"histDeltaT_PicoSilTotalCharge_MCP_Equal", "WriteDelete");
+  file->WriteTObject(histDeltaT_PicoSilLandauCharge_MCP_Equal,"histDeltaT_PicoSilLandauCharge_MCP_Equal", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_MCP_EventCharge,"histDeltaT_PicoSil_MCP_EventCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_MCP_TotalCharge,"histDeltaT_PicoSil_MCP_TotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_vs_MCP_TotalCharge,"histDeltaT_PicoSil_vs_MCP_TotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_vs_MCP_EventCharge,"histDeltaT_PicoSil_vs_MCP_EventCharge", "WriteDelete");
-
-  file->WriteTObject(histDeltaT_PicoSil_vs_MCP[0],"histDeltaT_PicoSil_vs_MCP[0]","WriteDelete");
-  file->WriteTObject(histDeltaT_PicoSil_vs_MCP[1],"histDeltaT_PicoSil_vs_MCP[1]","WriteDelete");
-  file->WriteTObject(histDeltaT_PicoSil_vs_MCP[2],"histDeltaT_PicoSil_vs_MCP[2]","WriteDelete");
-  file->WriteTObject(histDeltaT_PicoSil_vs_MCP[3],"histDeltaT_PicoSil_vs_MCP[3]","WriteDelete");
+  for(int i=0; i<=6; i++) {
+    file->WriteTObject(histDeltaT_PicoSil_vs_MCP[i],Form("histDeltaT_PicoSil_vs_MCP[%d]",i),"WriteDelete");
+  }  
+  for(int i=0; i<=6; i++) {
+    file->WriteTObject(histCharges[i],Form("histCharges[%d]",i),"WriteDelete");
+  }
 
 
   TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 400, 0, 2.5);
@@ -460,17 +524,17 @@ void makeTimeResolution( string filename ) {
   TFile *_file = TFile::Open( filename.c_str() ); //Should be .root
 
   //Create variables containing hists:
-  TH1F* histDeltaT_Center_MCP_Equal = (TH1F*)_file->Get("histDeltaT_Center_MCP_Equal"); // each device weighted equally
-  TH1F* histDeltaTCenter = (TH1F*)_file->Get("histDeltaTCenter"); //Picosil center pixel
-  TH1F* histDeltaTPicoSilTotalCharge = (TH1F*)_file->Get("histDeltaTPicoSilTotalCharge");//Picosil, total charge
-  TH1F* histDeltaTPicoSilEventCharge = (TH1F*)_file->Get("histDeltaTPicoSilEventCharge");//Picosil, event charge
-  TH1F* histDeltaTMCP = (TH1F*)_file->Get("histDeltaTMCP"); // MCP
-  TH1F* histDeltaT_PicoSil_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_Equal");
-  TH1F* histDeltaT_PicoSilEqual_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSilEqual_MCP_Equal");
-  TH1F* histDeltaT_PicoSilEventCharge_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSilEventCharge_MCP_Equal");
-  TH1F* histDeltaT_PicoSilTotalCharge_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSilTotalCharge_MCP_Equal");
-  TH1F* histDeltaT_PicoSil_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_EventCharge"); //Combination of device Delta T's after shifting distributions around 0 and then weighting event by event.
-  TH1F* histDeltaT_PicoSil_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_TotalCharge"); //Combination after shifting around 0 and weighting with total charge.
+  TH1F *histDeltaT_Center_MCP_Equal = (TH1F*)_file->Get("histDeltaT_Center_MCP_Equal"); // each device weighted equally
+  TH1F *histDeltaTCenter = (TH1F*)_file->Get("histDeltaTCenter"); //Picosil center pixel
+  TH1F *histDeltaTPicoSilTotalCharge = (TH1F*)_file->Get("histDeltaTPicoSilTotalCharge");//Picosil, total charge
+  TH1F *histDeltaTPicoSilEventCharge = (TH1F*)_file->Get("histDeltaTPicoSilEventCharge");//Picosil, event charge
+  TH1F *histDeltaTMCP = (TH1F*)_file->Get("histDeltaTMCP"); // MCP
+  TH1F *histDeltaT_PicoSil_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_Equal");
+  TH1F *histDeltaT_PicoSilEqual_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSilEqual_MCP_Equal");
+  TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSilEventCharge_MCP_Equal");
+  TH1F *histDeltaT_PicoSilTotalCharge_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSilTotalCharge_MCP_Equal");
+  TH1F *histDeltaT_PicoSil_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_EventCharge"); //Combination of device Delta T's after shifting distributions around 0 and then weighting event by event.
+  TH1F *histDeltaT_PicoSil_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_TotalCharge"); //Combination after shifting around 0 and weighting with total charge.
 
   TCanvas *c = new TCanvas ("c","c",800, 600); 
   TLatex *tex = new TLatex();
@@ -490,7 +554,7 @@ void makeTimeResolution( string filename ) {
   histDeltaT_Center_MCP_Equal->Fit("fgaus1","QMLE","", mean - 2.0*rms, mean + 2.0*rms); // Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   histDeltaT_Center_MCP_Equal->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaT_Center_MCP_Equal->SetTitle("PicoSil Center Pixel, MCP: #Deltat w/ Equal Weighting");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus1->GetParameter(2), 1000*fgaus1->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus1->GetParameter(2), 1000*fgaus1->GetParError(2)));
   c->SaveAs("deltaT_Center_MCP_Equal.pdf");
 
   histDeltaTCenter->Draw();
@@ -500,7 +564,7 @@ void makeTimeResolution( string filename ) {
   histDeltaTCenter->Fit("fgaus2","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaTCenter->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaTCenter->SetTitle("PicoSil Center Pixel: #Deltat");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus2->GetParameter(2), 1000*fgaus2->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus2->GetParameter(2), 1000*fgaus2->GetParError(2)));
   c->SaveAs("deltaTCenter.pdf");
 
   histDeltaTMCP->Draw();
@@ -510,7 +574,7 @@ void makeTimeResolution( string filename ) {
   histDeltaTMCP->Fit("fgaus3","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaTMCP->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaTMCP->SetTitle("MCP: #Deltat");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus3->GetParameter(2), 1000*fgaus3->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus3->GetParameter(2), 1000*fgaus3->GetParError(2)));
   c->SaveAs("deltaTMCP.pdf");
   
   histDeltaT_PicoSil_MCP_EventCharge->Draw();
@@ -520,7 +584,7 @@ void makeTimeResolution( string filename ) {
   histDeltaT_PicoSil_MCP_EventCharge->Fit("fgaus4","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaT_PicoSil_MCP_EventCharge->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaT_PicoSil_MCP_EventCharge->SetTitle("PicoSil Inner Ring and Center Pixel, MCP: #Deltat w/ Event Charge Weighting");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus4->GetParameter(2), 1000*fgaus4->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus4->GetParameter(2), 1000*fgaus4->GetParError(2)));
   c->SaveAs("deltaT_PicoSil_MCP_EventCharge.pdf");
 
   histDeltaT_PicoSil_MCP_TotalCharge->Draw();
@@ -530,7 +594,7 @@ void makeTimeResolution( string filename ) {
   histDeltaT_PicoSil_MCP_TotalCharge->Fit("fgaus5","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaT_PicoSil_MCP_TotalCharge->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaT_PicoSil_MCP_TotalCharge->SetTitle("PicoSil Inner Ring and Center Pixel, MCP: #Deltat w/ Total Charge Weighting");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus5->GetParameter(2), 1000*fgaus5->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus5->GetParameter(2), 1000*fgaus5->GetParError(2)));
   c->SaveAs("deltaT_PicoSil_MCP_TotalCharge.pdf");
 
   histDeltaTPicoSilTotalCharge->Draw();
@@ -540,7 +604,7 @@ void makeTimeResolution( string filename ) {
   histDeltaTPicoSilTotalCharge->Fit("fgaus6","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaTPicoSilTotalCharge->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaTPicoSilTotalCharge->SetTitle("PicoSil Inner Ring, Center Pixel: #Deltat w/ Total Charge Weighting");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus6->GetParameter(2), 1000*fgaus6->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus6->GetParameter(2), 1000*fgaus6->GetParError(2)));
   c->SaveAs("deltaTPicoSilTotalCharge.pdf");
 
   histDeltaT_PicoSil_MCP_Equal->Draw();
@@ -550,7 +614,7 @@ void makeTimeResolution( string filename ) {
   histDeltaT_PicoSil_MCP_Equal->Fit("fgaus7","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaT_PicoSil_MCP_Equal->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaT_PicoSil_MCP_Equal->SetTitle("PicoSil 6 Inner Ring Pixels and Center Pixel, MCP: #Deltat w/ Weighting 1/8");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus7->GetParameter(2), 1000*fgaus7->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus7->GetParameter(2), 1000*fgaus7->GetParError(2)));
   c->SaveAs("deltaT_PicoSil_MCP_Equal.pdf");
 
   histDeltaT_PicoSilEqual_MCP_Equal->Draw();
@@ -560,7 +624,7 @@ void makeTimeResolution( string filename ) {
   histDeltaT_PicoSilEqual_MCP_Equal->Fit("fgaus8","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaT_PicoSilEqual_MCP_Equal->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaT_PicoSilEqual_MCP_Equal->SetTitle("PicoSil 6 Inner Ring Pixels and Center Pixel Weighted 1/14, MCP Weighted 1/2: #Deltat");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus8->GetParameter(2), 1000*fgaus8->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus8->GetParameter(2), 1000*fgaus8->GetParError(2)));
   c->SaveAs("deltaT_PicoSilEqual_MCP_Equal.pdf");
 
   histDeltaT_PicoSilEventCharge_MCP_Equal->Draw();
@@ -570,7 +634,7 @@ void makeTimeResolution( string filename ) {
   histDeltaT_PicoSilEventCharge_MCP_Equal->Fit("fgaus9","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaT_PicoSilEventCharge_MCP_Equal->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaT_PicoSilEventCharge_MCP_Equal->SetTitle("PicoSil Pixels w/ Event Charge Weighting then *1/2, MCP Weighted 1/2: #Deltat");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus9->GetParameter(2), 1000*fgaus9->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus9->GetParameter(2), 1000*fgaus9->GetParError(2)));
   c->SaveAs("deltaT_PicoSilEventCharge_MCP_Equal.pdf");
 
   histDeltaT_PicoSilTotalCharge_MCP_Equal->Draw();
@@ -580,7 +644,7 @@ void makeTimeResolution( string filename ) {
   histDeltaT_PicoSilTotalCharge_MCP_Equal->Fit("fgaus10","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaT_PicoSilTotalCharge_MCP_Equal->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaT_PicoSilTotalCharge_MCP_Equal->SetTitle("PicoSil Pixels w/ Total Charge Weighting then *1/2, MCP Weighted 1/2: #Deltat");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus10->GetParameter(2), 1000*fgaus10->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus10->GetParameter(2), 1000*fgaus10->GetParError(2)));
   c->SaveAs("deltaT_PicoSilTotalCharge_MCP_Equal.pdf");
 
   histDeltaTPicoSilEventCharge->Draw();
@@ -590,7 +654,7 @@ void makeTimeResolution( string filename ) {
   histDeltaTPicoSilEventCharge->Fit("fgaus11","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
   histDeltaTPicoSilEventCharge->GetXaxis()->SetTitle("Time Resolution [ns]");
   histDeltaTPicoSilEventCharge->SetTitle("PicoSil Inner Ring, Center Pixel: #Deltat w/ Event Charge Weighting");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgaus11->GetParameter(2), 1000*fgaus11->GetParError(2)));
+  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.1f #pm %.1f ps", 1000*fgaus11->GetParameter(2), 1000*fgaus11->GetParError(2)));
   c->SaveAs("deltaTPicoSilEventCharge.pdf");
   
 }
