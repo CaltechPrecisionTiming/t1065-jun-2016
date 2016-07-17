@@ -539,6 +539,8 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   hist->GetXaxis()->SetTitle("Time Resolution [ns]");
   tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  gStyle->SetOptFit(0); //Hides the parameter box
+  gStyle->SetOptStat(0);
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
@@ -551,12 +553,14 @@ void makeTimeResolution( string filename ) {
   TH1F *histDeltaTCenter = (TH1F*)_file->Get("histDeltaTCenter"); //Picosil center pixel
   TH1F *histDeltaTPicoSilTotalCharge = (TH1F*)_file->Get("histDeltaTPicoSilTotalCharge");//Picosil, total charge
   TH1F *histDeltaTPicoSilEventCharge = (TH1F*)_file->Get("histDeltaTPicoSilEventCharge");//Picosil, event charge
+  TH1F *histDeltaTPicoSilLandauCharge= (TH1F*)_file->Get("histDeltaTPicoSilLandauCharge");//Picosil, landau charge
   TH1F *histDeltaTMCP = (TH1F*)_file->Get("histDeltaTMCP"); // MCP
   TH1F *histDeltaT_Center_MCP_Equal = (TH1F*)_file->Get("histDeltaT_Center_MCP_Equal"); // each device weighted equally
   TH1F *histDeltaT_PicoSil_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_Equal");
   TH1F *histDeltaT_PicoSilEqual_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSilEqual_MCP_Equal");
   TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSilEventCharge_MCP_Equal");
   TH1F *histDeltaT_PicoSilTotalCharge_MCP_Equal = (TH1F*)_file->Get("histDeltaT_PicoSilTotalCharge_MCP_Equal");
+  TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal= (TH1F*)_file->Get("histDeltaT_PicoSilLandauCharge_MCP_Equal");
   TH1F *histDeltaT_PicoSil_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_EventCharge"); //Combination of device Delta T's after shifting distributions around 0 and then weighting event by event.
   TH1F *histDeltaT_PicoSil_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_TotalCharge"); //Combination after shifting around 0 and weighting with total charge.
 
@@ -568,12 +572,11 @@ void makeTimeResolution( string filename ) {
   tex->SetTextColor(kBlack);
 
   c->cd();
-  gStyle->SetOptStat(0); // Hides the parameter box
-  gStyle->SetOptFit(0); 
 
   histDeltaTCenter->SetTitle("PicoSil Center Pixel: #Deltat");
   histDeltaTPicoSilEventCharge->SetTitle("PicoSil Inner Ring, Center Pixel: #Deltat w/ Event Charge Weighting");
   histDeltaTPicoSilTotalCharge->SetTitle("PicoSil Inner Ring, Center Pixel: #Deltat w/ Total Charge Weighting");
+  histDeltaTPicoSilLandauCharge->SetTitle("PicoSil Inner Ring, Center Pixel: #Deltat w/ Landau MPV Charge Weighting");
   histDeltaTMCP->SetTitle("MCP: #Deltat");
   histDeltaT_Center_MCP_Equal->SetTitle("PicoSil Center Pixel, MCP: #Deltat w/ Equal Weighting");
   histDeltaT_PicoSil_MCP_Equal->SetTitle("PicoSil 6 Inner Ring Pixels and Center Pixel, MCP: #Deltat w/ Weighting 1/8");
@@ -582,11 +585,13 @@ void makeTimeResolution( string filename ) {
   histDeltaT_PicoSil_MCP_TotalCharge->SetTitle("PicoSil Inner Ring and Center Pixel, MCP: #Deltat w/ Total Charge Weighting");
   histDeltaT_PicoSilEventCharge_MCP_Equal->SetTitle("PicoSil Pixels w/ Event Charge Weighting then *1/2, MCP Weighted 1/2: #Deltat");
   histDeltaT_PicoSilTotalCharge_MCP_Equal->SetTitle("PicoSil Pixels w/ Total Charge Weighting then *1/2, MCP Weighted 1/2: #Deltat");
+  histDeltaT_PicoSilLandauCharge_MCP_Equal->SetTitle("PicoSil Pixels w/ Landau MPV Charge Weighting then *1/2, MCP Weighted 1/2: #Deltat");
 
 
   PlotDeltaTPDF(c, tex, histDeltaTCenter, "deltaTCenter.pdf");
   PlotDeltaTPDF(c, tex, histDeltaTPicoSilEventCharge, "deltaTPicoSilEventCharge.pdf");
   PlotDeltaTPDF(c, tex, histDeltaTPicoSilTotalCharge, "deltaTPicoSilTotalCharge.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaTPicoSilLandauCharge, "deltaTPicoSilLandauCharge.pdf");
   PlotDeltaTPDF(c, tex, histDeltaTMCP, "deltaTMCP.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_Center_MCP_Equal, "deltaT_Center_MCP_Equal.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_MCP_Equal, "deltaT_PicoSil_MCP_Equal.pdf");
@@ -594,7 +599,8 @@ void makeTimeResolution( string filename ) {
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_MCP_EventCharge, "deltaT_PicoSil_MCP_EventCharge.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_MCP_TotalCharge, "deltaT_PicoSil_MCP_TotalCharge.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilEventCharge_MCP_Equal, "deltaT_PicoSilEventCharge_MCP_Equal.pdf");
-  PlotDeltaTPDF(c, tex, histDeltaT_PicoSilTotalCharge_MCP_Equal, "deltaT_PicoSilTotalCharge_MCP_Equal.pdf");  
+  PlotDeltaTPDF(c, tex, histDeltaT_PicoSilTotalCharge_MCP_Equal, "deltaT_PicoSilTotalCharge_MCP_Equal.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal, "deltaT_PicoSilLandauCharge_MCP_Equal.pdf");
 }
 
 
