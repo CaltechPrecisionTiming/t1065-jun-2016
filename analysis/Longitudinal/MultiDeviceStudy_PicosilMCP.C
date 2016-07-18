@@ -201,6 +201,7 @@ void DoMultiDeviceStudy( string filename ) {
   xmax = mean+2.0*rms;
   flandau[i] = new TF1( Form("flandau_%d",i), "landau", xmin, xmax); // 1-D landau func
   histCharges[i]->Fit( Form("flandau_%d",i), "QMLE","", xmin, xmax);
+  gStyle->SetOptFit(1);
   MPVlandau[i] = flandau[i]->GetMaximumX(); // In order to find MPV.
   }
   mean = histCharges[0]->GetMean();
@@ -209,6 +210,7 @@ void DoMultiDeviceStudy( string filename ) {
   xmax = mean+2.0*rms;
   flandau[0] = new TF1("flandau_0","gaus", xmin, xmax); // storing a Gaus fit for the central pixel with the other landau fits
   histCharges[0]->Fit("flandau_0","QMLE","", xmin, xmax);
+  gStyle->SetOptFit(1);
   MPVlandau[0] = flandau[0]->GetParameter(1);
 
 
