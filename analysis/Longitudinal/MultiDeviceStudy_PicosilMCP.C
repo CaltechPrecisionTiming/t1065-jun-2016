@@ -25,10 +25,10 @@
 // This code generates the combined Delta T histogram for the picosil (center pixel and first ring of pixels) and the Photonis MCP for the re-cabled configuration **with respect to the Photek**. The SiPad is not used. 
 // An update to the code includes use of the first ring pixels in the picosil.
 // Another update gives the Delta T histogram between the picosil and the Photonis MCP.
-// -DG
+// Author: Daniel Gawerc
 
 
-//Histogram names start with histDeltaT. Then they say the devices they incorporate: either MCP, PicoSil center pixel, or PicoSil with all pixels. The PicoSil with all the Pixels will either specify equal, total charge, or event charge; this signifies all pixels weighted equally (1/7), or by charge (either weighting differently event-by-event or the same weights using total charge in the each pixel throughout the run). Then the histogram will specify equal, total charge, or event charge, with the same meanings as above, except for weighting the PicoSil delta T against the MCP delta T. Finally, a last option No Shift indicates the component histograms hadn't been shifted to zero by having their means subtracted, which should result in a histogram with a high timing resolution.
+// Histogram names start with histDeltaT. Then they say the devices they incorporate: either MCP, PicoSil center pixel, or PicoSil with all pixels. The PicoSil with all the Pixels will either specify equal, total charge, or event charge; this signifies all pixels weighted equally (1/7), or by charge (either weighting differently event-by-event or the same weights using total charge in the each pixel throughout the run). Then the histogram will specify equal, total charge, or event charge, with the same meanings as above, except for weighting the PicoSil delta T against the MCP delta T. Finally, a last option No Shift indicates the component histograms hadn't been shifted to zero by having their means subtracted, which should result in a histogram with a high timing resolution.
 // Having At0 indicates the mean has been subtracted from the original hist.
 
 void DoMultiDeviceStudy( string filename ) {
@@ -81,19 +81,19 @@ void DoMultiDeviceStudy( string filename ) {
   TH1F *histCharges[7]; // collects charge values for picosil pixels in every event in which they pass the cuts.
   for(int i=0; i<7; i++) histCharges[i] = new TH1F( Form("histCharges_%d",i),"; Charge [pC];Number of Events", 160, 0, 80);
  
-  TH2F *histDeltaT_vs_Charge_PicoSil = new TH2F("histDeltaT_vs_Charge_PicoSil","; Event Charge [pC]; Time [ns];Number of Events", 200, 0.1, 80, 300, -0.3, 0.3);
-  TH2F *histDeltaT_vs_Charge_MCP = new TH2F("histDeltaT_vs_Charge_MCP","; Event Charge [pC]; Time [ns];Number of Events", 200, 0.1, 80, 300, -0.3, 0.3);
-  // THE ABOVE TWO HISTOGRAMS ARE INITIALIZED BUT UNUSED CURRENTLY.
+  //TH2F *histDeltaT_vs_Charge_PicoSil = new TH2F("histDeltaT_vs_Charge_PicoSil","; Event Charge [pC]; Time [ns];Number of Events", 200, 0.1, 80, 300, -0.3, 0.3);
+  //TH2F *histDeltaT_vs_Charge_MCP = new TH2F("histDeltaT_vs_Charge_MCP","; Event Charge [pC]; Time [ns];Number of Events", 200, 0.1, 80, 300, -0.3, 0.3);
+  // THE ABOVE TWO HISTOGRAMS ARE INITIALIZED BUT UNUSED CURRENTLY. -- Commented out.
 
 
   float totalPicoSilCharge[7] = {0.};
   float totalCenterCharge = 0; // Should be same value as totalPicoSilCharge[0]
   float totalMCPCharge = 0;
 
-  float photekAmpCut = 0.3; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
-  float photekChargeCut = 6.3;
-  float centerAmpCut = 0.3;
-  float centerChargeCut = 22;
+  float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
+  float photekChargeCut = sqrt(10)*2;
+  float centerAmpCut = 2*0.15;
+  float centerChargeCut = 2*11;
   float MCPAmpCut = 0.08;
 
   //read all entries and fill the histogram
@@ -200,7 +200,7 @@ void DoMultiDeviceStudy( string filename ) {
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
   flandau[i] = new TF1( Form("flandau_%d",i), "landau", xmin, xmax); // 1-D landau func
-  histCharges[i]->Fit( Form("flandau_%d",i), "QMLE","", xmin, xmax);
+  histCharges[i]->Fit( Form("flandau_%d",i), "QMLES","", xmin, xmax);
   gStyle->SetOptFit(1);
   MPVlandau[i] = flandau[i]->GetMaximumX(); // In order to find MPV.
   }
@@ -209,7 +209,7 @@ void DoMultiDeviceStudy( string filename ) {
   xmin = mean-2.0*rms;
   xmax = mean+2.0*rms;
   flandau[0] = new TF1("flandau_0","gaus", xmin, xmax); // storing a Gaus fit for the central pixel with the other landau fits
-  histCharges[0]->Fit("flandau_0","QMLE","", xmin, xmax);
+  histCharges[0]->Fit("flandau_0","QMLES","", xmin, xmax);
   gStyle->SetOptFit(1);
   MPVlandau[0] = flandau[0]->GetParameter(1);
 
@@ -535,21 +535,23 @@ void DoMultiDeviceStudy( string filename ) {
 
 void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   hist->Draw();
+  gStyle->SetOptFit(0); //Hides the parameter box
+  gStyle->SetOptStat(0);
   double mean = hist->GetMean();
   double rms = hist->GetRMS();
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   hist->GetXaxis()->SetTitle("Time Resolution [ns]");
   tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
-  gStyle->SetOptFit(0); //Hides the parameter box
-  gStyle->SetOptStat(0);
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
 
 void makeTimeResolution( string filename ) {
 
-  TFile *_file = TFile::Open( filename.c_str() ); //Should be .root
+  DoMultiDeviceStudy( filename.c_str() );
+
+  TFile *_file = TFile::Open( ("output"+filename).c_str() ); //Should be .root
 
   //Create variables containing hists:
   TH1F *histDeltaTCenter = (TH1F*)_file->Get("histDeltaTCenter"); //Picosil center pixel
@@ -607,6 +609,5 @@ void makeTimeResolution( string filename ) {
 
 
 void MultiDeviceStudy_PicosilMCP() {
-  DoMultiDeviceStudy("104-116except111-114.root");
-  makeTimeResolution("output104-116except111-114.root"); // Outputs PDFs with histograms
+  makeTimeResolution("104-116except111-114.root"); // Outputs PDFs with histograms
 }
