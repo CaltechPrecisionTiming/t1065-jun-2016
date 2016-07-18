@@ -25,5 +25,6 @@
     std::cout<<"\n\nLOG-LIKELIHOOD FIT RESULTS:\n"<<std::endl;
     histLikelihood->Draw();
     histLikelihood->Fit("gaus","MLES","");
+    c[j]->SaveAs( Form("ChiSqd_vs_Likelihood_%d.pdf",j) );
   }
 }
