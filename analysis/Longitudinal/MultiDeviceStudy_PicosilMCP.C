@@ -111,6 +111,7 @@ void DoMultiDeviceStudy( string filename ) {
   Long64_t nentries = tree->GetEntries();
 
   //Loop through every event in .root file
+  TRandom3 *rando = new TRandom3(seed);
   std::cout<<"Number of events in Sample: "<<nentries<<std::endl;  
   for (Long64_t iEntry=0; iEntry<nentries; iEntry++) {
     if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
@@ -141,9 +142,9 @@ void DoMultiDeviceStudy( string filename ) {
     //require MCP minimum amplitude. Possibly will include cut for charge at some point...
     if( !( MCPAmp > MCPAmpCut) ) continue;
 
-    TRandom3 *rando = new TRandom3(seed);
+    
     double linearTime45Smear[7];
-    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1],0.050); //Samples from smear
+    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1], 0.050); //Samples from smear
 
 
     //Calculates the Delta T's if the event passes the cuts:
@@ -245,7 +246,7 @@ void DoMultiDeviceStudy( string filename ) {
     meanPicoSil_vs_MCP[i] = histDeltaT_PicoSil_vs_MCP[i]->GetMean();
   }
 
-
+  TRandom3 *rando2 = new TRandom3(seed);
   //Loop through again. This time, subtracting the respective means. Process is almost the same.
   for (Long64_t iEntry=0; iEntry<nentries; iEntry++) {
     if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
@@ -271,9 +272,8 @@ void DoMultiDeviceStudy( string filename ) {
     if( !(centerAmp > centerAmpCut && centerCharge > centerChargeCut) ) continue;
     if( !( MCPAmp > MCPAmpCut) ) continue;
 
-    TRandom3 *rando = new TRandom3(seed);
     double linearTime45Smear[7];
-    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1],0.050);
+    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+1],0.050);
 
     float DeltaTPicoSil[7] = {0.}; 
     float DeltaTPicoSilSmear[7] = {0.};
