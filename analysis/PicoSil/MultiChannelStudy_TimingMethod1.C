@@ -255,16 +255,17 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F *histTOFRingOneChargeWeightedAvg_C;
   TH1F *histDeltaTCombined_C;
 
+  // this is the histogram that will have the gaussian fit to it
   TH1F *histDeltaT_C[7];
-  for(int j=0; j < 7; j++) histDeltaT_C[j]= new TH1F(Form("histDeltaT_C_%d",j),"; Time [ns];Number of Events", 200, -0.5, 0.5);
+  for(int j=0; j < 7; j++) histDeltaT_C[j]= new TH1F(Form("histDeltaT_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
 
   TH1F *histTOF_largest[7];
-  for(int j=0; j < 7; j++) histTOF_largest[j]= new TH1F(Form("histTOF_largest_%d",j),"; Time [ns];Number of Events", 100, -0.3, 0.3);
+  for(int j=0; j < 7; j++) histTOF_largest[j]= new TH1F(Form("histTOF_largest_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
 
   TH1F *histTOF_largest_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_C[j]= new TH1F(Form("histTOF_largest_C_%d",j),"; Time [ns];Number of Events", 100, -0.3, 0.3);
+  for(int j=0; j < 7; j++) histTOF_largest_C[j]= new TH1F(Form("histTOF_largest_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
 
   TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, 0.5,7.5);
   TH1F* histPixelsCombined_C = new TH1F("histPixelsCombined","; Number of Pixels;Number of Events", 7, 0.5,7.5);
@@ -312,7 +313,6 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
       if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
       tree->GetEntry(iEntry);  
 
-      //require photek (for electron selection)
       float photekTimeGauss = gauspeak[0];
       float photekAmp = amp[0];
       float photekCharge = integral[0];
@@ -333,7 +333,7 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
       float centerCharge = integral[1];
       float centerTime = linearTime45[1];
 
-      // fill histograms of variable being cut on
+      // fill histograms of variable being cut on, plots full range
       histPhotekAmpCut_C->Fill( photekAmp );
       histPhotekChargeCut_C->Fill( photekCharge );
       histCenterAmpCut_C->Fill( centerAmp );
@@ -373,7 +373,8 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
         histEnergyPhotekAmpPhotekCut_C->Fill( photekAmp, ratio3 );
       }
 
-      
+      // require photek amp and charge to be above cuts (to select electron events and not background), and require central pixel to be above amp and charge cuts
+
       // 8GeV cuts
       //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
       //require signal in the central pixel
@@ -433,7 +434,7 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
       float offset_quadratic;
       float offset_cubic;
 
-      // this will find which pixel has the maximum charge and plot the results in the MaxIndex histogram. largestIndex and largestIndexIntegral starts as 0
+      // this will find which pixel has the maximum charge and plot the results in the MaxIndex histogram. largestIndex and largestIndexIntegral start as 0
       // channels are 1 indexed for this
       for ( int j = 0; j <= 7; j++)
       {
@@ -456,7 +457,6 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
 
 
       // Sort the vect and plot the combination of the largest energy pixels
-      
       std::sort( vect.begin(), vect.end(), sortPixel );
 
       // These values will be used to determine if the pixel passes the required cuts
@@ -493,10 +493,9 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
       float count7 = 0;
       float Pixels = 0;
 
-      // This makes the TOF histogram with pixels with the largest charges, weighting the pixel time by the pixel charge. This is done event by event, so the TOF_largest_x will not necissarily have x pixels combined in every event.
+      // This makes the TOF histogram with pixels with the largest charges, weighting the pixel time by the pixel charge (if pixel passes cuts). This is done event by event, so the TOF_largest_x will not necissarily have x pixels combined in every event.
       // Also makes histograms of the total energy contained in the pixels used for the TOF histogram.
-      // 6db attenuator on the center pixel already accounted for
-
+      // 6db attenuator on the center pixel is already accounted for.
       // For an additional pixel to be added, it must have a charge > 1 pC and an amplitude > 0.01 V. If the pixel does not pass these cuts, then it is added with a weight of 0.
         
       if ( energy1 > 1 && amp1 > 0.01 )
@@ -589,6 +588,8 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
       histTOF_largest_C[6]->Fill( average ); 
       histChargeContained[6]->Fill( Energy );
 
+      totalEnergy = energy1 + energy2 + energy3 + energy4 + energy5 + energy6 + energy7;
+
       // energy histogram with all pixel cuts applied
       float energy_total2 = weight1 + weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
       ratio2 = energy_center / energy_total2;
@@ -599,30 +600,28 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
       // apply offset correction so there is no dependence of time on charge
       average_corrected = average - offset_correction - Energy * offset_slope - Energy * Energy * offset_quadratic - Energy * Energy * Energy * offset_cubic;
 
-      totalEnergy = energy1 + energy2 + energy3 + energy4 + energy5 + energy6 + energy7;
-
-      // Makes 2D histogram with delta t and charge for event, using overall cuts on Photek and center pixel (charge and amplitude). Plots total energy, not just energy of pixels that pass pixel cuts.
+      // Makes 2D histogram with delta t and charge for event, using overall cuts on Photek and center pixel (charge and amplitude). Plots just energy of pixels that pass pixel cuts.
       histDeltaTCharge_C->Fill( Energy , average );
-
+      // Same but with corrected average time (based on fit)
       histDeltaTChargeCorr_C->Fill( Energy, average_corrected );
-      //make a histogram of the TOF with time correction
+
+      // Makes a histogram of the TOF with time correction, has all 7 pixels combined
       histTOF_corr_C->Fill( average_corrected );
       histTOF_corr_fit_C->Fill( average_corrected ); 
 
-      // make histogram of charge (or energy) vs. number of events with this charge
+      // Makes histogram of charge (or energy) vs. number of events with this charge
       histTotalChargeContained_C->Fill( totalEnergy );
 
-
-      // make histogram of number of pixels combined (number of pixels above noise)
+      // Makes histogram of number of pixels combined (number of pixels above noise)
       Pixels = count1 + count2 + count3 + count4 + count5 + count6 + count7;
       histPixelsCombined_C->Fill( Pixels );
 
-      // make a histogram with the charge contained in the center pixel
+      // Makes a histogram with the charge contained in the center pixel
       histChargeCenterContained_C->Fill( energy_center );
 
-      // make histogram of time vs number of events (to determine time resolution) using events based on center pixel and photek passing charge and amplitude cuts
-      // but apply cuts such that only a specific energy (or charge) range is used for the events plotted
-      // time is weighted by charge in the pixel, same as the histTOF_largest above
+      // Makes histogram of time vs number of events (to determine time resolution) using events based on center pixel and photek passing charge and amplitude cuts
+      // Apply cuts such that only a specific energy (or charge) range is used for the events plotted
+      // Time is weighted by charge in the pixel, same as the histTOF_largest above
       if ( Energy >= 40 && Energy <= 50 )
       {
         histTOFEnergyCut_C->Fill( average );
@@ -657,13 +656,13 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
   TF1* f1_g1[7];
   for(int j=0; j<7; j++)
   {
-    double mean = histDeltaT[j]->GetMean();
-    double rms = histDeltaT[j]->GetRMS();
+    double mean = histDeltaT_C[j]->GetMean();
+    double rms = histDeltaT_C[j]->GetRMS();
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g1[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax);
     cout << "\nFitting Channel #" << j << ":\n" << endl;
-    histDeltaT[j]->Fit(Form("g_fit_%d",j),"QMLES","",xmin,xmax);
+    histDeltaT_C[j]->Fit(Form("g_fit_%d",j),"QMLES","",xmin,xmax);
   }
 
   // Do Gaussian fit of time resolution largest pixel distributions
