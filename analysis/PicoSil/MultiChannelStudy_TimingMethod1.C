@@ -367,8 +367,11 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
       float energy_total3 = vect1[0].charge + vect1[1].charge + vect1[2].charge + vect1[3].charge + vect1[4].charge + vect1[5].charge + vect1[6].charge;
       ratio3 = energy_center3 / energy_total3;
 
-      histEnergyRatioPhotekCut_C->Fill( ratio3 );
-      histEnergyPhotekAmpPhotekCut_C->Fill( photekAmp, ratio3 );
+      if ( energy_center3 > 0 )
+      {
+        histEnergyRatioPhotekCut_C->Fill( ratio3 );
+        histEnergyPhotekAmpPhotekCut_C->Fill( photekAmp, ratio3 );
+      }
 
       
       // 8GeV cuts
@@ -649,7 +652,7 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
   histChargeCenterOverTotalCharge = NormalizeHist(histChargeCenterOverTotalCharge);
   histChargeRingOneOverTotalCharge = NormalizeHist(histChargeRingOneOverTotalCharge);
 
-  // All fits use log likelihood method
+  // All fits use log likelihood method (QMLES)
   // Do Gaussian fit of delta T distributions for each pixel alone
   TF1* f1_g1[7];
   for(int j=0; j<7; j++)
