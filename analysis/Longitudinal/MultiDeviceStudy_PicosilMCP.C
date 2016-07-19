@@ -20,7 +20,8 @@
 #include "TColor.h"
 #include "TGraphErrors.h"
 #include "TLatex.h"
-#include <math.h> 
+#include <math.h>
+#include "TRandom3.h" 
 
 // This code generates the combined Delta T histogram for the picosil (center pixel and first ring of pixels) and the Photonis MCP for the re-cabled configuration **with respect to the Photek**. The SiPad is not used. 
 // An update to the code includes use of the first ring pixels in the picosil.
@@ -58,18 +59,24 @@ void DoMultiDeviceStudy( string filename ) {
   TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
   TH1F *histDeltaT_PicoSilTotalCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilTotalCharge_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);// Picosil delta T found by weighting with total pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
   TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);
+  TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal_Smear = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal_Smear","; Time [ns];Number of Events", 150, -.3, .3);//Smear
   TH1F *histDeltaT_PicoSilEqual_MCP_Equal = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);//Picosil delta T found by weighting pixels equally, and then overall delta T fund by weighting PicoSil and MCP equally. Thus MCP is weighted by 1/2 and each pixel is weighted 1/14.
   TH1F *histDeltaT_PicoSil_MCP_Equal = new TH1F("histDeltaT_PicoSil_MCP_Equal","; Time [ns];Number of Events", 150, -.3, .3);// delta T found by placing equal emphasis on the pixels as on the MCP. Thus everything is weighted 1/8.
   TH1F *histDeltaT_PicoSil_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_MCP_EventCharge","; Time [ns];Number of Events", 150, -.3, .3);// delta T found by weighting with event charge in each device.
   TH1F *histDeltaT_PicoSil_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_MCP_TotalCharge","; Time [ns];Number of Events", 150, -.3, .3);// delta T found by constant weighting with charge in device over entire run.
   TH1F *histDeltaT_Center_MCP_EventCharge_NoShift = new TH1F("histDeltaT_Center_MCP_EventCharge_NoShift","; Time [ns];Number of Events", 100, 2, 6); //Weights each event based on charge. Poor resolution.
   TH1F *histDeltaTPicoSil[7];
-  for(int i=0; i<7; i++) histDeltaTPicoSil[i] = new TH1F(Form("histDeltaTPicoSil_%d",i),"; Time [ns];Number of Events", 50, 3, 6); //DeltaT of PicoSil pixels
+  TH1F *histDeltaTPicoSilSmear[7];
+  for(int i=0; i<7; i++) {
+    histDeltaTPicoSil[i] = new TH1F(Form("histDeltaTPicoSil_%d",i),"; Time [ns];Number of Events", 50, 3, 6); //DeltaT of PicoSil pixels
+    histDeltaTPicoSilSmear[i] = new TH1F(Form("histDeltaTPicoSilSmear_%d",i),"; Time [ns];Number of Events", 50, 3, 6);
+  }
   TH1F *histDeltaTCenter = new TH1F("histDeltaTCenter","; Time [ns];Number of Events", 50, 4, 5); //DeltaT of center picosil pixel
   TH1F *histDeltaTMCP = new TH1F("histDeltaTMCP","; Time [ns];Number of Events", 50, 2, 3); //DeltaT of MCP
   TH1F *histDeltaTPicoSilAt0TotalCharge = new TH1F("histDeltaTPicoSilAt0TotalCharge","; Time [ns];Number of Events", 150, -0.3, 0.3); //All pixels combined
   TH1F *histDeltaTPicoSilAt0EventCharge = new TH1F("histDeltaTPicoSilAt0EventCharge","; Time [ns];Number of Events", 150, -0.3, 0.3);
   TH1F *histDeltaTPicoSilAt0LandauCharge = new TH1F("histDeltaTPicoSilAt0LandauCharge","; Time [ns];Number of Events", 150, -0.3, 0.3);// NEW: uses charge MPV
+  TH1F *histDeltaTPicoSilAt0LandauChargeSmear = new TH1F("histDeltaTPicoSilAt0LandauChargeSmear", "; Time [ns];Number of Events", 150, -0.3, 0.3);//SKIROC
   TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
   TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
 
@@ -130,15 +137,25 @@ void DoMultiDeviceStudy( string filename ) {
     //require MCP minimum amplitude. Possibly will include cut for charge at some point...
     if( !( MCPAmp > MCPAmpCut) ) continue;
 
+    TRandom3 *rando = new TRandom3(0);
+    double linearTime45Smear[7];
+    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1],0.050); //Samples from smear
+
+
     //Calculates the Delta T's if the event passes the cuts:
     // (Will be used to fill the histogram at every event)
     float DeltaTCenter = photekTimeGauss0 - centerTime; 
     float DeltaTMCP = photekTimeGauss1 - MCPTime;
-    float DeltaTPicoSil[7] = {-99.}; 
-    float DeltaTPicoSil_vs_MCP[7] = {-99.};
+    float DeltaTPicoSil[7]; 
+    float DeltaTPicoSilSmear[7];
+    float DeltaTPicoSil_vs_MCP[7];
+    std::fill(DeltaTPicoSil, DeltaTPicoSil+7, -99);
+    std::fill(DeltaTPicoSilSmear, DeltaTPicoSilSmear+7, -99);
+    std::fill(DeltaTPicoSil_vs_MCP, DeltaTPicoSil_vs_MCP+7, -99);
     for ( int j = 1; j <= 7; j++){
       if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
 	DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j];
+        DeltaTPicoSilSmear[j-1] = photekTimeGauss0 - linearTime45Smear[j-1];
 	DeltaTPicoSil_vs_MCP[j-1] = (linearTime45[j] - photekTimeGauss0) - (MCPTime - photekTimeGauss1); //subtracting photek accts for MCP and HGC in diff groups
 	if ( j == 1 ) {
 	  totalPicoSilCharge[j-1] += centerCharge;
@@ -163,6 +180,7 @@ void DoMultiDeviceStudy( string filename ) {
     for(int k=0; k<7; k++) {
       if (DeltaTPicoSil[k] != -99.) {
 	histDeltaTPicoSil[k]->Fill(DeltaTPicoSil[k]);
+        histDeltaTPicoSilSmear[k]->Fill(DeltaTPicoSilSmear[k]);
 	histDeltaT_PicoSil_vs_MCP[k]->Fill(DeltaTPicoSil_vs_MCP[k]);
       }
     }
