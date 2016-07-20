@@ -428,6 +428,7 @@ void DoMultiDeviceStudy( string filename ) {
     histDeltaT_PicoSil_vs_MCP_EventCharge->Fill(DeltaT_PicoSil_vs_MCP_EventCharge);
   }
 
+  // Add Gaussian fit
   Fitter(histDeltaT_Center_MCP_Equal);
   Fitter(histDeltaT_PicoSil_MCP_Equal);
   Fitter(histDeltaT_PicoSilEqual_MCP_Equal);
@@ -588,21 +589,21 @@ void makeTimeResolution( string filename ) {
   histDeltaTPicoSilEventCharge->SetTitle("HGC: TOF w/ Event Charge Weighting");
   histDeltaTPicoSilTotalCharge->SetTitle("HGC: TOF w/ Total Charge Weighting");
   histDeltaTPicoSilLandauCharge->SetTitle("HGC: TOF w/ Landau MPV Charge Weighting");
-  histDeltaTPicoSilLandauChargeSmear->SetTitle("SKIROC Emulation: HGC TOF w/ Landau MPV Charge Weighting");
+  histDeltaTPicoSilLandauChargeSmear->SetTitle("#splitline{SKIROC Emulation: HGC TOF w/ Landau}{MPV Charge Weighting}");
   histDeltaTPicoSilEqualSmear->SetTitle("SKIROC Emulation: HGC TOF w/ Equal Weighting");
   histDeltaTMCP->SetTitle("MCP: TOF");
   histDeltaTMCPSmear->SetTitle("SKIROC Emulation: MCP TOF");
-  histDeltaT_Center_MCP_Equal->SetTitle("HGC Center Pixel, MCP: TOF w/ Equal Weighting");
-  histDeltaT_PicoSil_MCP_Equal->SetTitle("HGC Inner Ring and Center Pixel, MCP: TOF w/ Weighting 1/8");
-  histDeltaT_PicoSilEqual_MCP_Equal->SetTitle("HGC Inner Ring and Center Pixel Weighted 1/14, MCP Weighted 1/2: TOF");
-  histDeltaT_PicoSilEqual_MCP_Equal_BothSmear->SetTitle("HGC Inner Ring and Center Pixel Smeared, Weighted 1/14; MCP Smeared, Weighted 1/2: TOF");
+  histDeltaT_Center_MCP_Equal->SetTitle("1/2 HGC Center Pixel, 1/2 MCP: TOF");
+  histDeltaT_PicoSil_MCP_Equal->SetTitle("HGC 7 Pixels, MCP: TOF w/ Weighting 1/8");
+  histDeltaT_PicoSilEqual_MCP_Equal->SetTitle("1/14 HGC 7 Pixels, 1/2 MCP: TOF");
+  histDeltaT_PicoSilEqual_MCP_Equal_BothSmear->SetTitle("1/14 HGC Smeared 7 Pixels, 1/2 MCP Smeared: TOF");
   histDeltaT_PicoSil_MCP_EventCharge->SetTitle("HGC, MCP: TOF w/ Event Charge Weighting");
   histDeltaT_PicoSil_MCP_TotalCharge->SetTitle("HGC, MCP: TOF w/ Total Charge Weighting");
-  histDeltaT_PicoSilEventCharge_MCP_Equal->SetTitle("HGC w/ Event Charge Weighting then *1/2, MCP Weighted 1/2: TOF");
-  histDeltaT_PicoSilTotalCharge_MCP_Equal->SetTitle("HGC w/ Total Charge Weighting then *1/2, MCP Weighted 1/2: TOF");
-  histDeltaT_PicoSilLandauCharge_MCP_Equal->SetTitle("HGC w/ Landau MPV Charge Weighting then *1/2, MCP Weighted 1/2: TOF");
-  histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->SetTitle("SKIROC Emulation: HGC Smeared w/ Landau MPV Charge Weighting then *1/2, MCP Weighted *1/2: TOF");
-  histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->SetTitle("SKIROC Emulation: HGC Smeared w/ Landau MPV Charge Weighting then *1/2, MCP Smeared Weighted *1/2: TOF");
+  histDeltaT_PicoSilEventCharge_MCP_Equal->SetTitle("1/2 HGC w/ Event Charge Weighting, 1/2 MCP: TOF");
+  histDeltaT_PicoSilTotalCharge_MCP_Equal->SetTitle("1/2 HGC w/ Total Charge Weighting, 1/2 MCP: TOF");
+  histDeltaT_PicoSilLandauCharge_MCP_Equal->SetTitle("1/2 HGC w/ Landau MPV Charge Weighting, 1/2 MCP: TOF");
+  histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 MCP: TOF}");
+  histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 Smeared MCP: TOF}");
 
 
   PlotDeltaTPDF(c, tex, histDeltaTCenter, "deltaTCenter.pdf");
