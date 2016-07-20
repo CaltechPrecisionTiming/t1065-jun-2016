@@ -22,6 +22,8 @@
 #include "TGraphErrors.h"
 #include "TLatex.h"
 #include <math.h> 
+#include "TRandom.h"
+#include "TRandom3.h"
 
 
 
@@ -51,6 +53,7 @@ struct Pixel
   float charge;
   float time;
   float amp;
+  float time_smear;
 };
 
 void DoMultiChannelStudy( string filename , string outputFilename) {
@@ -159,9 +162,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
 
     // 32GeV cuts, 1 mm
-    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
+    //if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
 
     // 32GeV cuts, 10 mm
     //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
@@ -174,9 +177,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 3 && centerAmp > 0.05 ) ) continue;
 
     // 32GeV cuts, 75 mm
-    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+    if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    //if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
+    if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
     
 
     for ( int j = 1; j <= 7; j++)
@@ -242,10 +245,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   
   float meanT[7];
   for ( int i = 0; i < 7; i++ )
-    {
-      meanT[i] = histDeltaT[i]->GetMean();
-      std::cout << "MEAN " << i << "-->" << meanT[i] << std::endl;
-    }
+  {
+    meanT[i] = histDeltaT[i]->GetMean();
+    std::cout << "MEAN " << i << "-->" << meanT[i] << std::endl;
+  }
 
 
   TH1F *histTOFCenter_C;
@@ -261,6 +264,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   TH1F *histDeltaTshifted_C[7];
   for(int j=0; j < 7; j++) histDeltaTshifted_C[j]= new TH1F(Form("histDeltaTshifted_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
+
+  // TOF histograms of each pixel with the smear added
+  TH1F *histDeltaTshifted_smear_C[7];
+  for(int j=0; j < 7; j++) histDeltaTshifted_smear_C[j]= new TH1F(Form("histDeltaTshifted_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
 
@@ -269,6 +276,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   TH1F *histTOF_largest_C[7];
   for(int j=0; j < 7; j++) histTOF_largest_C[j]= new TH1F(Form("histTOF_largest_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
+
+  // TOF of largest pixels, with the smear added
+  TH1F *histTOF_largest_smear_C[7];
+  for(int j=0; j < 7; j++) histTOF_largest_smear_C[j]= new TH1F(Form("histTOF_largest_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
 
   TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, 0.5,7.5);
   TH1F* histPixelsCombined_C = new TH1F("histPixelsCombined","; Number of Pixels;Number of Events", 7, 0.5,7.5);
@@ -310,7 +321,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   histTOFRingOneChargeWeightedAvg_C = new TH1F("histTOFRingOneChargeWeightedAvg_C","; Time [ns];Number of Events", 200, -10,10);
   histDeltaTCombined_C = new TH1F("histDeltaTCombined_C","; Time [ns];Number of Events", 100, 4,5.5);
 
-std::cout<<"Number of events in Sample: "<<nentries<<std::endl; 
+  TH1F* histRandomNumberTest_C = new TH1F("histRandomNumberTest_C","; number; number of events", 200, -0.5, 0.5);
+  TH1F* histLinearTime_C = new TH1F("histLinearTime_C","; time; number of events", 200, -0, 150);
+
+  std::cout<<"Number of events in Sample: "<<nentries<<std::endl; 
   for (Long64_t iEntry=0;iEntry<nentries;iEntry++)
     {
       if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
@@ -404,9 +418,45 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
       //if( !(centerCharge > 3 && centerAmp > 0.05 ) ) continue;
 
       // 32GeV cuts, 75 mm
-      //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+      if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
       //require signal in the central pixel
-      //if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
+      if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
+
+      
+
+
+
+
+
+      //TF1 *f1 = new TF1("f1","Gaus(0, 0.05)",0,10);
+      //double r = f1->GetRandom();
+
+      //Double_t mean = 0;
+      //Double_t sigma = 0.05;
+      //Double_t TRandom::Gaus ( Double_t mean, Double_t sigma); 
+      //Double_t gaus(0,1);
+      //TRandom3 r;
+      for ( int i = 1; i <= 7; i++)
+      {
+        //double x1 = r.Gaus(0, 20);
+        //Gaus(mean, sigma);
+        //histRandomNumberTest_C->Fill( x1 );
+        //x1.clear();
+      }
+
+      // Generates random numbers from the Gaussian distribution with mean 0 and sigma 0.05 (50 picoseconds)
+      float smear_number[7];
+      for ( int i = 0; i <= 6; i++)
+      {
+        TRandom3 *r = new TRandom3(0); 
+        Double_t random = r->Gaus(0, 0.05);
+        histRandomNumberTest_C->Fill( random );
+        smear_number[i] = random;
+      }
+
+
+
+
 
       std::vector< Pixel > vect;
       Pixel pixel;
@@ -416,6 +466,7 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
         {
           histDeltaT_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
           histDeltaTshifted_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
+          histDeltaTshifted_smear_C[j-1]->Fill(gauspeak[0] + smear_number[j-1] - linearTime45[j] - meanT[j-1]);
         } 
         pixel.index = j;
         if ( j == 1 )
@@ -423,15 +474,19 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
           pixel.charge = 2*integral[j]; // 2* to account for the 6db attenuation
         }
         else pixel.charge = integral[j];
-        pixel.time = gauspeak[0]-(linearTime45[j] + meanT[j-1]);
+        pixel.time = gauspeak[0] - (linearTime45[j] + meanT[j-1]);
+        pixel.time_smear = gauspeak[0] + smear_number[j-1] - linearTime45[j] - meanT[j-1];
         pixel.amp = amp[j];
         vect.push_back( pixel ) ;
       }
+
+      histLinearTime_C->Fill( linearTime45[1] );
 
       auto sortPixel = []( Pixel a, Pixel b ) {return a.charge > b.charge ?  true : false;};
       //std::sort( vect.begin(), vect.end(), sortPixel );
 
       float average;
+      float average_smear;
       float average_corrected;
       float offset_correction;
       float offset_slope;
@@ -510,8 +565,10 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
 
       Energy = weight1;
       average = vect[0].time;
+      average_smear = vect[0].time_smear;
       histTOF_largest[0]->Fill( average );
       histTOF_largest_C[0]->Fill( average );
+      histTOF_largest_smear_C[0]->Fill( average_smear );
       histChargeContained[0]->Fill( Energy );
 
       if ( energy2 > 1 && amp2 > 0.01 )
@@ -522,8 +579,10 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
 
       Energy = weight1 + weight2;
       average = ( weight1*vect[0].time + weight2*vect[1].time )/( Energy );
+      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear )/( Energy );
       histTOF_largest[1]->Fill( average );
-      histTOF_largest_C[1]->Fill( average );  
+      histTOF_largest_C[1]->Fill( average ); 
+      histTOF_largest_smear_C[1]->Fill( average_smear ); 
       histChargeContained[1]->Fill( Energy );
 
       if ( energy3 > 1 && amp3 > 0.01 )
@@ -534,8 +593,10 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
         
       Energy = weight1 + weight2 + weight3;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time )/( Energy );
+      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear )/( Energy );
       histTOF_largest[2]->Fill( average );
       histTOF_largest_C[2]->Fill( average );
+      histTOF_largest_smear_C[2]->Fill( average_smear );
       histChargeContained[2]->Fill( Energy );
 
       if ( energy4 > 1 && amp4 > 0.01 )
@@ -546,8 +607,10 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
         
       Energy = weight1 + weight2 + weight3 + weight4;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time )/( Energy );
+      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear )/( Energy );
       histTOF_largest[3]->Fill( average );
-      histTOF_largest_C[3]->Fill( average );     
+      histTOF_largest_C[3]->Fill( average );
+      histTOF_largest_smear_C[3]->Fill( average_smear );     
       histChargeContained[3]->Fill( Energy );
 
       if ( energy5 > 1 && amp5 > 0.01 )
@@ -558,8 +621,10 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
         
       Energy = weight1 + weight2 + weight3 + weight4 + weight5;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time )/( Energy );
+      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear )/( Energy );
       histTOF_largest[4]->Fill( average );
       histTOF_largest_C[4]->Fill( average );
+      histTOF_largest_smear_C[4]->Fill( average_smear );
       histChargeContained[4]->Fill( Energy );
 
       if ( energy6 > 1 && amp6 > 0.01 )
@@ -570,8 +635,10 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
         
       Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time )/( Energy );
+      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear + weight6*vect[5].time_smear )/( Energy );
       histTOF_largest[5]->Fill( average );
       histTOF_largest_C[5]->Fill( average );
+      histTOF_largest_smear_C[5]->Fill( average_smear );
       histChargeContained[5]->Fill( Energy );
 
       if ( energy7 > 1 && amp7 > 0.01 )
@@ -588,8 +655,10 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
 
       Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time + weight7*vect[6].time )/( Energy );
+      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear + weight6*vect[5].time_smear + weight7*vect[6].time_smear )/( Energy );
       histTOF_largest[6]->Fill( average );
-      histTOF_largest_C[6]->Fill( average ); 
+      histTOF_largest_C[6]->Fill( average );
+      histTOF_largest_smear_C[6]->Fill( average_smear ); 
       histChargeContained[6]->Fill( Energy );
 
       totalEnergy = energy1 + energy2 + energy3 + energy4 + energy5 + energy6 + energy7;
@@ -669,36 +738,62 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
     histDeltaT_C[j]->Fit(Form("g_fit_%d",j),"QMLES","",xmin,xmax);
   }
 
-  // Do Gaussian fit of time resolution largest pixel distributions
+  // Do Gaussian fit of delta T distributions for each pixel alone with the 50 ps smear applied
   TF1* f1_g2[7];
+  for(int j=0; j<7; j++)
+  {
+    double mean = histDeltaTshifted_smear_C[j]->GetMean();
+    double rms = histDeltaTshifted_smear_C[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    f1_g2[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax);
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histDeltaTshifted_smear_C[j]->Fit(Form("g_fit_%d",j),"QMLES","",xmin,xmax);
+  }
+
+  // Do Gaussian fit of time resolution largest pixel distributions
+  TF1* f1_g3[7];
   for(int j=0; j<7; j++) 
   {
     double mean = histTOF_largest_C[j]->GetMean();
     double rms = histTOF_largest_C[j]->GetRMS();
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
-    f1_g2[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    f1_g3[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
     cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
+  // Do Gaussian fit of the time resolution largest pixel distributions with the 50 ps smear added
+  TF1* f1_g4[7];
+  for(int j=0; j<7; j++) 
+  {
+    double mean = histTOF_largest_smear_C[j]->GetMean();
+    double rms = histTOF_largest_smear_C[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    f1_g4[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histTOF_largest_smear_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
+  }
+
   // Do Gaussian fit of time resolution for 7 pixels combined time resolution, with time-charge correction performed.
-  TF1* f1_g3;
+  TF1* f1_g5;
   double mean = histTOF_corr_fit_C->GetMean();
   double rms = histTOF_corr_fit_C->GetRMS();
   double xmin = mean - 2.0 * rms;
   double xmax = mean + 2.0 * rms;
-  f1_g3 = new TF1(Form("g_fit"), "gaus(0)", xmin, xmax);
+  f1_g5 = new TF1(Form("g_fit"), "gaus(0)", xmin, xmax);
   cout << "\nFitting Corrected Time Resolution" << endl;
   histTOF_corr_fit_C->Fit(Form("g_fit"),"QMLES","", xmin, xmax);
 
   // Do Gaussian fit of time resolution for 7 pixels combined time resolution, with charge cuts performed.
-  TF1* f1_g4;
+  TF1* f1_g6;
   double mean_2 = histTOFEnergyCut_C->GetMean();
   double rms_2 = histTOFEnergyCut_C->GetRMS();
   double xmin_2 = mean_2 - 2.0 * rms_2;
   double xmax_2 = mean_2 + 2.0 * rms_2;
-  f1_g4 = new TF1(Form("g_fit"), "gaus(0)", xmin_2, xmax_2);
+  f1_g6 = new TF1(Form("g_fit"), "gaus(0)", xmin_2, xmax_2);
   cout << "\nFitting Corrected Time Resolution" << endl;
   histTOFEnergyCut_C->Fit(Form("g_fit"),"QMLES","", xmin_2, xmax_2);
 
@@ -722,6 +817,7 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
   for( int i = 0; i < 7; i++ )
   {
     histTOF_largest_C[i]->Write( Form("TOF_largest_%d_corr", i+1) );
+    histTOF_largest_smear_C[i]->Write( Form("TOF_largest_smear_%d_corr", i+1) );
     histTOF_largest[i]->Write( Form("TOF_largest_%d", i+1) );
   }
 
@@ -759,12 +855,15 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
   file->WriteTObject(histCenterChargeCut_C,"Center Charge Cut", "WriteDelete");
   file->WriteTObject(histCenterAmpCut_C,"Center Amplitude Cut", "WriteDelete");
 
+  file->WriteTObject(histRandomNumberTest_C,"Random number", "WriteDelete");
+  file->WriteTObject(histLinearTime_C,"linearTime45","WriteDelete");
 
   for( int i = 0; i < 7; i++ )
     {
       histDeltaT_C[i]->Write( Form("deltaT_%d_corr", i+1) );
       histDeltaT[i]->Write( Form("deltaT_%d", i+1) );
       histDeltaTshifted_C[i]->Write( Form("deltaTshifted_%d_corr", i+1) );
+      histDeltaTshifted_smear_C[i]->Write( Form("deltaTshifted_smear_%d_corr", i+1) );
     }
 
   file->Close();
@@ -781,10 +880,10 @@ void MultiChannelStudy_TimingMethod1() {
   //DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
   //DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_8gev_1mm.root","output_8gev_1mm.root");
-  DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
+  //DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_10mm.root","output_32gev_10mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_32mm.root","output_32gev_32mm.root");
-  //DoMultiChannelStudy("../../raw/combine_32gev_75mm.root","output_32gev_75mm.root");
+  DoMultiChannelStudy("../../raw/combine_32gev_75mm.root","output_32gev_75mm.root");
 
 
 }
