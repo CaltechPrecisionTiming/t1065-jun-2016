@@ -33,6 +33,14 @@
 // Histogram names start with histDeltaT. Then they say the devices they incorporate: either MCP, PicoSil center pixel, or PicoSil with all pixels. The PicoSil with all the Pixels will either specify equal, total charge, or event charge; this signifies all pixels weighted equally (1/7), or by charge (either weighting differently event-by-event or the same weights using total charge in the each pixel throughout the run). Then the histogram will specify equal, total charge, or event charge, with the same meanings as above, except for weighting the PicoSil delta T against the MCP delta T. Finally, a last option No Shift indicates the component histograms hadn't been shifted to zero by having their means subtracted, which should result in a histogram with a high timing resolution.
 // Having At0 indicates the mean has been subtracted from the original hist.
 
+void Fitter(TH1F *hist) {
+  //Helper function for fitting Gaussian
+  double xmin = hist->GetMean() - 2.0*hist->GetRMS();
+  double xmax = hist->GetMean() + 2.0*hist->GetRMS();
+  hist->Fit("gaus","QMLES","",xmin,xmax); // Q suppresses fit results
+  gStyle->SetOptFit(1);
+}
+
 void DoMultiDeviceStudy( string filename ) {
 
   srand (time(NULL));
@@ -206,47 +214,31 @@ void DoMultiDeviceStudy( string filename ) {
   for(int i=1; i<=6; i++) ringChargeTotal += totalPicoSilCharge[i];
 
   // Do Gaussian fit of delta T distributions from (mean-2RMS) to (mean+2RMS)
-  double mean = histDeltaT_Center_MCP_EventCharge_NoShift->GetMean();
-  double rms = histDeltaT_Center_MCP_EventCharge_NoShift->GetRMS();
-  double xmin = mean-2.0*rms;
-  double xmax = mean+2.0*rms;
-  histDeltaT_Center_MCP_EventCharge_NoShift->Fit("gaus","QMLES","",xmin,xmax); // Q suppresses fit results
+  Fitter(histDeltaT_Center_MCP_EventCharge_NoShift); 
+  Fitter(histDeltaTCenter);
+  Fitter(histDeltaTMCP);
+  Fitter(histDeltaTMCPSmear);
 
   double meanCenter = histDeltaTCenter->GetMean();
-  rms = histDeltaTCenter->GetRMS();
-  xmin = meanCenter-2.0*rms;
-  xmax = meanCenter+2.0*rms;
-  histDeltaTCenter->Fit("gaus","QMLES","",xmin,xmax);
-
   double meanMCP = histDeltaTMCP->GetMean();
-  rms = histDeltaTMCP->GetRMS();
-  xmin = meanMCP-2.0*rms;
-  xmax = meanMCP+2.0*rms;
-  histDeltaTMCP->Fit("gaus","QMLES","",xmin,xmax);
-
   double meanMCPSmear = histDeltaTMCPSmear->GetMean();
-  rms = histDeltaTMCPSmear->GetRMS();
-  xmin = meanMCPSmear-2.0*rms;
-  xmax = meanMCPSmear+2.0*rms;
-  histDeltaTMCPSmear->Fit("gaus","QMLES","",xmin,xmax);
-
 
   TF1 *flandau[7];
   double MPVlandau[7]; // Seeing if we can get better results by using Landau mean as weighting charge value.
   for(int i=1; i<=6; i++) {
-  mean = histCharges[i]->GetMean();
-  rms = histCharges[i]->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
+  double mean = histCharges[i]->GetMean();
+  double rms = histCharges[i]->GetRMS();
+  double xmin = mean-2.0*rms;
+  double xmax = mean+2.0*rms;
   flandau[i] = new TF1( Form("flandau_%d",i), "landau", xmin, xmax); // 1-D landau func
   histCharges[i]->Fit( Form("flandau_%d",i), "QMLES","", xmin, xmax);
   gStyle->SetOptFit(1);
   MPVlandau[i] = flandau[i]->GetMaximumX(); // In order to find MPV.
   }
-  mean = histCharges[0]->GetMean();
-  rms = histCharges[0]->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
+  double mean = histCharges[0]->GetMean();
+  double rms = histCharges[0]->GetRMS();
+  double xmin = mean-2.0*rms;
+  double xmax = mean+2.0*rms;
   flandau[0] = new TF1("flandau_0","gaus", xmin, xmax); // storing a Gaus fit for the central pixel with the other landau fits
   histCharges[0]->Fit("flandau_0","QMLES","", xmin, xmax);
   gStyle->SetOptFit(1);
@@ -436,160 +428,30 @@ void DoMultiDeviceStudy( string filename ) {
     histDeltaT_PicoSil_vs_MCP_EventCharge->Fill(DeltaT_PicoSil_vs_MCP_EventCharge);
   }
 
-  mean = histDeltaT_Center_MCP_Equal->GetMean();
-  rms = histDeltaT_Center_MCP_Equal->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_Center_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSil_MCP_Equal->GetMean();
-  rms = histDeltaT_PicoSil_MCP_Equal->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSilEqual_MCP_Equal->GetMean();
-  rms = histDeltaT_PicoSilEqual_MCP_Equal->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSilEqual_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSilEqual_MCP_Equal_BothSmear->GetMean();
-  rms = histDeltaT_PicoSilEqual_MCP_Equal_BothSmear->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSilEqual_MCP_Equal_BothSmear->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSil_MCP_EventCharge->GetMean();
-  rms = histDeltaT_PicoSil_MCP_EventCharge->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_MCP_EventCharge->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSil_MCP_TotalCharge->GetMean();
-  rms = histDeltaT_PicoSil_MCP_TotalCharge->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_MCP_TotalCharge->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSilTotalCharge_MCP_Equal->GetMean();
-  rms = histDeltaT_PicoSilTotalCharge_MCP_Equal->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSilTotalCharge_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSilEventCharge_MCP_Equal->GetMean();
-  rms = histDeltaT_PicoSilEventCharge_MCP_Equal->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSilEventCharge_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSilLandauCharge_MCP_Equal->GetMean();
-  rms = histDeltaT_PicoSilLandauCharge_MCP_Equal->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSilLandauCharge_MCP_Equal->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->GetMean();
-  rms = histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->GetMean();
-  rms = histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaTCenterAt0->GetMean();
-  rms = histDeltaTCenterAt0->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTCenterAt0->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaTMCPAt0->GetMean();
-  rms = histDeltaTMCPAt0->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTMCPAt0->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaTPicoSilAt0TotalCharge->GetMean();
-  rms = histDeltaTPicoSilAt0TotalCharge->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTPicoSilAt0TotalCharge->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaTPicoSilAt0EventCharge->GetMean();
-  rms = histDeltaTPicoSilAt0EventCharge->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTPicoSilAt0EventCharge->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaTPicoSilAt0LandauCharge->GetMean();
-  rms = histDeltaTPicoSilAt0LandauCharge->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTPicoSilAt0LandauCharge->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaTPicoSilAt0LandauChargeSmear->GetMean();
-  rms = histDeltaTPicoSilAt0LandauChargeSmear->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTPicoSilAt0LandauChargeSmear->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaTPicoSilAt0EqualSmear->GetMean();
-  rms = histDeltaTPicoSilAt0EqualSmear->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTPicoSilAt0EqualSmear->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSil_vs_MCP_TotalCharge->GetMean();
-  rms = histDeltaT_PicoSil_vs_MCP_TotalCharge->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_vs_MCP_TotalCharge->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
-
-  mean = histDeltaT_PicoSil_vs_MCP_EventCharge->GetMean();
-  rms = histDeltaT_PicoSil_vs_MCP_EventCharge->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaT_PicoSil_vs_MCP_EventCharge->Fit("gaus","QMLES","",xmin,xmax);
-  gStyle->SetOptFit(1);
+  Fitter(histDeltaT_Center_MCP_Equal);
+  Fitter(histDeltaT_PicoSil_MCP_Equal);
+  Fitter(histDeltaT_PicoSilEqual_MCP_Equal);
+  Fitter(histDeltaT_PicoSilEqual_MCP_Equal_BothSmear);
+  Fitter(histDeltaT_PicoSil_MCP_EventCharge);
+  Fitter(histDeltaT_PicoSil_MCP_TotalCharge);
+  Fitter(histDeltaT_PicoSilTotalCharge_MCP_Equal);
+  Fitter(histDeltaT_PicoSilEventCharge_MCP_Equal);
+  Fitter(histDeltaT_PicoSilLandauCharge_MCP_Equal);
+  Fitter(histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear);
+  Fitter(histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear);
+  Fitter(histDeltaTCenterAt0);
+  Fitter(histDeltaTMCPAt0);
+  Fitter(histDeltaTPicoSilAt0TotalCharge);
+  Fitter(histDeltaTPicoSilAt0EventCharge);
+  Fitter(histDeltaTPicoSilAt0LandauCharge);
+  Fitter(histDeltaTPicoSilAt0LandauChargeSmear);
+  Fitter(histDeltaTPicoSilAt0EqualSmear);
+  Fitter(histDeltaT_PicoSil_vs_MCP_TotalCharge);
+  Fitter(histDeltaT_PicoSil_vs_MCP_EventCharge);
 
   for (int i = 0; i < 7; i++) {
-    mean = histDeltaTPicoSilSmearAt0[i]->GetMean();
-    rms = histDeltaTPicoSilSmearAt0[i]->GetRMS();
-    xmin = mean-2.0*rms;
-    xmax = mean+2.0*rms;
-    histDeltaTPicoSilSmearAt0[i]->Fit("gaus","QMLES","",xmin,xmax);
-    gStyle->SetOptFit(1);
-
-    mean = histDeltaT_PicoSil_vs_MCP[i]->GetMean();
-    rms = histDeltaT_PicoSil_vs_MCP[i]->GetRMS();
-    xmin = mean-2.0*rms;
-    xmax = mean+2.0*rms;
-    histDeltaT_PicoSil_vs_MCP[i]->Fit("gaus","QMLES","",xmin,xmax);
-    gStyle->SetOptFit(1);
+    Fitter(histDeltaTPicoSilSmearAt0[i]);
+    Fitter(histDeltaT_PicoSil_vs_MCP[i]);
   }
 
 
