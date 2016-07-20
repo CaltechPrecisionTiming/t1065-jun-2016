@@ -159,9 +159,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
 
     // 32GeV cuts, 1 mm
-    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    //if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
+    if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
 
     // 32GeV cuts, 10 mm
     //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
@@ -174,9 +174,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 3 && centerAmp > 0.05 ) ) continue;
 
     // 32GeV cuts, 75 mm
-    if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
+    //if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
     
 
     for ( int j = 1; j <= 7; j++)
@@ -258,6 +258,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   // this is the histogram that will have the gaussian fit to it
   TH1F *histDeltaT_C[7];
   for(int j=0; j < 7; j++) histDeltaT_C[j]= new TH1F(Form("histDeltaT_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
+
+  TH1F *histDeltaTshifted_C[7];
+  for(int j=0; j < 7; j++) histDeltaTshifted_C[j]= new TH1F(Form("histDeltaTshifted_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
 
@@ -401,9 +404,9 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
       //if( !(centerCharge > 3 && centerAmp > 0.05 ) ) continue;
 
       // 32GeV cuts, 75 mm
-      if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+      //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
       //require signal in the central pixel
-      if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
+      //if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
 
       std::vector< Pixel > vect;
       Pixel pixel;
@@ -412,6 +415,7 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
         if ( amp[j] > 0.01 && integral[j] > 1 )
         {
           histDeltaT_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
+          histDeltaTshifted_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
         } 
         pixel.index = j;
         if ( j == 1 )
@@ -760,6 +764,7 @@ std::cout<<"Number of events in Sample: "<<nentries<<std::endl;
     {
       histDeltaT_C[i]->Write( Form("deltaT_%d_corr", i+1) );
       histDeltaT[i]->Write( Form("deltaT_%d", i+1) );
+      histDeltaTshifted_C[i]->Write( Form("deltaTshifted_%d_corr", i+1) );
     }
 
   file->Close();
@@ -776,10 +781,10 @@ void MultiChannelStudy_TimingMethod1() {
   //DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
   //DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_8gev_1mm.root","output_8gev_1mm.root");
-  //DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
+  DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_10mm.root","output_32gev_10mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_32mm.root","output_32gev_32mm.root");
-  DoMultiChannelStudy("../../raw/combine_32gev_75mm.root","output_32gev_75mm.root");
+  //DoMultiChannelStudy("../../raw/combine_32gev_75mm.root","output_32gev_75mm.root");
 
 
 }
