@@ -102,6 +102,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   TH1F *histDeltaT[7];
   for(int j=0; j<7; j++) histDeltaT[j]= new TH1F(Form("histDeltaT_%d",j),"; Time [ns];Number of Events", 250, 4.4, 5.6);
+
+  TH1F *histDeltaT_smear[7];
+  for(int j=0; j<7; j++) histDeltaT_smear[j]= new TH1F(Form("histDeltaT_smear_%d",j),"; Time [ns];Number of Events", 250, 4.4, 5.6);
   
   histTotalCharge = new TH1F("histTotalCharge","; Time [ns];Number of Events", 200, 0,100);
   histTOFCenter = new TH1F("histTOFCenter","; Time [ns];Number of Events", 200, -6,-4);
@@ -117,6 +120,13 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   //read all entries and fill the histograms
   Long64_t nentries = tree->GetEntries();
+
+  // to generate the seed for the TRandom3
+  srand(time(NULL));
+  int seed = rand();
+
+  // The same seed will be used in the first and second event loops to generate the same random sequence with TRandom.
+  TRandom3 *r = new TRandom3(seed); 
 
 
   std::cout<<"Number of events in Sample: "<<nentries<<std::endl;  
@@ -142,6 +152,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     float TimeChargeWeightedAvg = 0;
 
     float DeltaT[7] = {-99.};
+    float DeltaT_smear[7] = {-99.};
     
     
     //require photek (for electron selection)
@@ -184,10 +195,17 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
     for ( int j = 1; j <= 7; j++)
       {
+        float smear_number = r->Gaus(0, 0.05);
+        if ( iEntry > 1000 && iEntry < 1015 )
+        {
+          //cout << "smear number " << smear_number << ":\n" << endl;
+        }
         if ( amp[j] > 0.01 && integral[j] > 1 ) 
         {
           DeltaT[j-1] = gauspeak[0] - linearTime45[j];
+          DeltaT_smear[j-1] = gauspeak[0] - smear_number - linearTime45[j];
           histDeltaT[j-1]->Fill(DeltaT[j-1]);
+          histDeltaT_smear[j-1]->Fill(DeltaT_smear[j-1]);
           NumberOfChannels++;
           TotalCharge += integral[j];
           TimeFlatAvg += linearTime45[j];
@@ -242,12 +260,19 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     histTOFChargeWeightedAvg->Fill( TimeChargeWeightedAvg - photekTimeGauss);
     
   }
-  
+
   float meanT[7];
   for ( int i = 0; i < 7; i++ )
   {
     meanT[i] = histDeltaT[i]->GetMean();
     std::cout << "MEAN " << i << "-->" << meanT[i] << std::endl;
+  }
+
+  float meanT_smear[7];
+  for ( int i = 0; i < 7; i++ )
+  {
+    meanT_smear[i] = histDeltaT_smear[i]->GetMean();
+    std::cout << "MEAN " << i << "-->" << meanT_smear[i] << std::endl;
   }
 
 
@@ -260,26 +285,36 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // this is the histogram that will have the gaussian fit to it
   TH1F *histDeltaT_C[7];
-  for(int j=0; j < 7; j++) histDeltaT_C[j]= new TH1F(Form("histDeltaT_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
+  for(int j=0; j < 7; j++) histDeltaT_C[j]= new TH1F(Form("histDeltaT_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
 
   TH1F *histDeltaTshifted_C[7];
-  for(int j=0; j < 7; j++) histDeltaTshifted_C[j]= new TH1F(Form("histDeltaTshifted_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
+  for(int j=0; j < 7; j++) histDeltaTshifted_C[j]= new TH1F(Form("histDeltaTshifted_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
 
   // TOF histograms of each pixel with the smear added
   TH1F *histDeltaTshifted_smear_C[7];
-  for(int j=0; j < 7; j++) histDeltaTshifted_smear_C[j]= new TH1F(Form("histDeltaTshifted_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
+  for(int j=0; j < 7; j++) histDeltaTshifted_smear_C[j]= new TH1F(Form("histDeltaTshifted_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
 
+  // TOF of largest pixels, by charge weighting. No fit is done on this histogram.
   TH1F *histTOF_largest[7];
-  for(int j=0; j < 7; j++) histTOF_largest[j]= new TH1F(Form("histTOF_largest_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
+  for(int j=0; j < 7; j++) histTOF_largest[j]= new TH1F(Form("histTOF_largest_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
 
+  // TOF of largest pixels, by charge weighting. The Gaussian fit will be done to this one.
   TH1F *histTOF_largest_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_C[j]= new TH1F(Form("histTOF_largest_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
+  for(int j=0; j < 7; j++) histTOF_largest_C[j]= new TH1F(Form("histTOF_largest_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
 
-  // TOF of largest pixels, with the smear added
+  // TOF of largest pixels, by equal weighting. The Gaussian fit will be done to this one.
+  TH1F *histTOF_largest_equal_C[7];
+  for(int j=0; j < 7; j++) histTOF_largest_equal_C[j]= new TH1F(Form("histTOF_largest_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+
+  // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
   TH1F *histTOF_largest_smear_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_smear_C[j]= new TH1F(Form("histTOF_largest_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 40, -0.2, 0.2);
+  for(int j=0; j < 7; j++) histTOF_largest_smear_C[j]= new TH1F(Form("histTOF_largest_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+
+  // TOF of largest pixels, with the smear added. For these, the times of each pixel will be added with equal weighting
+  TH1F *histTOF_largest_smear_equal_C[7];
+  for(int j=0; j < 7; j++) histTOF_largest_smear_equal_C[j]= new TH1F(Form("histTOF_largest_smear_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
 
   TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, 0.5,7.5);
   TH1F* histPixelsCombined_C = new TH1F("histPixelsCombined","; Number of Pixels;Number of Events", 7, 0.5,7.5);
@@ -323,6 +358,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   TH1F* histRandomNumberTest_C = new TH1F("histRandomNumberTest_C","; number; number of events", 200, -0.5, 0.5);
   TH1F* histLinearTime_C = new TH1F("histLinearTime_C","; time; number of events", 200, -0, 150);
+
+  // Delete memory allocated to r from first for loop. Then use same seed for the TRandom so the same random sequence is used in both event loops.
+  delete r;
+  r = new TRandom3(seed);
 
   std::cout<<"Number of events in Sample: "<<nentries<<std::endl; 
   for (Long64_t iEntry=0;iEntry<nentries;iEntry++)
@@ -426,33 +465,13 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
 
 
-
-
-      //TF1 *f1 = new TF1("f1","Gaus(0, 0.05)",0,10);
-      //double r = f1->GetRandom();
-
-      //Double_t mean = 0;
-      //Double_t sigma = 0.05;
-      //Double_t TRandom::Gaus ( Double_t mean, Double_t sigma); 
-      //Double_t gaus(0,1);
-      //TRandom3 r;
-      for ( int i = 1; i <= 7; i++)
-      {
-        //double x1 = r.Gaus(0, 20);
-        //Gaus(mean, sigma);
-        //histRandomNumberTest_C->Fill( x1 );
-        //x1.clear();
-      }
-
-      // Generates random numbers from the Gaussian distribution with mean 0 and sigma 0.05 (50 picoseconds)
-      float smear_number[7];
-      for ( int i = 0; i <= 6; i++)
-      {
-        TRandom3 *r = new TRandom3(0); 
-        Double_t random = r->Gaus(0, 0.05);
-        histRandomNumberTest_C->Fill( random );
-        smear_number[i] = random;
-      }
+      // Generates random numbers from the Gaussian distribution with mean 0 and sigma 0.05 (50 picoseconds) to perform the time smearing for each pixel
+      // float smear_number[7];
+      // for ( int i = 0; i <= 6; i++)
+      // {
+      //   Double_t random = r->Gaus(0, 0.05);
+      //   histRandomNumberTest_C->Fill( random );
+      // }
 
 
 
@@ -462,11 +481,17 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       Pixel pixel;
       for ( int j = 1; j <= 7; j++)
       {
+        // smear number is a random number choosen from a Gaussian distribution with mean 0 and sigam 0.05 (50 ps) to perform the time smearing for each pixel
+        float smear_number = r->Gaus(0, 0.05);
+        if ( iEntry > 1000 && iEntry < 1015 )
+        {
+          //cout << "smear number " << smear_number << ":\n" << endl;
+        }
         if ( amp[j] > 0.01 && integral[j] > 1 )
         {
           histDeltaT_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
           histDeltaTshifted_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
-          histDeltaTshifted_smear_C[j-1]->Fill(gauspeak[0] + smear_number[j-1] - linearTime45[j] - meanT[j-1]);
+          histDeltaTshifted_smear_C[j-1]->Fill(gauspeak[0] + smear_number - linearTime45[j] - meanT_smear[j-1]);
         } 
         pixel.index = j;
         if ( j == 1 )
@@ -475,7 +500,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         }
         else pixel.charge = integral[j];
         pixel.time = gauspeak[0] - (linearTime45[j] + meanT[j-1]);
-        pixel.time_smear = gauspeak[0] + smear_number[j-1] - linearTime45[j] - meanT[j-1];
+        pixel.time_smear = gauspeak[0] + smear_number - linearTime45[j] - meanT[j-1];
         pixel.amp = amp[j];
         vect.push_back( pixel ) ;
       }
@@ -486,7 +511,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       //std::sort( vect.begin(), vect.end(), sortPixel );
 
       float average;
+      float average_equal;
       float average_smear;
+      float average_smear_equal;
       float average_corrected;
       float offset_correction;
       float offset_slope;
@@ -541,9 +568,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       float weight4 = 0;
       float weight5 = 0;
       float weight6 = 0;
-      float weight7 = 0;
+      float weight7 = 0;     
 
-      float count1 = 0;     // To count how many pixels are combined total
+      float count1 = 0;     // To count how many pixels are combined total. Also, if the pixel passes the cuts, this will be changed to 1 and will be used for the equal pixel weighting.
       float count2 = 0;
       float count3 = 0;
       float count4 = 0;
@@ -568,7 +595,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       average_smear = vect[0].time_smear;
       histTOF_largest[0]->Fill( average );
       histTOF_largest_C[0]->Fill( average );
+      histTOF_largest_equal_C[0]->Fill( average );
       histTOF_largest_smear_C[0]->Fill( average_smear );
+      histTOF_largest_smear_equal_C[0]->Fill( average_smear );
       histChargeContained[0]->Fill( Energy );
 
       if ( energy2 > 1 && amp2 > 0.01 )
@@ -579,10 +608,14 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
       Energy = weight1 + weight2;
       average = ( weight1*vect[0].time + weight2*vect[1].time )/( Energy );
+      average_equal = ( count1*vect[0].time + count2*vect[1].time )/( count1 + count2 );
       average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear )/( Energy );
+      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear )/ (count1 + count2 );
       histTOF_largest[1]->Fill( average );
       histTOF_largest_C[1]->Fill( average ); 
-      histTOF_largest_smear_C[1]->Fill( average_smear ); 
+      histTOF_largest_equal_C[1]->Fill ( average_equal );
+      histTOF_largest_smear_C[1]->Fill( average_smear );
+      histTOF_largest_smear_equal_C[1]->Fill( average_smear_equal );
       histChargeContained[1]->Fill( Energy );
 
       if ( energy3 > 1 && amp3 > 0.01 )
@@ -593,10 +626,14 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         
       Energy = weight1 + weight2 + weight3;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time )/( Energy );
+      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time )/( count1 + count2 + count3 );
       average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear )/( Energy );
+      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear )/( count1 + count2 + count3 );
       histTOF_largest[2]->Fill( average );
       histTOF_largest_C[2]->Fill( average );
+      histTOF_largest_equal_C[2]->Fill( average_equal );
       histTOF_largest_smear_C[2]->Fill( average_smear );
+      histTOF_largest_smear_equal_C[2]->Fill( average_smear_equal );
       histChargeContained[2]->Fill( Energy );
 
       if ( energy4 > 1 && amp4 > 0.01 )
@@ -607,10 +644,14 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         
       Energy = weight1 + weight2 + weight3 + weight4;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time )/( Energy );
+      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time )/( count1 + count2 + count3 + count4 );
       average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear )/( Energy );
+      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear )/( count1 + count2 + count3 + count4 );
       histTOF_largest[3]->Fill( average );
       histTOF_largest_C[3]->Fill( average );
-      histTOF_largest_smear_C[3]->Fill( average_smear );     
+      histTOF_largest_equal_C[3]->Fill( average_equal );
+      histTOF_largest_smear_C[3]->Fill( average_smear ); 
+      histTOF_largest_smear_equal_C[3]->Fill( average_smear_equal );    
       histChargeContained[3]->Fill( Energy );
 
       if ( energy5 > 1 && amp5 > 0.01 )
@@ -621,10 +662,14 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         
       Energy = weight1 + weight2 + weight3 + weight4 + weight5;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time )/( Energy );
+      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time + count5*vect[4].time )/( count1 + count2 + count3 + count4 + count5 );
       average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear )/( Energy );
+      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear + count5*vect[4].time_smear )/( count1 + count2 + count3 + count4 + count5 );
       histTOF_largest[4]->Fill( average );
       histTOF_largest_C[4]->Fill( average );
+      histTOF_largest_equal_C[4]->Fill( average_equal );
       histTOF_largest_smear_C[4]->Fill( average_smear );
+      histTOF_largest_smear_equal_C[4]->Fill( average_smear_equal );
       histChargeContained[4]->Fill( Energy );
 
       if ( energy6 > 1 && amp6 > 0.01 )
@@ -635,10 +680,14 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         
       Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time )/( Energy );
+      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time + count5*vect[4].time + count6*vect[5].time )/( count1 + count2 + count3 + count4 + count5 + count6 );
       average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear + weight6*vect[5].time_smear )/( Energy );
+      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear + count5*vect[4].time_smear + count6*vect[5].time_smear )/( count1 + count2 + count3 + count4 + count5 + count6 );
       histTOF_largest[5]->Fill( average );
       histTOF_largest_C[5]->Fill( average );
+      histTOF_largest_equal_C[5]->Fill( average_equal );
       histTOF_largest_smear_C[5]->Fill( average_smear );
+      histTOF_largest_smear_equal_C[5]->Fill( average_smear_equal );
       histChargeContained[5]->Fill( Energy );
 
       if ( energy7 > 1 && amp7 > 0.01 )
@@ -655,10 +704,14 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
       Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
       average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time + weight7*vect[6].time )/( Energy );
+      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time + count5*vect[4].time + count6*vect[5].time + count7*vect[6].time )/( count1 + count2 + count3 + count4 + count5 + count6 + count7 );
       average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear + weight6*vect[5].time_smear + weight7*vect[6].time_smear )/( Energy );
+      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear + count5*vect[4].time_smear + count6*vect[5].time_smear + count7*vect[6].time_smear )/( count1 + count2 + count3 + count4 + count5 + count6 + count7 );
       histTOF_largest[6]->Fill( average );
       histTOF_largest_C[6]->Fill( average );
-      histTOF_largest_smear_C[6]->Fill( average_smear ); 
+      histTOF_largest_equal_C[6]->Fill( average_equal );
+      histTOF_largest_smear_C[6]->Fill( average_smear );
+      histTOF_largest_smear_equal_C[6]->Fill( average_smear_equal ); 
       histChargeContained[6]->Fill( Energy );
 
       totalEnergy = energy1 + energy2 + energy3 + energy4 + energy5 + energy6 + energy7;
@@ -706,7 +759,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
         histTOFEnergyCutCenter_C->Fill( average );
       }
 
-      std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
+      //std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
     }
   
   /*for ( int i = 0; i < 7; i++)
@@ -751,7 +804,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     histDeltaTshifted_smear_C[j]->Fit(Form("g_fit_%d",j),"QMLES","",xmin,xmax);
   }
 
-  // Do Gaussian fit of time resolution largest pixel distributions
+  // Do Gaussian fit of time resolution largest pixel distributions, with charge weighting
   TF1* f1_g3[7];
   for(int j=0; j<7; j++) 
   {
@@ -764,36 +817,62 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     histTOF_largest_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
-  // Do Gaussian fit of the time resolution largest pixel distributions with the 50 ps smear added
+  // Do Gaussian fit of time resolution largest pixel distributions, with equal pixel weighting
   TF1* f1_g4[7];
+  for(int j=0; j<7; j++) 
+  {
+    double mean = histTOF_largest_equal_C[j]->GetMean();
+    double rms = histTOF_largest_equal_C[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    f1_g4[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histTOF_largest_equal_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
+  }
+
+  // Do Gaussian fit of the time resolution largest pixel distributions with the 50 ps smear added (charge weighting)
+  TF1* f1_g5[7];
   for(int j=0; j<7; j++) 
   {
     double mean = histTOF_largest_smear_C[j]->GetMean();
     double rms = histTOF_largest_smear_C[j]->GetRMS();
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
-    f1_g4[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    f1_g5[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
     cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_smear_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
+  // Do Gaussian fit of the time resolution largest pixel distributions with the 50 ps smear added (equal weighting)
+  TF1* f1_g6[7];
+  for(int j=0; j<7; j++) 
+  {
+    double mean = histTOF_largest_smear_equal_C[j]->GetMean();
+    double rms = histTOF_largest_smear_equal_C[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    f1_g6[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histTOF_largest_smear_equal_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
+  }
+
   // Do Gaussian fit of time resolution for 7 pixels combined time resolution, with time-charge correction performed.
-  TF1* f1_g5;
+  TF1* f1_g7;
   double mean = histTOF_corr_fit_C->GetMean();
   double rms = histTOF_corr_fit_C->GetRMS();
   double xmin = mean - 2.0 * rms;
   double xmax = mean + 2.0 * rms;
-  f1_g5 = new TF1(Form("g_fit"), "gaus(0)", xmin, xmax);
+  f1_g7 = new TF1(Form("g_fit"), "gaus(0)", xmin, xmax);
   cout << "\nFitting Corrected Time Resolution" << endl;
   histTOF_corr_fit_C->Fit(Form("g_fit"),"QMLES","", xmin, xmax);
 
   // Do Gaussian fit of time resolution for 7 pixels combined time resolution, with charge cuts performed.
-  TF1* f1_g6;
+  TF1* f1_g8;
   double mean_2 = histTOFEnergyCut_C->GetMean();
   double rms_2 = histTOFEnergyCut_C->GetRMS();
   double xmin_2 = mean_2 - 2.0 * rms_2;
   double xmax_2 = mean_2 + 2.0 * rms_2;
-  f1_g6 = new TF1(Form("g_fit"), "gaus(0)", xmin_2, xmax_2);
+  f1_g8 = new TF1(Form("g_fit"), "gaus(0)", xmin_2, xmax_2);
   cout << "\nFitting Corrected Time Resolution" << endl;
   histTOFEnergyCut_C->Fit(Form("g_fit"),"QMLES","", xmin_2, xmax_2);
 
@@ -816,9 +895,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   for( int i = 0; i < 7; i++ )
   {
-    histTOF_largest_C[i]->Write( Form("TOF_largest_%d_corr", i+1) );
-    histTOF_largest_smear_C[i]->Write( Form("TOF_largest_smear_%d_corr", i+1) );
     histTOF_largest[i]->Write( Form("TOF_largest_%d", i+1) );
+    histTOF_largest_C[i]->Write( Form("TOF_largest_%d_fit", i+1) );
+    histTOF_largest_equal_C[i]->Write( Form("TOF_largest_equal_%d", i+1) );
+    histTOF_largest_smear_C[i]->Write( Form("TOF_largest_smear_%d", i+1) );
+    histTOF_largest_smear_equal_C[i]->Write( Form("TOF_largest_smear_equal_%d", i+1) );
   }
 
   for ( int i = 0; i < 7; i++ )
@@ -860,10 +941,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   for( int i = 0; i < 7; i++ )
     {
-      histDeltaT_C[i]->Write( Form("deltaT_%d_corr", i+1) );
       histDeltaT[i]->Write( Form("deltaT_%d", i+1) );
-      histDeltaTshifted_C[i]->Write( Form("deltaTshifted_%d_corr", i+1) );
-      histDeltaTshifted_smear_C[i]->Write( Form("deltaTshifted_smear_%d_corr", i+1) );
+      histDeltaTshifted_C[i]->Write( Form("deltaT_shifted_%d", i+1) );
+      histDeltaT_C[i]->Write( Form("deltaT_shifted_%d_fit", i+1) );
+      histDeltaTshifted_smear_C[i]->Write( Form("deltaTshifted_smear_%d_fit", i+1) );
     }
 
   file->Close();
