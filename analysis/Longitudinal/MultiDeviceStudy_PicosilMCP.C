@@ -22,11 +22,14 @@
 #include "TLatex.h"
 #include <math.h>
 #include <time.h>
-#include "TRandom3.h" 
+#include <algorithm>
+#include <functional>
+#include "TRandom3.h"
 
 // This code generates the combined Delta T histogram for the picosil (center pixel and first ring of pixels) and the Photonis MCP for the re-cabled configuration **with respect to the Photek**. The SiPad is not used. 
 // An update to the code includes use of the first ring pixels in the picosil.
 // Another update gives the Delta T histogram between the picosil and the Photonis MCP.
+// Another update gives the SKIROC emulation.
 // Author: Daniel Gawerc
 
 
@@ -95,6 +98,9 @@ void DoMultiDeviceStudy( string filename ) {
   TH1F *histDeltaTPicoSilAt0LandauCharge = new TH1F("histDeltaTPicoSilAt0LandauCharge","; Time [ns];Number of Events", 150, -0.3, 0.3);// uses charge MPV
   TH1F *histDeltaTPicoSilAt0LandauChargeSmear = new TH1F("histDeltaTPicoSilAt0LandauChargeSmear", "; Time [ns];Number of Events", 150, -0.3, 0.3);//SKIROC
   TH1F *histDeltaTPicoSilAt0EqualSmear = new TH1F("histDeltaTPicoSilAt0EqualSmear", "; Time [ns];Number of Events", 150, -0.3, 0.3);//SKIROC
+  TH1F *histDeltaTPicoSilAt0EqualSmear_nEventsCombine[7];//Central pixel smear is [0], central + second highest nEvents is [1], etc...
+  for(int i=0; i<7; i++) histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i] = 
+      new TH1F(Form("histDeltaTPicoSilAt0EqualSmear_nEventsCombine_%dPixels",i+1), "; Time [ns];Number of Events", 150, -0.3, 0.3);//SKIROC
   TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
   TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
   TH1F *histDeltaTMCPAt0Smear = new TH1F("histDeltaTMCPAt0Smear","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
@@ -247,12 +253,29 @@ void DoMultiDeviceStudy( string filename ) {
 
   double meanPicoSil[7];
   double meanPicoSilSmear[7];
+  int DeltaTPicoSilSmear_Events[7];
   double meanPicoSil_vs_MCP[7];
   for (int i = 0; i < 7; i++){
     meanPicoSil[i] = histDeltaTPicoSil[i]->GetMean();
     meanPicoSilSmear[i] = histDeltaTPicoSilSmear[i]->GetMean();
+    DeltaTPicoSilSmear_Events[i] = histDeltaTPicoSilSmear[i]->GetEntries();
     meanPicoSil_vs_MCP[i] = histDeltaT_PicoSil_vs_MCP[i]->GetMean();
   }
+  int DeltaTPicoSilSmear_Events_Sorted[7];
+  int DeltaTPicoSilSmear_Events_SortedIndices[7];
+  std::copy(DeltaTPicoSilSmear_Events, DeltaTPicoSilSmear_Events+7, DeltaTPicoSilSmear_Events_Sorted);
+  std::sort(DeltaTPicoSilSmear_Events_Sorted, DeltaTPicoSilSmear_Events_Sorted+7, std::greater<int>() );
+  for (int i = 0; i < 7; i++){
+    for (int j = 0; j < 7; j++) {
+      if( DeltaTPicoSilSmear_Events[j] == DeltaTPicoSilSmear_Events_Sorted[i] ) {
+        DeltaTPicoSilSmear_Events_SortedIndices[i] = j;
+        break;
+      }
+    }
+  }
+
+
+
 
   TRandom3 *rando2 = new TRandom3(seed);
   //Loop through again. This time, subtracting the respective means. Process is almost the same.
@@ -402,6 +425,20 @@ void DoMultiDeviceStudy( string filename ) {
     float DeltaT_PicoSil_vs_MCP_TotalCharge = PicoSil_vs_MCP_WeightTotal / PicoSil_vs_MCP_ChargeTotal;
     float DeltaT_PicoSil_vs_MCP_EventCharge = PicoSil_vs_MCP_WeightEvent / PicoSil_vs_MCP_ChargeEvent;
 
+    // For adding in each pixel in descending order by number of events.
+    for(int j = 0; j < 7; j++) {
+      double fill = 0;
+      inc = 0;
+      for(int k = 0; k <= j; k++) {
+        if( DeltaTPicoSilSmear[ DeltaTPicoSilSmear_Events_SortedIndices[k] ] != 0. ) {
+          fill += DeltaTPicoSilSmear[ DeltaTPicoSilSmear_Events_SortedIndices[k] ];
+          inc += 1;
+        }
+      }
+      fill /= inc;
+      histDeltaTPicoSilAt0EqualSmear_nEventsCombine[j]->Fill( fill );
+    }
+
 
     histDeltaT_Center_MCP_Equal->Fill(DeltaT_Center_MCP_Equal);
     histDeltaT_PicoSil_MCP_EventCharge->Fill(DeltaT_PicoSil_MCP_EventCharge); 
@@ -452,6 +489,7 @@ void DoMultiDeviceStudy( string filename ) {
 
   for (int i = 0; i < 7; i++) {
     Fitter(histDeltaTPicoSilSmearAt0[i]);
+    Fitter(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i]);
     Fitter(histDeltaT_PicoSil_vs_MCP[i]);
   }
 
@@ -489,6 +527,9 @@ void DoMultiDeviceStudy( string filename ) {
   }
   for(int i=0; i<=6; i++) {
     file->WriteTObject(histDeltaTPicoSilSmearAt0[i],Form("histDeltaTPicoSilSmear[%d]",i),"WriteDelete");
+  }
+  for(int i=0; i<=6; i++) {
+    file->WriteTObject(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i],Form("Combine Smeared Pixels Equally by nEvents: %d Pixels",i+1),"WriteDelete");
   }
 
 
