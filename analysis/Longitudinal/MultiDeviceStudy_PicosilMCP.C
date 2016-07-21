@@ -479,6 +479,7 @@ void DoMultiDeviceStudy( string filename ) {
   Fitter(histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear);
   Fitter(histDeltaTCenterAt0);
   Fitter(histDeltaTMCPAt0);
+  Fitter(histDeltaTMCPAt0Smear);
   Fitter(histDeltaTPicoSilAt0TotalCharge);
   Fitter(histDeltaTPicoSilAt0EventCharge);
   Fitter(histDeltaTPicoSilAt0LandauCharge);
@@ -528,8 +529,11 @@ void DoMultiDeviceStudy( string filename ) {
   for(int i=0; i<=6; i++) {
     file->WriteTObject(histDeltaTPicoSilSmearAt0[i],Form("histDeltaTPicoSilSmear[%d]",i),"WriteDelete");
   }
+  string pixels_added[7];
+  pixels_added[0] = Form("Combine Equally by nEvents. Smeared Pixels: %d", DeltaTPicoSilSmear_Events_SortedIndices[0]);
+  for(int i=1; i<=6; i++) pixels_added[i] = pixels_added[i-1] + Form(",%d",DeltaTPicoSilSmear_Events_SortedIndices[i]);
   for(int i=0; i<=6; i++) {
-    file->WriteTObject(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i],Form("Combine Smeared Pixels Equally by nEvents: %d Pixels",i+1),"WriteDelete");
+    file->WriteTObject(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i], pixels_added[i].c_str(), "WriteDelete");
   }
 
 
