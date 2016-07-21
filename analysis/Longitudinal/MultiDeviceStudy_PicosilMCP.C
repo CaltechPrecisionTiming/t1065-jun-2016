@@ -22,11 +22,14 @@
 #include "TLatex.h"
 #include <math.h>
 #include <time.h>
-#include "TRandom3.h" 
+#include <algorithm>
+#include <functional>
+#include "TRandom3.h"
 
 // This code generates the combined Delta T histogram for the picosil (center pixel and first ring of pixels) and the Photonis MCP for the re-cabled configuration **with respect to the Photek**. The SiPad is not used. 
 // An update to the code includes use of the first ring pixels in the picosil.
 // Another update gives the Delta T histogram between the picosil and the Photonis MCP.
+// Another update gives the SKIROC emulation.
 // Author: Daniel Gawerc
 
 
@@ -95,6 +98,9 @@ void DoMultiDeviceStudy( string filename ) {
   TH1F *histDeltaTPicoSilAt0LandauCharge = new TH1F("histDeltaTPicoSilAt0LandauCharge","; Time [ns];Number of Events", 150, -0.3, 0.3);// uses charge MPV
   TH1F *histDeltaTPicoSilAt0LandauChargeSmear = new TH1F("histDeltaTPicoSilAt0LandauChargeSmear", "; Time [ns];Number of Events", 150, -0.3, 0.3);//SKIROC
   TH1F *histDeltaTPicoSilAt0EqualSmear = new TH1F("histDeltaTPicoSilAt0EqualSmear", "; Time [ns];Number of Events", 150, -0.3, 0.3);//SKIROC
+  TH1F *histDeltaTPicoSilAt0EqualSmear_nEventsCombine[7];//Central pixel smear is [0], central + second highest nEvents is [1], etc...
+  for(int i=0; i<7; i++) histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i] = 
+      new TH1F(Form("histDeltaTPicoSilAt0EqualSmear_nEventsCombine_%dPixels",i+1), "; Time [ns];Number of Events", 150, -0.3, 0.3);//SKIROC
   TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
   TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
   TH1F *histDeltaTMCPAt0Smear = new TH1F("histDeltaTMCPAt0Smear","; Time [ns];Number of Events", 150, -0.3, 0.3); //shifted to be centered at zero
@@ -247,12 +253,29 @@ void DoMultiDeviceStudy( string filename ) {
 
   double meanPicoSil[7];
   double meanPicoSilSmear[7];
+  int DeltaTPicoSilSmear_Events[7];
   double meanPicoSil_vs_MCP[7];
   for (int i = 0; i < 7; i++){
     meanPicoSil[i] = histDeltaTPicoSil[i]->GetMean();
     meanPicoSilSmear[i] = histDeltaTPicoSilSmear[i]->GetMean();
+    DeltaTPicoSilSmear_Events[i] = histDeltaTPicoSilSmear[i]->GetEntries();
     meanPicoSil_vs_MCP[i] = histDeltaT_PicoSil_vs_MCP[i]->GetMean();
   }
+  int DeltaTPicoSilSmear_Events_Sorted[7];
+  int DeltaTPicoSilSmear_Events_SortedIndices[7];
+  std::copy(DeltaTPicoSilSmear_Events, DeltaTPicoSilSmear_Events+7, DeltaTPicoSilSmear_Events_Sorted);
+  std::sort(DeltaTPicoSilSmear_Events_Sorted, DeltaTPicoSilSmear_Events_Sorted+7, std::greater<int>() );
+  for (int i = 0; i < 7; i++){
+    for (int j = 0; j < 7; j++) {
+      if( DeltaTPicoSilSmear_Events[j] == DeltaTPicoSilSmear_Events_Sorted[i] ) {
+        DeltaTPicoSilSmear_Events_SortedIndices[i] = j;
+        break;
+      }
+    }
+  }
+
+
+
 
   TRandom3 *rando2 = new TRandom3(seed);
   //Loop through again. This time, subtracting the respective means. Process is almost the same.
@@ -402,6 +425,20 @@ void DoMultiDeviceStudy( string filename ) {
     float DeltaT_PicoSil_vs_MCP_TotalCharge = PicoSil_vs_MCP_WeightTotal / PicoSil_vs_MCP_ChargeTotal;
     float DeltaT_PicoSil_vs_MCP_EventCharge = PicoSil_vs_MCP_WeightEvent / PicoSil_vs_MCP_ChargeEvent;
 
+    // For adding in each pixel in descending order by number of events.
+    for(int j = 0; j < 7; j++) {
+      double fill = 0;
+      inc = 0;
+      for(int k = 0; k <= j; k++) {
+        if( DeltaTPicoSilSmear[ DeltaTPicoSilSmear_Events_SortedIndices[k] ] != 0. ) {
+          fill += DeltaTPicoSilSmear[ DeltaTPicoSilSmear_Events_SortedIndices[k] ];
+          inc += 1;
+        }
+      }
+      fill /= inc;
+      histDeltaTPicoSilAt0EqualSmear_nEventsCombine[j]->Fill( fill );
+    }
+
 
     histDeltaT_Center_MCP_Equal->Fill(DeltaT_Center_MCP_Equal);
     histDeltaT_PicoSil_MCP_EventCharge->Fill(DeltaT_PicoSil_MCP_EventCharge); 
@@ -428,6 +465,7 @@ void DoMultiDeviceStudy( string filename ) {
     histDeltaT_PicoSil_vs_MCP_EventCharge->Fill(DeltaT_PicoSil_vs_MCP_EventCharge);
   }
 
+  // Add Gaussian fit
   Fitter(histDeltaT_Center_MCP_Equal);
   Fitter(histDeltaT_PicoSil_MCP_Equal);
   Fitter(histDeltaT_PicoSilEqual_MCP_Equal);
@@ -451,6 +489,7 @@ void DoMultiDeviceStudy( string filename ) {
 
   for (int i = 0; i < 7; i++) {
     Fitter(histDeltaTPicoSilSmearAt0[i]);
+    Fitter(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i]);
     Fitter(histDeltaT_PicoSil_vs_MCP[i]);
   }
 
@@ -488,6 +527,9 @@ void DoMultiDeviceStudy( string filename ) {
   }
   for(int i=0; i<=6; i++) {
     file->WriteTObject(histDeltaTPicoSilSmearAt0[i],Form("histDeltaTPicoSilSmear[%d]",i),"WriteDelete");
+  }
+  for(int i=0; i<=6; i++) {
+    file->WriteTObject(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i],Form("Combine Smeared Pixels Equally by nEvents: %d Pixels",i+1),"WriteDelete");
   }
 
 
@@ -588,21 +630,21 @@ void makeTimeResolution( string filename ) {
   histDeltaTPicoSilEventCharge->SetTitle("HGC: TOF w/ Event Charge Weighting");
   histDeltaTPicoSilTotalCharge->SetTitle("HGC: TOF w/ Total Charge Weighting");
   histDeltaTPicoSilLandauCharge->SetTitle("HGC: TOF w/ Landau MPV Charge Weighting");
-  histDeltaTPicoSilLandauChargeSmear->SetTitle("SKIROC Emulation: HGC TOF w/ Landau MPV Charge Weighting");
+  histDeltaTPicoSilLandauChargeSmear->SetTitle("#splitline{SKIROC Emulation: HGC TOF w/ Landau}{MPV Charge Weighting}");
   histDeltaTPicoSilEqualSmear->SetTitle("SKIROC Emulation: HGC TOF w/ Equal Weighting");
   histDeltaTMCP->SetTitle("MCP: TOF");
   histDeltaTMCPSmear->SetTitle("SKIROC Emulation: MCP TOF");
-  histDeltaT_Center_MCP_Equal->SetTitle("HGC Center Pixel, MCP: TOF w/ Equal Weighting");
-  histDeltaT_PicoSil_MCP_Equal->SetTitle("HGC Inner Ring and Center Pixel, MCP: TOF w/ Weighting 1/8");
-  histDeltaT_PicoSilEqual_MCP_Equal->SetTitle("HGC Inner Ring and Center Pixel Weighted 1/14, MCP Weighted 1/2: TOF");
-  histDeltaT_PicoSilEqual_MCP_Equal_BothSmear->SetTitle("HGC Inner Ring and Center Pixel Smeared, Weighted 1/14; MCP Smeared, Weighted 1/2: TOF");
+  histDeltaT_Center_MCP_Equal->SetTitle("1/2 HGC Center Pixel, 1/2 MCP: TOF");
+  histDeltaT_PicoSil_MCP_Equal->SetTitle("HGC 7 Pixels, MCP: TOF w/ Weighting 1/8");
+  histDeltaT_PicoSilEqual_MCP_Equal->SetTitle("1/14 HGC 7 Pixels, 1/2 MCP: TOF");
+  histDeltaT_PicoSilEqual_MCP_Equal_BothSmear->SetTitle("1/14 HGC Smeared 7 Pixels, 1/2 MCP Smeared: TOF");
   histDeltaT_PicoSil_MCP_EventCharge->SetTitle("HGC, MCP: TOF w/ Event Charge Weighting");
   histDeltaT_PicoSil_MCP_TotalCharge->SetTitle("HGC, MCP: TOF w/ Total Charge Weighting");
-  histDeltaT_PicoSilEventCharge_MCP_Equal->SetTitle("HGC w/ Event Charge Weighting then *1/2, MCP Weighted 1/2: TOF");
-  histDeltaT_PicoSilTotalCharge_MCP_Equal->SetTitle("HGC w/ Total Charge Weighting then *1/2, MCP Weighted 1/2: TOF");
-  histDeltaT_PicoSilLandauCharge_MCP_Equal->SetTitle("HGC w/ Landau MPV Charge Weighting then *1/2, MCP Weighted 1/2: TOF");
-  histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->SetTitle("SKIROC Emulation: HGC Smeared w/ Landau MPV Charge Weighting then *1/2, MCP Weighted *1/2: TOF");
-  histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->SetTitle("SKIROC Emulation: HGC Smeared w/ Landau MPV Charge Weighting then *1/2, MCP Smeared Weighted *1/2: TOF");
+  histDeltaT_PicoSilEventCharge_MCP_Equal->SetTitle("1/2 HGC w/ Event Charge Weighting, 1/2 MCP: TOF");
+  histDeltaT_PicoSilTotalCharge_MCP_Equal->SetTitle("1/2 HGC w/ Total Charge Weighting, 1/2 MCP: TOF");
+  histDeltaT_PicoSilLandauCharge_MCP_Equal->SetTitle("1/2 HGC w/ Landau MPV Charge Weighting, 1/2 MCP: TOF");
+  histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 MCP: TOF}");
+  histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 Smeared MCP: TOF}");
 
 
   PlotDeltaTPDF(c, tex, histDeltaTCenter, "deltaTCenter.pdf");
