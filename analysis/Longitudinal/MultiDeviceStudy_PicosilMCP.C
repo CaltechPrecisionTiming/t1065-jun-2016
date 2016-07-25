@@ -169,8 +169,8 @@ void DoMultiDeviceStudy( string filename ) {
 
     
     double linearTime45Smear[7];
-    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1], 0.050); //Samples from smear
-    double MCPTimeSmear = rando->Gaus(MCPTime, 0.050);
+    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1], 0.500); //Samples from smear
+    double MCPTimeSmear = rando->Gaus(MCPTime, 0.300);
 
 
     //Calculates the Delta T's if the event passes the cuts:
@@ -308,12 +308,14 @@ void DoMultiDeviceStudy( string filename ) {
     if( !( MCPAmp > MCPAmpCut) ) continue;
 
     double linearTime45Smear[7];
-    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+1],0.050);
-    double MCPTimeSmear = rando2->Gaus(MCPTime, 0.050);
+    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+1],0.500);
+    double MCPTimeSmear = rando2->Gaus(MCPTime, 0.300);
 
-    float DeltaTPicoSil[7] = {0.}; 
-    float DeltaTPicoSilSmear[7] = {0.};
+    float DeltaTPicoSil[7]; 
+    float DeltaTPicoSilSmear[7];
     float DeltaTPicoSil_vs_MCP[7] = {0.};
+    std::fill(DeltaTPicoSil, DeltaTPicoSil+7, -99);
+    std::fill(DeltaTPicoSilSmear, DeltaTPicoSilSmear+7, -99);
     for ( int j = 1; j <= 7; j++){
       if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
         DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j] - meanPicoSil[j-1];
@@ -328,9 +330,11 @@ void DoMultiDeviceStudy( string filename ) {
     float ringWeightEvent = 0;
     float ringChargeEvent = 0;
     for(int ii = 2; ii <= 7; ii++){
-      ringWeightTotal += totalPicoSilCharge[ii-1] * DeltaTPicoSil[ii-1];
-      ringWeightEvent += integral[ii] * DeltaTPicoSil[ii-1];
-      if(DeltaTPicoSil[ii-1] != 0.) ringChargeEvent += integral[ii];
+      if(DeltaTPicoSil[ii-1] != -99.) {
+        ringChargeEvent += integral[ii];
+        ringWeightTotal += totalPicoSilCharge[ii-1] * DeltaTPicoSil[ii-1];
+        ringWeightEvent += integral[ii] * DeltaTPicoSil[ii-1];
+      }
     }
 
 
@@ -361,26 +365,38 @@ void DoMultiDeviceStudy( string filename ) {
 
     float DeltaT_PicoSilTotalCharge_MCP_Equal = 0.5*DeltaTMCP; //Add PicoSil on next line.
     float temp_pstotalweight = 0;
-    for (int j = 0; j <= 6; j++) temp_pstotalweight += DeltaTPicoSil[j]*totalPicoSilCharge[j];
     float temp_pstotalcharge = 0;
-    for (int j = 0; j <= 6; j++) {if (DeltaTPicoSil[j] != 0) temp_pstotalcharge += totalPicoSilCharge[j];}
+    for (int j = 0; j <= 6; j++) {
+      if (DeltaTPicoSil[j] != -99.) {
+        temp_pstotalcharge += totalPicoSilCharge[j];
+        temp_pstotalweight += DeltaTPicoSil[j]*totalPicoSilCharge[j];
+      }
+    }
     DeltaT_PicoSilTotalCharge_MCP_Equal += 0.5*temp_pstotalweight/temp_pstotalcharge;
 
     float DeltaT_PicoSilEventCharge_MCP_Equal = 0.5*DeltaTMCP;
     float temp_pseventweight = 0;
-    for (int j = 1; j <= 6; j++) temp_pseventweight += DeltaTPicoSil[j]*integral[j+1];
-    temp_pseventweight += DeltaTPicoSil[0]*centerCharge;
     float temp_pseventcharge = 0;
-    for (int j = 1; j <= 6; j++) {if (DeltaTPicoSil[j] != 0) temp_pseventcharge += integral[j+1];}
-    if (DeltaTPicoSil[0] != 0) temp_pseventcharge += centerCharge;
+    if (DeltaTPicoSil[0] != -99.) {
+      temp_pseventweight += DeltaTPicoSil[0]*centerCharge;
+      temp_pseventcharge += centerCharge;
+    }
+    for (int j = 1; j <= 6; j++) {
+      if (DeltaTPicoSil[j] != -99) {
+        temp_pseventweight += DeltaTPicoSil[j]*integral[j+1];
+        temp_pseventcharge += integral[j+1];
+      }
+    }
     DeltaT_PicoSilEventCharge_MCP_Equal += 0.5*temp_pseventweight/temp_pseventcharge;
 
     float DeltaT_PicoSilLandauCharge_MCP_Equal = 0.5*DeltaTMCP;
     float temp_pslandauweight = 0;
     float temp_pslandaucharge = 0;
     for (int j = 0; j <= 6; j++) {
-      temp_pslandauweight += DeltaTPicoSil[j]*MPVlandau[j];
-      if (DeltaTPicoSil[j] != 0) temp_pslandaucharge += MPVlandau[j];
+      if (DeltaTPicoSil[j] != -99.) {
+        temp_pslandauweight += DeltaTPicoSil[j]*MPVlandau[j];
+        temp_pslandaucharge += MPVlandau[j];
+      }
     }
     DeltaT_PicoSilLandauCharge_MCP_Equal += 0.5*temp_pslandauweight/temp_pslandaucharge;
 
@@ -388,8 +404,10 @@ void DoMultiDeviceStudy( string filename ) {
     float temp_pslandauweight_smear = 0;
     float temp_pslandaucharge_smear = 0;
     for (int j = 0; j <= 6; j++) {
-      temp_pslandauweight_smear += DeltaTPicoSilSmear[j]*MPVlandau[j];
-      if (DeltaTPicoSilSmear[j] != 0) temp_pslandaucharge_smear += MPVlandau[j];
+      if (DeltaTPicoSilSmear[j] != -99.) {
+        temp_pslandauweight_smear += DeltaTPicoSilSmear[j]*MPVlandau[j];
+        temp_pslandaucharge_smear += MPVlandau[j];
+      }
     }
     DeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear += 0.5*temp_pslandauweight_smear/temp_pslandaucharge_smear;
 
@@ -400,8 +418,10 @@ void DoMultiDeviceStudy( string filename ) {
     float DeltaT_PicoSil_MCP_Equal = DeltaTMCP;
     int inc = 0; //Divide by inc at the end, because some PicoSil pixels may not have passed cuts.
     for (int j = 0; j <= 6; j++) {
-      DeltaT_PicoSil_MCP_Equal += DeltaTPicoSil[j];
-      if (DeltaTPicoSil[j] != 0.) inc += 1;
+      if (DeltaTPicoSil[j] != -99.) {
+        DeltaT_PicoSil_MCP_Equal += DeltaTPicoSil[j];
+        inc += 1;
+      }
     }
     DeltaT_PicoSil_MCP_Equal /= inc;
 
@@ -409,8 +429,10 @@ void DoMultiDeviceStudy( string filename ) {
     inc = 0;
     float temp_psdeltat = 0;
     for (int j = 0; j <= 6; j++) {
-      temp_psdeltat += DeltaTPicoSil[j];
-      if (DeltaTPicoSil[j] != 0.) inc += 1;
+      if (DeltaTPicoSil[j] != -99.) {
+        inc += 1;
+        temp_psdeltat += DeltaTPicoSil[j];
+      }
     }
     temp_psdeltat /= inc;
     DeltaT_PicoSilEqual_MCP_Equal += 0.5*temp_psdeltat;
@@ -418,7 +440,7 @@ void DoMultiDeviceStudy( string filename ) {
     float DeltaTPicoSilAt0EqualSmear = 0;
     inc = 0;
     for (int j = 0; j <= 6; j++) {
-      if (DeltaTPicoSilSmear[j] != 0.) {
+      if (DeltaTPicoSilSmear[j] != -99.) {
         inc += 1;
         DeltaTPicoSilAt0EqualSmear += DeltaTPicoSilSmear[j];
       }
@@ -434,7 +456,7 @@ void DoMultiDeviceStudy( string filename ) {
       double fill = 0;
       inc = 0;
       for(int k = 0; k <= j; k++) {
-        if( DeltaTPicoSilSmear[ DeltaTPicoSilSmear_Events_SortedIndices[k] ] != 0. ) {
+        if( DeltaTPicoSilSmear[ DeltaTPicoSilSmear_Events_SortedIndices[k] ] != -99. ) {
           fill += DeltaTPicoSilSmear[ DeltaTPicoSilSmear_Events_SortedIndices[k] ];
           inc += 1;
         }
