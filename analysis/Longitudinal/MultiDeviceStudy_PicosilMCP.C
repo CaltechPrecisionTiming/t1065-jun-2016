@@ -313,9 +313,10 @@ void DoMultiDeviceStudy( string filename ) {
 
     float DeltaTPicoSil[7]; 
     float DeltaTPicoSilSmear[7];
-    float DeltaTPicoSil_vs_MCP[7] = {0.};
+    float DeltaTPicoSil_vs_MCP[7];
     std::fill(DeltaTPicoSil, DeltaTPicoSil+7, -99);
     std::fill(DeltaTPicoSilSmear, DeltaTPicoSilSmear+7, -99);
+    std::fill)DeltaTPicoSil_vs_MCP, DeltaTPicoSil_vs_MCP+7, -99);
     for ( int j = 1; j <= 7; j++){
       if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
         DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j] - meanPicoSil[j-1];
@@ -343,13 +344,17 @@ void DoMultiDeviceStudy( string filename ) {
     float PicoSil_vs_MCP_ChargeTotal = 0;
     float PicoSil_vs_MCP_ChargeEvent = 0;
     for (int jj = 1; jj <= 7; jj++) {
-      PicoSil_vs_MCP_WeightTotal += totalPicoSilCharge[jj-1] * DeltaTPicoSil_vs_MCP[jj-1];
-      if (jj != 1) PicoSil_vs_MCP_WeightEvent += integral[jj] * DeltaTPicoSil_vs_MCP[jj-1];
-      else PicoSil_vs_MCP_WeightEvent += centerCharge * DeltaTPicoSil_vs_MCP[jj-1];
-      if (DeltaTPicoSil_vs_MCP[jj-1] != 0.) {
-      	if ( jj != 1 ) PicoSil_vs_MCP_ChargeEvent += integral[jj];
-      	else PicoSil_vs_MCP_ChargeEvent += centerCharge;
-      	PicoSil_vs_MCP_ChargeTotal += totalPicoSilCharge[jj-1];
+      if (DeltaTPicoSil_vs_MCP[jj-1] != -99.) {
+        PicoSil_vs_MCP_WeightTotal += totalPicoSilCharge[jj-1] * DeltaTPicoSil_vs_MCP[jj-1];
+        PicoSil_vs_MCP_ChargeTotal += totalPicoSilCharge[jj-1];
+      	if ( jj != 1 ) {
+          PicoSil_vs_MCP_ChargeEvent += integral[jj];
+          PicoSil_vs_MCP_WeightEvent += integral[jj] * DeltaTPicoSil_vs_MCP[jj-1];
+        }
+      	else {
+          PicoSil_vs_MCP_ChargeEvent += centerCharge;
+          PicoSil_vs_MCP_WeightEvent += centerCharge * DeltaTPicoSil_vs_MCP[jj-1];
+        }
       }
     }
 
