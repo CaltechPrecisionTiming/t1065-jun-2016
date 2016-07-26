@@ -125,6 +125,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   srand(time(NULL));
   int seed = rand();
 
+  // to set the smear time (this is in ns, so 0.05 means a smearing of 50 ps)
+  float smear = 0.5;
+
   // The same seed will be used in the first and second event loops to generate the same random sequence with TRandom.
   TRandom3 *r = new TRandom3(seed); 
 
@@ -195,7 +198,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
     for ( int j = 1; j <= 7; j++)
       {
-        float smear_number = r->Gaus(0, 0.05);
+        float smear_number = r->Gaus(0, smear);
         if ( iEntry > 1000 && iEntry < 1015 )
         {
           //cout << "smear number " << smear_number << ":\n" << endl;
@@ -292,7 +295,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF histograms of each pixel with the smear added
   TH1F *histDeltaTshifted_smear_C[7];
-  for(int j=0; j < 7; j++) histDeltaTshifted_smear_C[j]= new TH1F(Form("histDeltaTshifted_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 7; j++) histDeltaTshifted_smear_C[j]= new TH1F(Form("histDeltaTshifted_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
+  
+  // TOF histogram of each pixel with the smear added, for the code that only uses the ring
+  TH1F *histDeltaTshifted_smear2_C[6];
+  for(int j=0; j < 6; j ++) histDeltaTshifted_smear2_C[j]= new TH1F(Form("histDeltaTshifted_smear2_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
 
@@ -310,11 +317,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
   TH1F *histTOF_largest_smear_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_smear_C[j]= new TH1F(Form("histTOF_largest_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 7; j++) histTOF_largest_smear_C[j]= new TH1F(Form("histTOF_largest_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
 
   // TOF of largest pixels, with the smear added. For these, the times of each pixel will be added with equal weighting
   TH1F *histTOF_largest_smear_equal_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_smear_equal_C[j]= new TH1F(Form("histTOF_largest_smear_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 7; j++) histTOF_largest_smear_equal_C[j]= new TH1F(Form("histTOF_largest_smear_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
 
   TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, 0.5,7.5);
   TH1F* histPixelsCombined_C = new TH1F("histPixelsCombined","; Number of Pixels;Number of Events", 7, 0.5,7.5);
@@ -349,7 +356,6 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F* histCenterChargeCut_C = new TH1F("histCenterChargeCut","; Center Charge (pC);Number of Events", 300, -0.5 , 100);
   TH1F* histCenterAmpCut_C = new TH1F("histCenterAmplitudeCut","; Center Amplitude;Number of Events", 300, -0.5 , 1);
 
-
   histTOFFlatAvg_C = new TH1F("histTOFFlatAvg_C","; Time [ns];Number of Events", 200, -6,-4);
   histTOFChargeWeightedAvg_C = new TH1F("histTOFChargeWeightedAvg_C","; Time [ns];Number of Events", 200, -1,-1);
   histTOFRingOneFlatAvg_C = new TH1F("histTOFRingOneFlatAvg_C","; Time [ns];Number of Events", 200, -10,10);
@@ -359,408 +365,668 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F* histRandomNumberTest_C = new TH1F("histRandomNumberTest_C","; number; number of events", 200, -0.5, 0.5);
   TH1F* histLinearTime_C = new TH1F("histLinearTime_C","; time; number of events", 200, -0, 150);
 
+
   // Delete memory allocated to r from first for loop. Then use same seed for the TRandom so the same random sequence is used in both event loops.
   delete r;
   r = new TRandom3(seed);
 
   std::cout<<"Number of events in Sample: "<<nentries<<std::endl; 
   for (Long64_t iEntry=0;iEntry<nentries;iEntry++)
+  {
+    if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
+    tree->GetEntry(iEntry);  
+
+    float photekTimeGauss = gauspeak[0];
+    float photekAmp = amp[0];
+    float photekCharge = integral[0];
+
+    float totalEnergy = 0;
+    float Energy = 0;
+    float percent = 0;
+
+    float largestIndex = 0;
+    float largestIndexIntegral = 0;
+
+    float ratio = 0;
+    float ratio1 = 0;
+    float ratio2 = 0;
+    float ratio3 = 0;
+
+    float centerAmp = amp[1];
+    float centerCharge = integral[1];
+    float centerTime = linearTime45[1];
+
+    // fill histograms of variable being cut on, plots full range
+    histPhotekAmpCut_C->Fill( photekAmp );
+    histPhotekChargeCut_C->Fill( photekCharge );
+    histCenterAmpCut_C->Fill( centerAmp );
+    histCenterChargeCut_C->Fill( centerCharge );
+
+
+    std::vector< Pixel > vect1;
+    Pixel pixel1;
+    for ( int j = 1; j <= 7; j++)
     {
-      if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
-      tree->GetEntry(iEntry);  
-
-      float photekTimeGauss = gauspeak[0];
-      float photekAmp = amp[0];
-      float photekCharge = integral[0];
-
-      float totalEnergy = 0;
-      float Energy = 0;
-      float percent = 0;
-
-      float largestIndex = 0;
-      float largestIndexIntegral = 0;
-
-      float ratio = 0;
-      float ratio1 = 0;
-      float ratio2 = 0;
-      float ratio3 = 0;
-
-      float centerAmp = amp[1];
-      float centerCharge = integral[1];
-      float centerTime = linearTime45[1];
-
-      // fill histograms of variable being cut on, plots full range
-      histPhotekAmpCut_C->Fill( photekAmp );
-      histPhotekChargeCut_C->Fill( photekCharge );
-      histCenterAmpCut_C->Fill( centerAmp );
-      histCenterChargeCut_C->Fill( centerCharge );
-
-
-      std::vector< Pixel > vect1;
-      Pixel pixel1;
-      for ( int j = 1; j <= 7; j++)
+      pixel1.index = j;
+      if ( j == 1 )
       {
-        pixel1.index = j;
-        if ( j == 1 )
-        {
-          pixel1.charge = 2*integral[j]; // 2* to account for the 6db attenuation
-        }
-        else pixel1.charge = integral[j];
-        vect1.push_back( pixel1 ) ;
+        pixel1.charge = 2*integral[j]; // 2* to account for the 6db attenuation
       }
-
-      // energy ratio histogram with no cuts applied, goes through every event before event cuts are applied
-      float energy_center1 = vect1[0].charge;
-      float energy_total1 = vect1[0].charge + vect1[1].charge + vect1[2].charge + vect1[3].charge + vect1[4].charge + vect1[5].charge + vect1[6].charge;
-      ratio1 = energy_center1 / energy_total1;
-
-      histEnergyRatio_C->Fill( ratio1 );
-      histEnergyPhotekAmp_C->Fill( photekAmp, ratio1 );
-
-      if ( !(photekAmp > 0.09 && photekCharge > 2 )) continue;
-
-      float energy_center3 = vect1[0].charge;
-      float energy_total3 = vect1[0].charge + vect1[1].charge + vect1[2].charge + vect1[3].charge + vect1[4].charge + vect1[5].charge + vect1[6].charge;
-      ratio3 = energy_center3 / energy_total3;
-
-      if ( energy_center3 > 0 )
-      {
-        histEnergyRatioPhotekCut_C->Fill( ratio3 );
-        histEnergyPhotekAmpPhotekCut_C->Fill( photekAmp, ratio3 );
-      }
-
-      // require photek amp and charge to be above cuts (to select electron events and not background), and require central pixel to be above amp and charge cuts
-
-      // 8GeV cuts
-      //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
-      //require signal in the central pixel
-      //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
-
-      // 16GeV cuts
-      //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
-      //require signal in the central pixel
-      //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
-
-      // 32GeV cuts, 1 mm
-      //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
-      //require signal in the central pixel
-      //if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
-
-      // 32GeV cuts, 10 mm
-      //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
-      //require signal in the central pixel
-      //if( !(centerCharge > 8 && centerAmp > 0.1 ) ) continue;
-
-      // 32GeV cuts, 32 mm
-      //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
-      //require signal in the central pixel
-      //if( !(centerCharge > 3 && centerAmp > 0.05 ) ) continue;
-
-      // 32GeV cuts, 75 mm
-      if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
-      //require signal in the central pixel
-      if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
-
-      
-
-
-
-      // Generates random numbers from the Gaussian distribution with mean 0 and sigma 0.05 (50 picoseconds) to perform the time smearing for each pixel
-      // float smear_number[7];
-      // for ( int i = 0; i <= 6; i++)
-      // {
-      //   Double_t random = r->Gaus(0, 0.05);
-      //   histRandomNumberTest_C->Fill( random );
-      // }
-
-
-
-
-
-      std::vector< Pixel > vect;
-      Pixel pixel;
-      for ( int j = 1; j <= 7; j++)
-      {
-        // smear number is a random number choosen from a Gaussian distribution with mean 0 and sigam 0.05 (50 ps) to perform the time smearing for each pixel
-        float smear_number = r->Gaus(0, 0.05);
-        if ( iEntry > 1000 && iEntry < 1015 )
-        {
-          //cout << "smear number " << smear_number << ":\n" << endl;
-        }
-        if ( amp[j] > 0.01 && integral[j] > 1 )
-        {
-          histDeltaT_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
-          histDeltaTshifted_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
-          histDeltaTshifted_smear_C[j-1]->Fill(gauspeak[0] + smear_number - linearTime45[j] - meanT_smear[j-1]);
-        } 
-        pixel.index = j;
-        if ( j == 1 )
-        {
-          pixel.charge = 2*integral[j]; // 2* to account for the 6db attenuation
-        }
-        else pixel.charge = integral[j];
-        pixel.time = gauspeak[0] - (linearTime45[j] + meanT[j-1]);
-        pixel.time_smear = gauspeak[0] + smear_number - linearTime45[j] - meanT[j-1];
-        pixel.amp = amp[j];
-        vect.push_back( pixel ) ;
-      }
-
-      histLinearTime_C->Fill( linearTime45[1] );
-
-      auto sortPixel = []( Pixel a, Pixel b ) {return a.charge > b.charge ?  true : false;};
-      //std::sort( vect.begin(), vect.end(), sortPixel );
-
-      float average;
-      float average_equal;
-      float average_smear;
-      float average_smear_equal;
-      float average_corrected;
-      float offset_correction;
-      float offset_slope;
-      float offset_quadratic;
-      float offset_cubic;
-
-      // this will find which pixel has the maximum charge and plot the results in the MaxIndex histogram. largestIndex and largestIndexIntegral start as 0
-      // channels are 1 indexed for this
-      for ( int j = 0; j <= 7; j++)
-      {
-        if ( integral[j] > largestIndexIntegral )
-          {
-            largestIndexIntegral = integral[j];
-            largestIndex = j;
-          }
-      }
-      histMaxIndex_C->Fill( largestIndex );
-
-
-      float energy_center = vect[0].charge;
-      float energy_total = vect[0].charge + vect[1].charge + vect[2].charge + vect[3].charge + vect[4].charge + vect[5].charge + vect[6].charge;
-      float time_center = vect[0].time;
-      ratio = energy_center / energy_total;
-
-      histEnergyRatioEventCut_C->Fill( ratio );
-      histEnergyPhotekAmpEventCut_C->Fill( photekAmp, ratio );
-
-
-      // Sort the vect and plot the combination of the largest energy pixels
-      std::sort( vect.begin(), vect.end(), sortPixel );
-
-      // These values will be used to determine if the pixel passes the required cuts
-      float energy1 = vect[0].charge;           // 6db attenuator on the center pixel already accounted for
-      float energy2 = vect[1].charge;
-      float energy3 = vect[2].charge;
-      float energy4 = vect[3].charge;
-      float energy5 = vect[4].charge;
-      float energy6 = vect[5].charge;
-      float energy7 = vect[6].charge;
-
-      float amp1 = vect[0].amp;
-      float amp2 = vect[1].amp;
-      float amp3 = vect[2].amp;
-      float amp4 = vect[3].amp;
-      float amp5 = vect[4].amp;
-      float amp6 = vect[5].amp;
-      float amp7 = vect[6].amp;
-
-      float weight1 = 0;    // If the pixel passes the cuts, these weights will be changed to the charge of the pixel (and time will be charge weighted) 
-      float weight2 = 0;
-      float weight3 = 0;
-      float weight4 = 0;
-      float weight5 = 0;
-      float weight6 = 0;
-      float weight7 = 0;     
-
-      float count1 = 0;     // To count how many pixels are combined total. Also, if the pixel passes the cuts, this will be changed to 1 and will be used for the equal pixel weighting.
-      float count2 = 0;
-      float count3 = 0;
-      float count4 = 0;
-      float count5 = 0;
-      float count6 = 0;
-      float count7 = 0;
-      float Pixels = 0;
-
-      // This makes the TOF histogram with pixels with the largest charges, weighting the pixel time by the pixel charge (if pixel passes cuts). This is done event by event, so the TOF_largest_x will not necissarily have x pixels combined in every event.
-      // Also makes histograms of the total energy contained in the pixels used for the TOF histogram.
-      // 6db attenuator on the center pixel is already accounted for.
-      // For an additional pixel to be added, it must have a charge > 1 pC and an amplitude > 0.01 V. If the pixel does not pass these cuts, then it is added with a weight of 0.
-        
-      if ( energy1 > 1 && amp1 > 0.01 )
-      {
-        weight1 = energy1;
-        count1 = 1;
-      }
-
-      Energy = weight1;
-      average = vect[0].time;
-      average_smear = vect[0].time_smear;
-      histTOF_largest[0]->Fill( average );
-      histTOF_largest_C[0]->Fill( average );
-      histTOF_largest_equal_C[0]->Fill( average );
-      histTOF_largest_smear_C[0]->Fill( average_smear );
-      histTOF_largest_smear_equal_C[0]->Fill( average_smear );
-      histChargeContained[0]->Fill( Energy );
-
-      if ( energy2 > 1 && amp2 > 0.01 )
-      {
-        weight2 = energy2;
-        count2 = 1;
-      }
-
-      Energy = weight1 + weight2;
-      average = ( weight1*vect[0].time + weight2*vect[1].time )/( Energy );
-      average_equal = ( count1*vect[0].time + count2*vect[1].time )/( count1 + count2 );
-      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear )/( Energy );
-      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear )/ (count1 + count2 );
-      histTOF_largest[1]->Fill( average );
-      histTOF_largest_C[1]->Fill( average ); 
-      histTOF_largest_equal_C[1]->Fill ( average_equal );
-      histTOF_largest_smear_C[1]->Fill( average_smear );
-      histTOF_largest_smear_equal_C[1]->Fill( average_smear_equal );
-      histChargeContained[1]->Fill( Energy );
-
-      if ( energy3 > 1 && amp3 > 0.01 )
-      {
-        weight3 = energy3;
-        count3 = 1;
-      }
-        
-      Energy = weight1 + weight2 + weight3;
-      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time )/( Energy );
-      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time )/( count1 + count2 + count3 );
-      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear )/( Energy );
-      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear )/( count1 + count2 + count3 );
-      histTOF_largest[2]->Fill( average );
-      histTOF_largest_C[2]->Fill( average );
-      histTOF_largest_equal_C[2]->Fill( average_equal );
-      histTOF_largest_smear_C[2]->Fill( average_smear );
-      histTOF_largest_smear_equal_C[2]->Fill( average_smear_equal );
-      histChargeContained[2]->Fill( Energy );
-
-      if ( energy4 > 1 && amp4 > 0.01 )
-      {
-        weight4 = energy4;
-        count4 = 1;
-      }
-        
-      Energy = weight1 + weight2 + weight3 + weight4;
-      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time )/( Energy );
-      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time )/( count1 + count2 + count3 + count4 );
-      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear )/( Energy );
-      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear )/( count1 + count2 + count3 + count4 );
-      histTOF_largest[3]->Fill( average );
-      histTOF_largest_C[3]->Fill( average );
-      histTOF_largest_equal_C[3]->Fill( average_equal );
-      histTOF_largest_smear_C[3]->Fill( average_smear ); 
-      histTOF_largest_smear_equal_C[3]->Fill( average_smear_equal );    
-      histChargeContained[3]->Fill( Energy );
-
-      if ( energy5 > 1 && amp5 > 0.01 )
-      {
-        weight5 = energy5;
-        count5 = 1;
-      }
-        
-      Energy = weight1 + weight2 + weight3 + weight4 + weight5;
-      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time )/( Energy );
-      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time + count5*vect[4].time )/( count1 + count2 + count3 + count4 + count5 );
-      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear )/( Energy );
-      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear + count5*vect[4].time_smear )/( count1 + count2 + count3 + count4 + count5 );
-      histTOF_largest[4]->Fill( average );
-      histTOF_largest_C[4]->Fill( average );
-      histTOF_largest_equal_C[4]->Fill( average_equal );
-      histTOF_largest_smear_C[4]->Fill( average_smear );
-      histTOF_largest_smear_equal_C[4]->Fill( average_smear_equal );
-      histChargeContained[4]->Fill( Energy );
-
-      if ( energy6 > 1 && amp6 > 0.01 )
-      {
-        weight6 = energy6;
-        count6 = 1;
-      }
-        
-      Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6;
-      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time )/( Energy );
-      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time + count5*vect[4].time + count6*vect[5].time )/( count1 + count2 + count3 + count4 + count5 + count6 );
-      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear + weight6*vect[5].time_smear )/( Energy );
-      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear + count5*vect[4].time_smear + count6*vect[5].time_smear )/( count1 + count2 + count3 + count4 + count5 + count6 );
-      histTOF_largest[5]->Fill( average );
-      histTOF_largest_C[5]->Fill( average );
-      histTOF_largest_equal_C[5]->Fill( average_equal );
-      histTOF_largest_smear_C[5]->Fill( average_smear );
-      histTOF_largest_smear_equal_C[5]->Fill( average_smear_equal );
-      histChargeContained[5]->Fill( Energy );
-
-      if ( energy7 > 1 && amp7 > 0.01 )
-      {
-        weight7 = energy7;
-        count7 = 1;
-      }
-      
-      // values of offset are from the cubic fit of the 
-      offset_correction = 0.02167;
-      offset_slope = 0.0006389;
-      offset_quadratic = -0.00004141;
-      offset_cubic = 0.0000003572;
-
-      Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
-      average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time + weight7*vect[6].time )/( Energy );
-      average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time + count5*vect[4].time + count6*vect[5].time + count7*vect[6].time )/( count1 + count2 + count3 + count4 + count5 + count6 + count7 );
-      average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear + weight6*vect[5].time_smear + weight7*vect[6].time_smear )/( Energy );
-      average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear + count5*vect[4].time_smear + count6*vect[5].time_smear + count7*vect[6].time_smear )/( count1 + count2 + count3 + count4 + count5 + count6 + count7 );
-      histTOF_largest[6]->Fill( average );
-      histTOF_largest_C[6]->Fill( average );
-      histTOF_largest_equal_C[6]->Fill( average_equal );
-      histTOF_largest_smear_C[6]->Fill( average_smear );
-      histTOF_largest_smear_equal_C[6]->Fill( average_smear_equal ); 
-      histChargeContained[6]->Fill( Energy );
-
-      totalEnergy = energy1 + energy2 + energy3 + energy4 + energy5 + energy6 + energy7;
-
-      // energy histogram with all pixel cuts applied
-      float energy_total2 = weight1 + weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
-      ratio2 = energy_center / energy_total2;
-
-      histEnergyRatioAllCuts_C->Fill( ratio2 );
-      histEnergyPhotekAmpAllCuts_C->Fill( photekAmp, ratio2 );
-
-      // apply offset correction so there is no dependence of time on charge
-      average_corrected = average - offset_correction - Energy * offset_slope - Energy * Energy * offset_quadratic - Energy * Energy * Energy * offset_cubic;
-
-      // Makes 2D histogram with delta t and charge for event, using overall cuts on Photek and center pixel (charge and amplitude). Plots just energy of pixels that pass pixel cuts.
-      histDeltaTCharge_C->Fill( Energy , average );
-      // Same but with corrected average time (based on fit)
-      histDeltaTChargeCorr_C->Fill( Energy, average_corrected );
-
-      // Makes a histogram of the TOF with time correction, has all 7 pixels combined
-      histTOF_corr_C->Fill( average_corrected );
-      histTOF_corr_fit_C->Fill( average_corrected ); 
-
-      // Makes histogram of charge (or energy) vs. number of events with this charge
-      histTotalChargeContained_C->Fill( totalEnergy );
-
-      // Makes histogram of number of pixels combined (number of pixels above noise)
-      Pixels = count1 + count2 + count3 + count4 + count5 + count6 + count7;
-      histPixelsCombined_C->Fill( Pixels );
-
-      // Makes a histogram with the charge contained in the center pixel
-      histChargeCenterContained_C->Fill( energy_center );
-
-      // Makes histogram of time vs number of events (to determine time resolution) using events based on center pixel and photek passing charge and amplitude cuts
-      // Apply cuts such that only a specific energy (or charge) range is used for the events plotted
-      // Time is weighted by charge in the pixel, same as the histTOF_largest above
-      if ( Energy >= 40 && Energy <= 50 )
-      {
-        histTOFEnergyCut_C->Fill( average );
-      }
-      // same but only use center pixel
-      if ( energy_center >= 30 && energy_center <= 40 )
-      {
-        average = time_center ;
-        histTOFEnergyCutCenter_C->Fill( average );
-      }
-
-      //std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
+      else pixel1.charge = integral[j];
+      vect1.push_back( pixel1 ) ;
     }
+
+    // energy ratio histogram with no cuts applied, goes through every event before event cuts are applied
+    float energy_center1 = vect1[0].charge;
+    float energy_total1 = vect1[0].charge + vect1[1].charge + vect1[2].charge + vect1[3].charge + vect1[4].charge + vect1[5].charge + vect1[6].charge;
+    ratio1 = energy_center1 / energy_total1;
+
+    histEnergyRatio_C->Fill( ratio1 );
+    histEnergyPhotekAmp_C->Fill( photekAmp, ratio1 );
+
+    if ( !(photekAmp > 0.1 && photekCharge > 2 )) continue;
+
+    float energy_center3 = vect1[0].charge;
+    float energy_total3 = vect1[0].charge + vect1[1].charge + vect1[2].charge + vect1[3].charge + vect1[4].charge + vect1[5].charge + vect1[6].charge;
+    ratio3 = energy_center3 / energy_total3;
+
+    if ( energy_center3 > 0 )
+    {
+      histEnergyRatioPhotekCut_C->Fill( ratio3 );
+      histEnergyPhotekAmpPhotekCut_C->Fill( photekAmp, ratio3 );
+    }
+
+    // require photek amp and charge to be above cuts (to select electron events and not background), and require central pixel to be above amp and charge cuts
+
+    // 8GeV cuts
+    //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
+
+    // 16GeV cuts
+    //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
+
+    // 32GeV cuts, 1 mm
+    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
+
+    // 32GeV cuts, 10 mm
+    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 8 && centerAmp > 0.1 ) ) continue;
+
+    // 32GeV cuts, 32 mm
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 3 && centerAmp > 0.05 ) ) continue;
+
+    // 32GeV cuts, 75 mm
+    if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+    //require signal in the central pixel
+    if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
+
+      
+
+
+
+    // Generates random numbers from the Gaussian distribution with mean 0 and sigma 0.05 (50 picoseconds) to perform the time smearing for each pixel
+    // float smear_number[7];
+    // for ( int i = 0; i <= 6; i++)
+    // {
+    //   Double_t random = r->Gaus(0, 0.05);
+    //   histRandomNumberTest_C->Fill( random );
+    // }
+
+
+
+
+
+    std::vector< Pixel > vect;
+    Pixel pixel;
+    for ( int j = 1; j <= 7; j++)
+    {
+      // smear number is a random number choosen from a Gaussian distribution with mean 0 and sigam 0.05 (50 ps) to perform the time smearing for each pixel
+      float smear_number = r->Gaus(0, smear);
+      if ( iEntry > 1000 && iEntry < 1015 )
+      {
+        //cout << "smear number " << smear_number << ":\n" << endl;
+      }
+      if ( amp[j] > 0.01 && integral[j] > 1 )
+      {
+        histDeltaT_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
+        histDeltaTshifted_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
+        histDeltaTshifted_smear_C[j-1]->Fill(gauspeak[0] + smear_number - linearTime45[j] - meanT_smear[j-1]);
+      } 
+      pixel.index = j;
+      if ( j == 1 )
+      {
+        pixel.charge = 2*integral[j]; // 2* to account for the 6db attenuation
+      }
+      else pixel.charge = integral[j];
+      pixel.time = gauspeak[0] - (linearTime45[j] + meanT[j-1]);
+      pixel.time_smear = gauspeak[0] + smear_number - linearTime45[j] - meanT[j-1];
+      pixel.amp = amp[j];
+      vect.push_back( pixel ) ;
+    }
+
+    histLinearTime_C->Fill( linearTime45[1] );
+
+    auto sortPixel = []( Pixel a, Pixel b ) {return a.charge > b.charge ?  true : false;};
+    //std::sort( vect.begin(), vect.end(), sortPixel );
+
+    float average;
+    float average_equal;
+    float average_smear;
+    float average_smear_equal;
+    float average_corrected;
+    float offset_correction;
+    float offset_slope;
+    float offset_quadratic;
+    float offset_cubic;
+
+    // this will find which pixel has the maximum charge and plot the results in the MaxIndex histogram. largestIndex and largestIndexIntegral start as 0
+    // channels are 1 indexed for this
+    for ( int j = 1; j <= 7; j++)
+    {
+      if ( integral[j] > largestIndexIntegral )
+      {
+        largestIndexIntegral = integral[j];
+        largestIndex = j;
+      }
+    }
+    histMaxIndex_C->Fill( largestIndex );
+
+
+    float energy_center = vect[0].charge;
+    float energy_total = vect[0].charge + vect[1].charge + vect[2].charge + vect[3].charge + vect[4].charge + vect[5].charge + vect[6].charge;
+    float time_center = vect[0].time;
+    ratio = energy_center / energy_total;
+
+    histEnergyRatioEventCut_C->Fill( ratio );
+    histEnergyPhotekAmpEventCut_C->Fill( photekAmp, ratio );
+
+
+    // Sort the vect and plot the combination of the largest energy pixels
+    std::sort( vect.begin(), vect.end(), sortPixel );
+
+    // These values will be used to determine if the pixel passes the required cuts
+    float energy1 = vect[0].charge;           // 6db attenuator on the center pixel already accounted for
+    float energy2 = vect[1].charge;
+    float energy3 = vect[2].charge;
+    float energy4 = vect[3].charge;
+    float energy5 = vect[4].charge;
+    float energy6 = vect[5].charge;
+    float energy7 = vect[6].charge;
+
+    float amp1 = vect[0].amp;
+    float amp2 = vect[1].amp;
+    float amp3 = vect[2].amp;
+    float amp4 = vect[3].amp;
+    float amp5 = vect[4].amp;
+    float amp6 = vect[5].amp;
+    float amp7 = vect[6].amp;
+
+    float weight1 = 0;    // If the pixel passes the cuts, these weights will be changed to the charge of the pixel (and time will be charge weighted) 
+    float weight2 = 0;
+    float weight3 = 0;
+    float weight4 = 0;
+    float weight5 = 0;
+    float weight6 = 0;
+    float weight7 = 0;     
+
+    float count1 = 0;     // To count how many pixels are combined total. Also, if the pixel passes the cuts, this will be changed to 1 and will be used for the equal pixel weighting.
+    float count2 = 0;
+    float count3 = 0;
+    float count4 = 0;
+    float count5 = 0;
+    float count6 = 0;
+    float count7 = 0;
+    float Pixels = 0;
+
+    // This makes the TOF histogram with pixels with the largest charges, weighting the pixel time by the pixel charge (if pixel passes cuts). This is done event by event, so the TOF_largest_x will not necissarily have x pixels combined in every event.
+    // Also makes histograms of the total energy contained in the pixels used for the TOF histogram.
+    // 6db attenuator on the center pixel is already accounted for.
+    // For an additional pixel to be added, it must have a charge > 1 pC and an amplitude > 0.01 V. If the pixel does not pass these cuts, then it is added with a weight of 0.
+        
+    if ( energy1 > 1 && amp1 > 0.01 )
+    {
+      weight1 = energy1;
+      count1 = 1;
+    }
+
+    Energy = weight1;
+    average = vect[0].time;
+    average_smear = vect[0].time_smear;
+    histTOF_largest[0]->Fill( average );
+    histTOF_largest_C[0]->Fill( average );
+    histTOF_largest_equal_C[0]->Fill( average );
+    histTOF_largest_smear_C[0]->Fill( average_smear );
+    histTOF_largest_smear_equal_C[0]->Fill( average_smear );
+    histChargeContained[0]->Fill( Energy );
+
+    if ( energy2 > 1 && amp2 > 0.01 )
+    {
+      weight2 = energy2;
+      count2 = 1;
+    }
+
+    Energy = weight1 + weight2;
+    average = ( weight1*vect[0].time + weight2*vect[1].time )/( Energy );
+    average_equal = ( count1*vect[0].time + count2*vect[1].time )/( count1 + count2 );
+    average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear )/( Energy );
+    average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear )/ (count1 + count2 );
+    histTOF_largest[1]->Fill( average );
+    histTOF_largest_C[1]->Fill( average ); 
+    histTOF_largest_equal_C[1]->Fill ( average_equal );
+    histTOF_largest_smear_C[1]->Fill( average_smear );
+    histTOF_largest_smear_equal_C[1]->Fill( average_smear_equal );
+    histChargeContained[1]->Fill( Energy );
+
+    if ( energy3 > 1 && amp3 > 0.01 )
+    {
+      weight3 = energy3;
+      count3 = 1;
+    }
+        
+    Energy = weight1 + weight2 + weight3;
+    average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time )/( Energy );
+    average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time )/( count1 + count2 + count3 );
+    average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear )/( Energy );
+    average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear )/( count1 + count2 + count3 );
+    histTOF_largest[2]->Fill( average );
+    histTOF_largest_C[2]->Fill( average );
+    histTOF_largest_equal_C[2]->Fill( average_equal );
+    histTOF_largest_smear_C[2]->Fill( average_smear );
+    histTOF_largest_smear_equal_C[2]->Fill( average_smear_equal );
+    histChargeContained[2]->Fill( Energy );
+
+    if ( energy4 > 1 && amp4 > 0.01 )
+    {
+      weight4 = energy4;
+      count4 = 1;
+    }
+        
+    Energy = weight1 + weight2 + weight3 + weight4;
+    average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time )/( Energy );
+    average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time )/( count1 + count2 + count3 + count4 );
+    average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear )/( Energy );
+    average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear )/( count1 + count2 + count3 + count4 );
+    histTOF_largest[3]->Fill( average );
+    histTOF_largest_C[3]->Fill( average );
+    histTOF_largest_equal_C[3]->Fill( average_equal );
+    histTOF_largest_smear_C[3]->Fill( average_smear ); 
+    histTOF_largest_smear_equal_C[3]->Fill( average_smear_equal );    
+    histChargeContained[3]->Fill( Energy );
+
+    if ( energy5 > 1 && amp5 > 0.01 )
+    {
+      weight5 = energy5;
+      count5 = 1;
+    }
+        
+    Energy = weight1 + weight2 + weight3 + weight4 + weight5;
+    average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time )/( Energy );
+    average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time + count5*vect[4].time )/( count1 + count2 + count3 + count4 + count5 );
+    average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear )/( Energy );
+    average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear + count5*vect[4].time_smear )/( count1 + count2 + count3 + count4 + count5 );
+    histTOF_largest[4]->Fill( average );
+    histTOF_largest_C[4]->Fill( average );
+    histTOF_largest_equal_C[4]->Fill( average_equal );
+    histTOF_largest_smear_C[4]->Fill( average_smear );
+    histTOF_largest_smear_equal_C[4]->Fill( average_smear_equal );
+    histChargeContained[4]->Fill( Energy );
+
+    if ( energy6 > 1 && amp6 > 0.01 )
+    {
+      weight6 = energy6;
+      count6 = 1;
+    }
+        
+    Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6;
+    average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time )/( Energy );
+    average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time + count5*vect[4].time + count6*vect[5].time )/( count1 + count2 + count3 + count4 + count5 + count6 );
+    average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear + weight6*vect[5].time_smear )/( Energy );
+    average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear + count5*vect[4].time_smear + count6*vect[5].time_smear )/( count1 + count2 + count3 + count4 + count5 + count6 );
+    histTOF_largest[5]->Fill( average );
+    histTOF_largest_C[5]->Fill( average );
+    histTOF_largest_equal_C[5]->Fill( average_equal );
+    histTOF_largest_smear_C[5]->Fill( average_smear );
+    histTOF_largest_smear_equal_C[5]->Fill( average_smear_equal );
+    histChargeContained[5]->Fill( Energy );
+
+    if ( energy7 > 1 && amp7 > 0.01 )
+    {
+      weight7 = energy7;
+      count7 = 1;
+    }
+      
+    // values of offset are from the cubic fit of the 
+    offset_correction = 0.02167;
+    offset_slope = 0.0006389;
+    offset_quadratic = -0.00004141;
+    offset_cubic = 0.0000003572;
+
+    Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
+    average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time + weight7*vect[6].time )/( Energy );
+    average_equal = ( count1*vect[0].time + count2*vect[1].time + count3*vect[2].time + count4*vect[3].time + count5*vect[4].time + count6*vect[5].time + count7*vect[6].time )/( count1 + count2 + count3 + count4 + count5 + count6 + count7 );
+    average_smear = ( weight1*vect[0].time_smear + weight2*vect[1].time_smear + weight3*vect[2].time_smear + weight4*vect[3].time_smear + weight5*vect[4].time_smear + weight6*vect[5].time_smear + weight7*vect[6].time_smear )/( Energy );
+    average_smear_equal = ( count1*vect[0].time_smear + count2*vect[1].time_smear + count3*vect[2].time_smear + count4*vect[3].time_smear + count5*vect[4].time_smear + count6*vect[5].time_smear + count7*vect[6].time_smear )/( count1 + count2 + count3 + count4 + count5 + count6 + count7 );
+    histTOF_largest[6]->Fill( average );
+    histTOF_largest_C[6]->Fill( average );
+    histTOF_largest_equal_C[6]->Fill( average_equal );
+    histTOF_largest_smear_C[6]->Fill( average_smear );
+    histTOF_largest_smear_equal_C[6]->Fill( average_smear_equal ); 
+    histChargeContained[6]->Fill( Energy );
+
+    totalEnergy = energy1 + energy2 + energy3 + energy4 + energy5 + energy6 + energy7;
+
+    // energy histogram with all pixel cuts applied
+    float energy_total2 = weight1 + weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
+    ratio2 = energy_center / energy_total2;
+
+    histEnergyRatioAllCuts_C->Fill( ratio2 );
+    histEnergyPhotekAmpAllCuts_C->Fill( photekAmp, ratio2 );
+
+    // apply offset correction so there is no dependence of time on charge
+    average_corrected = average - offset_correction - Energy * offset_slope - Energy * Energy * offset_quadratic - Energy * Energy * Energy * offset_cubic;
+
+    // Makes 2D histogram with delta t and charge for event, using overall cuts on Photek and center pixel (charge and amplitude). Plots just energy of pixels that pass pixel cuts.
+    histDeltaTCharge_C->Fill( Energy , average );
+    // Same but with corrected average time (based on fit)
+    histDeltaTChargeCorr_C->Fill( Energy, average_corrected );
+
+    // Makes a histogram of the TOF with time correction, has all 7 pixels combined
+    histTOF_corr_C->Fill( average_corrected );
+    histTOF_corr_fit_C->Fill( average_corrected ); 
+
+    // Makes histogram of charge (or energy) vs. number of events with this charge
+    histTotalChargeContained_C->Fill( totalEnergy );
+
+    // Makes histogram of number of pixels combined (number of pixels above noise)
+    Pixels = count1 + count2 + count3 + count4 + count5 + count6 + count7;
+    histPixelsCombined_C->Fill( Pixels );
+
+    // Makes a histogram with the charge contained in the center pixel
+    histChargeCenterContained_C->Fill( energy_center );
+
+    // Makes histogram of time vs number of events (to determine time resolution) using events based on center pixel and photek passing charge and amplitude cuts
+    // Apply cuts such that only a specific energy (or charge) range is used for the events plotted
+    // Time is weighted by charge in the pixel, same as the histTOF_largest above
+    if ( Energy >= 40 && Energy <= 50 )
+    {
+      histTOFEnergyCut_C->Fill( average );
+    }
+    // same but only use center pixel
+    if ( energy_center >= 30 && energy_center <= 40 )
+    {
+      average = time_center ;
+      histTOFEnergyCutCenter_C->Fill( average );
+    }
+
+    //std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
+  }
+  
+
+
+  // TOF of largest pixels, by charge weighting. The Gaussian fit will be done to this one.
+  TH1F *histTOF_largest_ring_C[6];
+  for(int j=0; j < 6; j++) histTOF_largest_ring_C[j]= new TH1F(Form("histTOF_largest_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+
+  // TOF of largest pixels, by equal weighting. The Gaussian fit will be done to this one.
+  TH1F *histTOF_largest_equal_ring_C[6];
+  for(int j=0; j < 6; j++) histTOF_largest_equal_ring_C[j]= new TH1F(Form("histTOF_largest_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+
+  // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
+  TH1F *histTOF_largest_smear_ring_C[6];
+  for(int j=0; j < 6; j++) histTOF_largest_smear_ring_C[j]= new TH1F(Form("histTOF_largest_smear_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
+
+  // TOF of largest pixels, with the smear added. For these, the times of each pixel will be added with equal weighting
+  TH1F *histTOF_largest_smear_equal_ring_C[6];
+  for(int j=0; j < 6; j++) histTOF_largest_smear_equal_ring_C[j]= new TH1F(Form("histTOF_largest_smear_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
+
+
+  // Delete memory allocated to r from first for loop. Then use same seed for the TRandom so the same random sequence is used in both event loops.
+  delete r;
+  r = new TRandom3(seed);
+
+
+  // first ring analysis
+  std::cout<<"Number of events in Sample: "<<nentries<<std::endl; 
+  for (Long64_t iEntry=0;iEntry<nentries;iEntry++)
+  {
+    if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
+    tree->GetEntry(iEntry);  
+
+    float photekTimeGauss = gauspeak[0];
+    float photekAmp = amp[0];
+    float photekCharge = integral[0];
+
+    float centerAmp = amp[1];
+    float centerCharge = integral[1];
+    float centerTime = linearTime45[1];
+
+    float PixelAmp = 0;
+    float PixelCharge = 0;
+    float PixelTime = 0;
+
+    float largestIndexIntegral = 0;
+    int largestIndex = 0;
+
+
+    for ( int j = 2; j <= 7; j++)
+    {
+      if ( integral[j] > largestIndexIntegral )
+      {
+        largestIndexIntegral = integral[j];
+        largestIndex = j;
+      }
+    }
+
+    PixelAmp = amp[largestIndex];
+    PixelCharge = integral[largestIndex];
+    PixelTime = linearTime45[largestIndex];
+
+
+
+    // require photek amp and charge to be above cuts (to select electron events and not background), and require one of the first ring pixels to be above amp and charge cuts
+
+    // 8GeV cuts
+    //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
+    //require signal in largest of the ring pixels
+    //if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
+
+    // 16GeV cuts
+    //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
+    //require signal in largest of the ring pixels
+    //if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
+
+    // 32GeV cuts, 1 mm
+    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    //require signal in largest of the ring pixels
+    if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
+
+    // 32GeV cuts, 10 mm
+    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    //require signal in largest of the ring pixels
+    //if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
+
+    // 32GeV cuts, 32 mm
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+    //require signal in largest of the ring pixels
+    //if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
+
+    // 32GeV cuts, 75 mm
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+    //require signal in largest of the ring pixels
+    //if( !(PixelCharge > 1 && PixleAmp > 0.01 ) ) continue;
+
+
+    std::vector< Pixel > vect;
+    Pixel pixel;
+    for ( int j = 2; j <= 7; j++)
+    {
+      // smear number is a random number choosen from a Gaussian distribution with mean 0 and sigam 0.05 (50 ps) to perform the time smearing for each pixel
+      float smear_number = r->Gaus(0, smear);
+      if ( iEntry > 1000 && iEntry < 1015 )
+      {
+        //cout << "smear number " << smear_number << ":\n" << endl;
+      }
+      if ( amp[j] > 0.01 && integral[j] > 1 )
+      {
+        histDeltaTshifted_smear2_C[j-1]->Fill(gauspeak[0] + smear_number - linearTime45[j] - meanT_smear[j-1]);
+      } 
+      pixel.index = j;
+      pixel.charge = integral[j];
+      pixel.time = gauspeak[0] - (linearTime45[j] + meanT[j-1]);
+      pixel.time_smear = gauspeak[0] + smear_number - linearTime45[j] - meanT[j-1];
+      pixel.amp = amp[j];
+      vect.push_back( pixel ) ;
+    }
+
+    // Sort the vect and plot the combination of the largest energy pixels
+    auto sortPixel = []( Pixel a, Pixel b ) {return a.charge > b.charge ?  true : false;};
+    //std::sort( vect.begin(), vect.end(), sortPixel );
+
+    // These values will be used to determine if the pixel passes the required cuts
+    float energy2 = vect[1].charge;
+    float energy3 = vect[2].charge;
+    float energy4 = vect[3].charge;
+    float energy5 = vect[4].charge;
+    float energy6 = vect[5].charge;
+    float energy7 = vect[6].charge;
+
+    float amp2 = vect[1].amp;
+    float amp3 = vect[2].amp;
+    float amp4 = vect[3].amp;
+    float amp5 = vect[4].amp;
+    float amp6 = vect[5].amp;
+    float amp7 = vect[6].amp;
+
+    float weight2 = 0;      // If the pixel passes the cuts, these weights will be changed to the charge of the pixel (and time will be charge weighted) 
+    float weight3 = 0;
+    float weight4 = 0;
+    float weight5 = 0;
+    float weight6 = 0;
+    float weight7 = 0;     
+
+    float count2 = 0;     // To count how many pixels are combined total. Also, if the pixel passes the cuts, this will be changed to 1 and will be used for the equal pixel weighting.
+    float count3 = 0;
+    float count4 = 0;
+    float count5 = 0;
+    float count6 = 0;
+    float count7 = 0;
+    float Pixels = 0;
+
+    float Energy = 0;
+    float average = 0;
+    float average_equal = 0;
+    float average_smear = 0;
+    float average_smear_equal = 0;
+
+    // This makes the TOF histogram with pixels with the largest charges, weighting the pixel time by the pixel charge (if pixel passes cuts). This is done event by event, so the TOF_largest_x will not necissarily have x pixels combined in every event.
+    // For an additional pixel to be added, it must have a charge > 1 pC and an amplitude > 0.01 V. If the pixel does not pass these cuts, then it is added with a weight of 0.
+        
+    if ( energy2 > 1 && amp2 > 0.01 )
+    {
+      weight2 = energy2;
+      count2 = 1;
+    }
+
+    Energy = weight2;
+    average = vect[0].time;
+    average_smear = vect[0].time_smear;
+    histTOF_largest_ring_C[0]->Fill( average );
+    histTOF_largest_equal_ring_C[0]->Fill( average );
+    histTOF_largest_smear_ring_C[0]->Fill( average_smear );
+    histTOF_largest_smear_equal_ring_C[0]->Fill( average_smear );
+
+    if ( energy3 > 1 && amp3 > 0.01 )
+    {
+      weight3 = energy3;
+      count3 = 1;
+    }
+
+    Energy = weight2 + weight3;
+    average = ( weight2*vect[0].time + weight3*vect[1].time )/( Energy );
+    average_equal = ( count2*vect[0].time + count3*vect[1].time )/( count2 + count3 );
+    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear )/ (count2 + count3 );
+    histTOF_largest_ring_C[1]->Fill( average ); 
+    histTOF_largest_equal_ring_C[1]->Fill ( average_equal );
+    histTOF_largest_smear_ring_C[1]->Fill( average_smear );
+    histTOF_largest_smear_equal_ring_C[1]->Fill( average_smear_equal );
+    
+    if ( energy4 > 1 && amp4 > 0.01 )
+    {
+      weight4 = energy4;
+      count4 = 1;
+    }
+
+    Energy = weight2 + weight3 + weight4 ;
+    average = ( weight2*vect[0].time + weight3*vect[1].time + weight4*vect[2].time )/( Energy );
+    average_equal = ( count2*vect[0].time + count3*vect[1].time + count4*vect[2].time )/( count2 + count3 + count4 );
+    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear + weight4*vect[2].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear + count4*vect[2].time_smear )/( count2 + count3 + count4 );
+    histTOF_largest_ring_C[2]->Fill( average );
+    histTOF_largest_equal_ring_C[2]->Fill( average_equal );
+    histTOF_largest_smear_ring_C[2]->Fill( average_smear );
+    histTOF_largest_smear_equal_ring_C[2]->Fill( average_smear_equal );
+
+    if ( energy5 > 1 && amp5 > 0.01 )
+    {
+      weight5 = energy5;
+      count5 = 1;
+    }
+
+    Energy = weight2 + weight3 + weight4 + weight5 ;
+    average = ( weight2*vect[0].time + weight3*vect[1].time + weight4*vect[2].time + weight5*vect[3].time )/( Energy );
+    average_equal = ( count2*vect[0].time + count3*vect[1].time + count4*vect[2].time + count5*vect[3].time )/( count2 + count3 + count4 + count5  );
+    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear + weight4*vect[2].time_smear + weight5*vect[3].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear + count4*vect[2].time_smear + count5*vect[3].time_smear )/( count2 + count3 + count4 + count5 );
+    histTOF_largest_ring_C[3]->Fill( average );
+    histTOF_largest_equal_ring_C[3]->Fill( average_equal );
+    histTOF_largest_smear_ring_C[3]->Fill( average_smear );
+    histTOF_largest_smear_equal_ring_C[3]->Fill( average_smear_equal );
+
+    if ( energy6 > 1 && amp6 > 0.01 )
+    {
+      weight6 = energy6;
+      count6 = 1;
+    }
+
+    Energy = weight2 + weight3 + weight4 + weight5 + weight6;
+    average = ( weight2*vect[0].time + weight3*vect[1].time + weight4*vect[2].time + weight5*vect[3].time + weight6*vect[4].time )/( Energy );
+    average_equal = ( count2*vect[0].time + count3*vect[1].time + count4*vect[2].time + count5*vect[3].time + count6*vect[4].time )/( count2 + count3 + count4 + count5 + count6 );
+    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear + weight4*vect[2].time_smear + weight5*vect[3].time_smear + weight6*vect[4].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear + count4*vect[2].time_smear + count5*vect[3].time_smear + count6*vect[4].time_smear )/( count2 + count3 + count4 + count5 + count6 );
+    histTOF_largest_ring_C[4]->Fill( average );
+    histTOF_largest_equal_ring_C[4]->Fill( average_equal );
+    histTOF_largest_smear_ring_C[4]->Fill( average_smear );
+    histTOF_largest_smear_equal_ring_C[4]->Fill( average_smear_equal ); 
+    
+    if ( energy7 > 1 && amp7 > 0.01 )
+    {
+      weight7 = energy7;
+      count7 = 1;
+    }
+
+    Energy = weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
+    average = ( weight2*vect[0].time + weight3*vect[1].time + weight4*vect[2].time + weight5*vect[3].time + weight6*vect[4].time + weight7*vect[5].time )/( Energy );
+    average_equal = ( count2*vect[0].time + count3*vect[1].time + count4*vect[2].time + count5*vect[3].time + count6*vect[4].time + count7*vect[5].time )/( count2 + count3 + count4 + count5 + count6 + count7 );
+    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear + weight4*vect[2].time_smear + weight5*vect[3].time_smear + weight6*vect[4].time_smear + weight7*vect[5].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear + count4*vect[2].time_smear + count5*vect[3].time_smear + count6*vect[4].time_smear + count7*vect[5].time_smear )/( count2 + count3 + count4 + count5 + count6 + count7 );
+    histTOF_largest_ring_C[5]->Fill( average );
+    histTOF_largest_equal_ring_C[5]->Fill( average_equal );
+    histTOF_largest_smear_ring_C[5]->Fill( average_smear );
+    histTOF_largest_smear_equal_ring_C[5]->Fill( average_smear_equal ); 
+
+    //std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
+  }
+
+
   
   /*for ( int i = 0; i < 7; i++)
     {
@@ -876,6 +1142,57 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   cout << "\nFitting Corrected Time Resolution" << endl;
   histTOFEnergyCut_C->Fit(Form("g_fit"),"QMLES","", xmin_2, xmax_2);
 
+  // Do Gaussian fit of time resolution for ring largest pixels with charge weighing
+  TF1* f1_g9[6];
+  for(int j=0; j<6; j++) 
+  {
+    double mean = histTOF_largest_ring_C[j]->GetMean();
+    double rms = histTOF_largest_ring_C[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    f1_g9[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histTOF_largest_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
+  }
+
+  // Do Gaussian fit of time resolution for ring largest pixels with equal weighting
+  TF1* f1_g10[6];
+  for(int j=0; j<6; j++) 
+  {
+    double mean = histTOF_largest_equal_ring_C[j]->GetMean();
+    double rms = histTOF_largest_equal_ring_C[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    f1_g10[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histTOF_largest_equal_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
+  }
+
+  // Do Gaussian fit of time resolution for ring largest pixels with charge weighting, smearing applied
+  TF1* f1_g11[6];
+  for(int j=0; j<6; j++) 
+  {
+    double mean = histTOF_largest_smear_ring_C[j]->GetMean();
+    double rms = histTOF_largest_smear_ring_C[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    f1_g11[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histTOF_largest_smear_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
+  }
+
+  // Do Gaussian fit of time resolution for ring largest pixels with equal weighting, smearing applied
+  TF1* f1_g12[6];
+  for(int j=0; j<6; j++) 
+  {
+    double mean = histTOF_largest_smear_equal_ring_C[j]->GetMean();
+    double rms = histTOF_largest_smear_equal_ring_C[j]->GetRMS();
+    double xmin = mean-2.0*rms;
+    double xmax = mean+2.0*rms;
+    f1_g12[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
+    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    histTOF_largest_smear_equal_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
+  }
 
   // creates root file
   TFile *file = TFile::Open(outputFilename.c_str(), "RECREATE");
@@ -940,12 +1257,21 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   file->WriteTObject(histLinearTime_C,"linearTime45","WriteDelete");
 
   for( int i = 0; i < 7; i++ )
-    {
-      histDeltaT[i]->Write( Form("deltaT_%d", i+1) );
-      histDeltaTshifted_C[i]->Write( Form("deltaT_shifted_%d", i+1) );
-      histDeltaT_C[i]->Write( Form("deltaT_shifted_%d_fit", i+1) );
-      histDeltaTshifted_smear_C[i]->Write( Form("deltaTshifted_smear_%d_fit", i+1) );
-    }
+  {
+    histDeltaT[i]->Write( Form("deltaT_%d", i+1) );
+    histDeltaTshifted_C[i]->Write( Form("deltaT_shifted_%d", i+1) );
+    histDeltaT_C[i]->Write( Form("deltaT_shifted_%d_fit", i+1) );
+    histDeltaTshifted_smear_C[i]->Write( Form("deltaTshifted_smear_%d_fit", i+1) );
+  }
+
+  for (int i = 0; i < 6; i++ )
+  {
+    histDeltaTshifted_smear2_C[i]->Write(Form("deltaTshifted_smear2_%d", i+1) );
+    histTOF_largest_ring_C[i]->Write( Form("TOF_largest_ring_%d", i+1) );
+    histTOF_largest_equal_ring_C[i]->Write( Form("TOF_largest_equal_ring_%d", i+1) );
+    histTOF_largest_smear_ring_C[i]->Write( Form("TOF_largest_smear_ring_%d", i+1) );
+    histTOF_largest_smear_equal_ring_C[i]->Write( Form("TOF_largest_smear_equal_ring_%d", i+1) );
+  }
 
   file->Close();
   delete file;
