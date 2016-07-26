@@ -44,6 +44,29 @@ void Fitter(TH1F *hist) {
   gStyle->SetOptFit(1);
 }
 
+void SKIROCPlotPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile, int *pixelsUsed) {
+
+  // Draw hist; Remove Stat and Fit parameter boxes:
+  hist->Draw();
+  gStyle->SetOptFit(0);
+  gStyle->SetOptStat(0);
+  // Add text box:
+  TPaveText *txtbox = new TPaveText(0.75, 0.3, 1, 0.6, "NDC");
+  txtbox->AddText(" "); //So the label doesn't cover up the first line
+  for (int i = 0; i<7; i++) txtbox->AddText( Form("%d Pixel(s):  %d Events", i+1, pixelsUsed[i]) );
+  txtbox->SetLabel("Pixels Passing Cuts");
+  // Add Sigma Parameter text:
+  double mean = hist->GetMean();
+  double rms = hist->GetRMS();
+  TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
+  hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
+  hist->GetXaxis()->SetTitle("Time Resolution [ns]");
+  txtbox->Draw();
+  tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  c->SaveAs( (outfile + ".pdf").c_str() ); 
+  c->SaveAs( (outfile +   ".C").c_str() );
+}
+
 void DoMultiDeviceStudy( string filename ) {
 
   srand (time(NULL));
@@ -278,6 +301,8 @@ void DoMultiDeviceStudy( string filename ) {
     }
   }
 
+  int pixelsUsed[7][7] = {0}; // [nPixels added] [nPixels actually used]
+
 
 
 
@@ -316,7 +341,7 @@ void DoMultiDeviceStudy( string filename ) {
     float DeltaTPicoSil_vs_MCP[7];
     std::fill(DeltaTPicoSil, DeltaTPicoSil+7, -99);
     std::fill(DeltaTPicoSilSmear, DeltaTPicoSilSmear+7, -99);
-    std::fill)DeltaTPicoSil_vs_MCP, DeltaTPicoSil_vs_MCP+7, -99);
+    std::fill(DeltaTPicoSil_vs_MCP, DeltaTPicoSil_vs_MCP+7, -99);
     for ( int j = 1; j <= 7; j++){
       if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
         DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j] - meanPicoSil[j-1];
@@ -467,6 +492,7 @@ void DoMultiDeviceStudy( string filename ) {
         }
       }
       fill /= inc;
+      pixelsUsed[j][inc - 1] += 1;
       histDeltaTPicoSilAt0EqualSmear_nEventsCombine[j]->Fill( fill );
     }
 
@@ -526,6 +552,26 @@ void DoMultiDeviceStudy( string filename ) {
   }
 
 
+  TCanvas *c = new TCanvas ("c","c",800, 600); 
+  TLatex *tex = new TLatex();
+  tex->SetNDC(); // Sets coords such that (0,0) is bottom left & (1,1) is top right.
+  tex->SetTextSize(0.060);
+  tex->SetTextFont(42);
+  tex->SetTextColor(kBlack);
+
+  c->cd();
+
+  string pixels_added[7];
+  pixels_added[0] = Form("#Deltat of Equal-Weight HGC Pixels in Order of # Events. Smeared Pixels: %d", DeltaTPicoSilSmear_Events_SortedIndices[0]);
+  for (int i = 1; i<7; i++) pixels_added[i] = pixels_added[i-1] + Form(",%d",DeltaTPicoSilSmear_Events_SortedIndices[i]);
+  for (int i = 0; i<7; i++){
+    histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i]->SetTitle( pixels_added[i].c_str() );
+    int tempArray[7] = {0};
+    for (int j = 0; j<7; j++) tempArray[j] = pixelsUsed[i][j];
+    SKIROCPlotPDF(c, tex, histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i], Form("SKIROC_%d_Pixels",i+1), tempArray );
+  }
+
+
   // Creates output root file
   TFile *file = TFile::Open(("output"+filename).c_str(), "RECREATE");
   file->cd();
@@ -560,9 +606,6 @@ void DoMultiDeviceStudy( string filename ) {
   for(int i=0; i<=6; i++) {
     file->WriteTObject(histDeltaTPicoSilSmearAt0[i],Form("histDeltaTPicoSilSmear[%d]",i),"WriteDelete");
   }
-  string pixels_added[7];
-  pixels_added[0] = Form("Combine Equally by nEvents. Smeared Pixels: %d", DeltaTPicoSilSmear_Events_SortedIndices[0]);
-  for(int i=1; i<=6; i++) pixels_added[i] = pixels_added[i-1] + Form(",%d",DeltaTPicoSilSmear_Events_SortedIndices[i]);
   for(int i=0; i<=6; i++) {
     file->WriteTObject(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i], pixels_added[i].c_str(), "WriteDelete");
   }
