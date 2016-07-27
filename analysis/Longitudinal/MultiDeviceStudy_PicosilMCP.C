@@ -53,6 +53,7 @@ void SKIROCPlotPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile, int *pix
   // Add text box:
   TPaveText *txtbox = new TPaveText(0.7, 0.45, 0.9, 0.75, "NDC");
   txtbox->SetBorderSize(1);
+  txtbox->SetFillColor(10);
   txtbox->AddText("Pixels Passing Cuts");
   txtbox->AddLine(0., 0.875, 1., 0.875);
   for (int i = 0; i<7; i++) txtbox->AddText( Form("%d Pixel(s):  %d Events", i+1, pixelsUsed[i]) );
