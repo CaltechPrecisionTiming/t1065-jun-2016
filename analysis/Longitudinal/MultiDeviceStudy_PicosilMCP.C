@@ -99,6 +99,8 @@ void DoMultiDeviceStudy( string filename ) {
   float width = 0.3;
   float smearWidth = 1.5;
   float smearBins = 45;
+  float pixelSmear = 0.050; // in ps
+  float MCPSmear = 0.030;
 
   TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal","; Time [ns];Number of Events", 100, -width, width); // Weights MCP and PicoSil center pixel 50-50
   TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal","; Time [ns];Number of Events", 100, -width, width);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
@@ -195,8 +197,8 @@ void DoMultiDeviceStudy( string filename ) {
 
     
     double linearTime45Smear[7];
-    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1], 0.500); //Samples from smear
-    double MCPTimeSmear = rando->Gaus(MCPTime, 0.300);
+    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1], pixelSmear); //Samples from smear
+    double MCPTimeSmear = rando->Gaus(MCPTime, MCPSmear);
 
 
     //Calculates the Delta T's if the event passes the cuts:
@@ -336,8 +338,8 @@ void DoMultiDeviceStudy( string filename ) {
     if( !( MCPAmp > MCPAmpCut) ) continue;
 
     double linearTime45Smear[7];
-    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+1],0.500);
-    double MCPTimeSmear = rando2->Gaus(MCPTime, 0.300);
+    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+1], pixelSmear);
+    double MCPTimeSmear = rando2->Gaus(MCPTime, MCPSmear);
 
     float DeltaTPicoSil[7]; 
     float DeltaTPicoSilSmear[7];

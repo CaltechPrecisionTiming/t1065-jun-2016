@@ -68,6 +68,8 @@ void DoMultiDeviceStudy( string filename ) {
   //Create histograms
   float smearWidth = 1.5;
   float smearBins = 45;
+  float pixelSmear = 0.050; // in ps
+  float MCPSmear = 0.035;
 
   TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear","; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);
   TH1F *histDeltaTPicoSilSmear[6];
@@ -118,8 +120,8 @@ void DoMultiDeviceStudy( string filename ) {
 
 
     double linearTime45Smear[6];
-    for (int j = 0; j < 6; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+2], 0.500); //Samples from smear
-    double MCPTimeSmear = rando->Gaus(MCPTime, 0.350);
+    for (int j = 0; j < 6; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+2], pixelSmear); //Samples from smear
+    double MCPTimeSmear = rando->Gaus(MCPTime, MCPSmear);
 
 
     //Calculates the Delta T's if the event passes the cuts:
@@ -177,8 +179,8 @@ void DoMultiDeviceStudy( string filename ) {
     if( !( MCPAmp > MCPAmpCut) ) continue;
 
     double linearTime45Smear[6];
-    for (int j = 0; j < 6; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+2],0.500);
-    double MCPTimeSmear = rando2->Gaus(MCPTime, 0.350);
+    for (int j = 0; j < 6; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+2], pixelSmear);
+    double MCPTimeSmear = rando2->Gaus(MCPTime, MCPSmear);
 
     float DeltaTPicoSilSmear[6];
     std::fill(DeltaTPicoSilSmear, DeltaTPicoSilSmear+6, -99);
