@@ -29,6 +29,9 @@
 // SKIROC emulation with center HGC pixel removed/not taken into account.
 // Author: Daniel Gawerc
 
+string pixels_added[6];
+
+
 void Fitter(TH1F *hist) {
   //Helper function for fitting Gaussian
   double xmin = hist->GetMean() - 2.0*hist->GetRMS();
@@ -64,7 +67,7 @@ void DoMultiDeviceStudy( string filename ) {
 
   //Create histograms
   float smearWidth = 1.5;
-  float smearBins = 75;
+  float smearBins = 45;
 
   TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear","; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);
   TH1F *histDeltaTPicoSilSmear[6];
@@ -115,8 +118,8 @@ void DoMultiDeviceStudy( string filename ) {
 
 
     double linearTime45Smear[6];
-    for (int j = 0; j < 6; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+2], 0.100); //Samples from smear
-    double MCPTimeSmear = rando->Gaus(MCPTime, 0.090);
+    for (int j = 0; j < 6; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+2], 0.500); //Samples from smear
+    double MCPTimeSmear = rando->Gaus(MCPTime, 0.350);
 
 
     //Calculates the Delta T's if the event passes the cuts:
@@ -174,8 +177,8 @@ void DoMultiDeviceStudy( string filename ) {
     if( !( MCPAmp > MCPAmpCut) ) continue;
 
     double linearTime45Smear[6];
-    for (int j = 0; j < 6; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+2],0.100);
-    double MCPTimeSmear = rando2->Gaus(MCPTime, 0.090);
+    for (int j = 0; j < 6; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+2],0.500);
+    double MCPTimeSmear = rando2->Gaus(MCPTime, 0.350);
 
     float DeltaTPicoSilSmear[6];
     std::fill(DeltaTPicoSilSmear, DeltaTPicoSilSmear+6, -99);
@@ -248,8 +251,7 @@ void DoMultiDeviceStudy( string filename ) {
     file->WriteTObject(histDeltaTPicoSilSmearAt0[i],Form("histDeltaTPicoSilSmear[%d]",i+1),"WriteDelete");
   }
 
-  string pixels_added[6];
-  pixels_added[0] = Form("Combine Equally by nEvents. Smeared Pixels: %d", DeltaTPicoSilSmear_Events_SortedIndices[0]+1);
+  pixels_added[0] = Form("#Deltat of Equal-Weight HGC Ring 1 Pixels in Order of # Events. Smeared Pixels: %d", DeltaTPicoSilSmear_Events_SortedIndices[0]+1);
   for(int i=1; i<6; i++) pixels_added[i] = pixels_added[i-1] + Form(",%d",DeltaTPicoSilSmear_Events_SortedIndices[i]+1);
   for(int i=0; i<6; i++) {
     file->WriteTObject(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i], pixels_added[i].c_str(), "WriteDelete");
@@ -296,9 +298,10 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   hist->GetXaxis()->SetTitle("Time Resolution [ns]");
-  tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
+
 
 
 void makeTimeResolution( string filename ) {
@@ -311,6 +314,8 @@ void makeTimeResolution( string filename ) {
   TH1F *histDeltaTPicoSilEqualSmear = (TH1F*)_file->Get("histDeltaTPicoSilEqualSmear");
   TH1F *histDeltaTMCPSmear = (TH1F*)_file->Get("histDeltaTMCPSmear"); // MCP
   TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = (TH1F*)_file->Get("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear");
+  TH1F *combo[6];
+  for (int i=0; i<6; i++) combo[i] = (TH1F*)_file->Get( pixels_added[i].c_str() );
 
   TCanvas *c = new TCanvas ("c","c",800, 600); 
   TLatex *tex = new TLatex();
@@ -324,10 +329,12 @@ void makeTimeResolution( string filename ) {
   histDeltaTPicoSilEqualSmear->SetTitle("SKIROC Emulation: HGC Ring 1 TOF w/ Equal Weighting");
   histDeltaTMCPSmear->SetTitle("SKIROC Emulation: MCP TOF");
   histDeltaT_PicoSilEqual_MCP_Equal_BothSmear->SetTitle("1/12 HGC Smeared Ring 1 Pixels, 1/2 MCP Smeared: TOF");
+  for (int i=0; i<6; i++) combo[i]->SetTitle( pixels_added[i].c_str() );
 
   PlotDeltaTPDF(c, tex, histDeltaTPicoSilEqualSmear, "deltaTPicoSilEqualSmear_NoCenter.pdf");
   PlotDeltaTPDF(c, tex, histDeltaTMCPSmear, "deltaTMCPSmear_NoCenter.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilEqual_MCP_Equal_BothSmear, "deltaT_PicoSilEqual_MCP_Equal_BothSmear_NoCenter.pdf");
+  for (int i=0; i<6; i++) PlotDeltaTPDF(c, tex, combo[i], Form("SKIROC_%d_Pixels_NoCenter.pdf",i+1) );
 }
 
 
