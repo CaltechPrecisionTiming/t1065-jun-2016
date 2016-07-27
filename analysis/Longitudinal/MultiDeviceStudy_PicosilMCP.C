@@ -44,6 +44,33 @@ void Fitter(TH1F *hist) {
   gStyle->SetOptFit(1);
 }
 
+void SKIROCPlotPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile, int *pixelsUsed) {
+
+  // Draw hist; Remove Stat and Fit parameter boxes:
+  hist->Draw();
+  gStyle->SetOptFit(0);
+  gStyle->SetOptStat(0);
+  // Add text box:
+  TPaveText *txtbox = new TPaveText(0.7, 0.45, 0.9, 0.75, "NDC");
+  txtbox->SetBorderSize(1);
+  txtbox->SetFillColor(10);
+  txtbox->AddText("Pixels Passing Cuts");
+  txtbox->AddLine(0., 0.875, 1., 0.875);
+  for (int i = 0; i<7; i++) txtbox->AddText( Form("%d Pixel(s):  %d Events", i+1, pixelsUsed[i]) );
+  // Add Sigma Parameter text:
+  double mean = hist->GetMean();
+  double rms = hist->GetRMS();
+  TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
+  hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
+  hist->GetXaxis()->SetTitle("Time Resolution [ns]");
+  txtbox->Draw();
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  c->SaveAs( (outfile + ".pdf").c_str() ); 
+  c->SaveAs( (outfile +   ".C").c_str() );
+}
+
+
 void DoMultiDeviceStudy( string filename ) {
 
   srand (time(NULL));
@@ -73,6 +100,8 @@ void DoMultiDeviceStudy( string filename ) {
   float width = 0.3;
   float smearWidth = 1.5;
   float smearBins = 45;
+  float pixelSmear = 0.500; // in ps
+  float MCPSmear = 0.300;
 
   TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal","; Time [ns];Number of Events", 100, -width, width); // Weights MCP and PicoSil center pixel 50-50
   TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal","; Time [ns];Number of Events", 100, -width, width);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
@@ -169,8 +198,8 @@ void DoMultiDeviceStudy( string filename ) {
 
     
     double linearTime45Smear[7];
-    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1], 0.500); //Samples from smear
-    double MCPTimeSmear = rando->Gaus(MCPTime, 0.300);
+    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando->Gaus(linearTime45[j+1], pixelSmear); //Samples from smear
+    double MCPTimeSmear = rando->Gaus(MCPTime, MCPSmear);
 
 
     //Calculates the Delta T's if the event passes the cuts:
@@ -278,6 +307,8 @@ void DoMultiDeviceStudy( string filename ) {
     }
   }
 
+  int pixelsUsed[7][7] = {0}; // [nPixels added] [nPixels actually used]
+
 
 
 
@@ -308,15 +339,15 @@ void DoMultiDeviceStudy( string filename ) {
     if( !( MCPAmp > MCPAmpCut) ) continue;
 
     double linearTime45Smear[7];
-    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+1],0.500);
-    double MCPTimeSmear = rando2->Gaus(MCPTime, 0.300);
+    for (int j = 0; j < 7; j++)  linearTime45Smear[j] = rando2->Gaus(linearTime45[j+1], pixelSmear);
+    double MCPTimeSmear = rando2->Gaus(MCPTime, MCPSmear);
 
     float DeltaTPicoSil[7]; 
     float DeltaTPicoSilSmear[7];
     float DeltaTPicoSil_vs_MCP[7];
     std::fill(DeltaTPicoSil, DeltaTPicoSil+7, -99);
     std::fill(DeltaTPicoSilSmear, DeltaTPicoSilSmear+7, -99);
-    std::fill)DeltaTPicoSil_vs_MCP, DeltaTPicoSil_vs_MCP+7, -99);
+    std::fill(DeltaTPicoSil_vs_MCP, DeltaTPicoSil_vs_MCP+7, -99);
     for ( int j = 1; j <= 7; j++){
       if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
         DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j] - meanPicoSil[j-1];
@@ -467,6 +498,7 @@ void DoMultiDeviceStudy( string filename ) {
         }
       }
       fill /= inc;
+      pixelsUsed[j][inc - 1] += 1;
       histDeltaTPicoSilAt0EqualSmear_nEventsCombine[j]->Fill( fill );
     }
 
@@ -526,6 +558,26 @@ void DoMultiDeviceStudy( string filename ) {
   }
 
 
+  TCanvas *c = new TCanvas ("c","c",800, 600); 
+  TLatex *tex = new TLatex();
+  tex->SetNDC(); // Sets coords such that (0,0) is bottom left & (1,1) is top right.
+  tex->SetTextSize(0.060);
+  tex->SetTextFont(42);
+  tex->SetTextColor(kBlack);
+
+  c->cd();
+
+  string pixels_added[7];
+  pixels_added[0] = Form("#Deltat of Equal-Weight HGC Pixels in Order of # Events. Smeared Pixels: %d", DeltaTPicoSilSmear_Events_SortedIndices[0]);
+  for (int i = 1; i<7; i++) pixels_added[i] = pixels_added[i-1] + Form(",%d",DeltaTPicoSilSmear_Events_SortedIndices[i]);
+  for (int i = 0; i<7; i++){
+    histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i]->SetTitle( pixels_added[i].c_str() );
+    int tempArray[7] = {0};
+    for (int j = 0; j<7; j++) tempArray[j] = pixelsUsed[i][j];
+    SKIROCPlotPDF(c, tex, histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i], Form("SKIROC_%d_Pixels",i+1), tempArray );
+  }
+
+
   // Creates output root file
   TFile *file = TFile::Open(("output"+filename).c_str(), "RECREATE");
   file->cd();
@@ -560,9 +612,6 @@ void DoMultiDeviceStudy( string filename ) {
   for(int i=0; i<=6; i++) {
     file->WriteTObject(histDeltaTPicoSilSmearAt0[i],Form("histDeltaTPicoSilSmear[%d]",i),"WriteDelete");
   }
-  string pixels_added[7];
-  pixels_added[0] = Form("Combine Equally by nEvents. Smeared Pixels: %d", DeltaTPicoSilSmear_Events_SortedIndices[0]);
-  for(int i=1; i<=6; i++) pixels_added[i] = pixels_added[i-1] + Form(",%d",DeltaTPicoSilSmear_Events_SortedIndices[i]);
   for(int i=0; i<=6; i++) {
     file->WriteTObject(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i], pixels_added[i].c_str(), "WriteDelete");
   }
@@ -620,7 +669,8 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   hist->GetXaxis()->SetTitle("Time Resolution [ns]");
-  tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
