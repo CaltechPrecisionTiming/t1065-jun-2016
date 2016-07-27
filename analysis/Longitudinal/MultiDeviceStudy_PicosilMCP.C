@@ -64,7 +64,8 @@ void SKIROCPlotPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile, int *pix
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   hist->GetXaxis()->SetTitle("Time Resolution [ns]");
   txtbox->Draw();
-  tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs( (outfile + ".pdf").c_str() ); 
   c->SaveAs( (outfile +   ".C").c_str() );
 }
@@ -99,8 +100,8 @@ void DoMultiDeviceStudy( string filename ) {
   float width = 0.3;
   float smearWidth = 1.5;
   float smearBins = 45;
-  float pixelSmear = 0.050; // in ps
-  float MCPSmear = 0.030;
+  float pixelSmear = 0.500; // in ps
+  float MCPSmear = 0.300;
 
   TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal","; Time [ns];Number of Events", 100, -width, width); // Weights MCP and PicoSil center pixel 50-50
   TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal","; Time [ns];Number of Events", 100, -width, width);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
@@ -668,7 +669,8 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   hist->GetXaxis()->SetTitle("Time Resolution [ns]");
-  tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 

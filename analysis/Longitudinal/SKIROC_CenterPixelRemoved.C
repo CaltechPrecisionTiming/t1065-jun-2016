@@ -68,8 +68,8 @@ void DoMultiDeviceStudy( string filename ) {
   //Create histograms
   float smearWidth = 1.5;
   float smearBins = 45;
-  float pixelSmear = 0.050; // in ps
-  float MCPSmear = 0.035;
+  float pixelSmear = 0.500; // in ps
+  float MCPSmear = 0.350;
 
   TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear","; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);
   TH1F *histDeltaTPicoSilSmear[6];
@@ -300,7 +300,8 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   hist->GetXaxis()->SetTitle("Time Resolution [ns]");
-  tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
