@@ -176,9 +176,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
 
     // 32GeV cuts, 1 mm
-    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    //if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
+    if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
 
     // 32GeV cuts, 10 mm
     //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
@@ -191,9 +191,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 3 && centerAmp > 0.05 ) ) continue;
 
     // 32GeV cuts, 75 mm
-    if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
+    //if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
     
 
     for ( int j = 1; j <= 7; j++)
@@ -295,11 +295,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF histograms of each pixel with the smear added
   TH1F *histDeltaTshifted_smear_C[7];
-  for(int j=0; j < 7; j++) histDeltaTshifted_smear_C[j]= new TH1F(Form("histDeltaTshifted_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
+  for(int j=0; j < 7; j++) histDeltaTshifted_smear_C[j]= new TH1F(Form("histDeltaTshifted_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
   
   // TOF histogram of each pixel with the smear added, for the code that only uses the ring
   TH1F *histDeltaTshifted_smear2_C[6];
-  for(int j=0; j < 6; j ++) histDeltaTshifted_smear2_C[j]= new TH1F(Form("histDeltaTshifted_smear2_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
+  for(int j=0; j < 6; j ++) histDeltaTshifted_smear2_C[j]= new TH1F(Form("histDeltaTshifted_smear2_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
 
@@ -317,11 +317,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
   TH1F *histTOF_largest_smear_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_smear_C[j]= new TH1F(Form("histTOF_largest_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
+  for(int j=0; j < 7; j++) histTOF_largest_smear_C[j]= new TH1F(Form("histTOF_largest_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
 
   // TOF of largest pixels, with the smear added. For these, the times of each pixel will be added with equal weighting
   TH1F *histTOF_largest_smear_equal_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_smear_equal_C[j]= new TH1F(Form("histTOF_largest_smear_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
+  for(int j=0; j < 7; j++) histTOF_largest_smear_equal_C[j]= new TH1F(Form("histTOF_largest_smear_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
 
   TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, 0.5,7.5);
   TH1F* histPixelsCombined_C = new TH1F("histPixelsCombined","; Number of Pixels;Number of Events", 7, 0.5,7.5);
@@ -449,9 +449,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
 
     // 32GeV cuts, 1 mm
-    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    //if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
+    if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
 
     // 32GeV cuts, 10 mm
     //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
@@ -464,9 +464,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 3 && centerAmp > 0.05 ) ) continue;
 
     // 32GeV cuts, 75 mm
-    if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
+    //if( !(centerCharge > 2 && centerAmp > 0.03 ) ) continue;
 
       
 
@@ -488,12 +488,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     Pixel pixel;
     for ( int j = 1; j <= 7; j++)
     {
-      // smear number is a random number choosen from a Gaussian distribution with mean 0 and sigam 0.05 (50 ps) to perform the time smearing for each pixel
+      // smear number is a random number choosen from a Gaussian distribution with mean 0 and sigma 0.05 (50 ps) to perform the time smearing for each pixel
       float smear_number = r->Gaus(0, smear);
-      if ( iEntry > 1000 && iEntry < 1015 )
-      {
-        //cout << "smear number " << smear_number << ":\n" << endl;
-      }
+
       if ( amp[j] > 0.01 && integral[j] > 1 )
       {
         histDeltaT_C[j-1]->Fill(gauspeak[0] - linearTime45[j] - meanT[j-1]);
@@ -781,11 +778,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
   TH1F *histTOF_largest_smear_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_smear_ring_C[j]= new TH1F(Form("histTOF_largest_smear_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
+  for(int j=0; j < 6; j++) histTOF_largest_smear_ring_C[j]= new TH1F(Form("histTOF_largest_smear_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
 
   // TOF of largest pixels, with the smear added. For these, the times of each pixel will be added with equal weighting
   TH1F *histTOF_largest_smear_equal_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_smear_equal_ring_C[j]= new TH1F(Form("histTOF_largest_smear_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 400, -2, 2);
+  for(int j=0; j < 6; j++) histTOF_largest_smear_equal_ring_C[j]= new TH1F(Form("histTOF_largest_smear_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
 
 
   // Delete memory allocated to r from first for loop. Then use same seed for the TRandom so the same random sequence is used in both event loops.
@@ -876,7 +873,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       }
       if ( amp[j] > 0.01 && integral[j] > 1 )
       {
-        histDeltaTshifted_smear2_C[j-1]->Fill(gauspeak[0] + smear_number - linearTime45[j] - meanT_smear[j-1]);
+        histDeltaTshifted_smear2_C[j-2]->Fill(gauspeak[0] + smear_number - linearTime45[j] - meanT_smear[j-2]);
       } 
       pixel.index = j;
       pixel.charge = integral[j];
@@ -1287,10 +1284,10 @@ void MultiChannelStudy_TimingMethod1() {
   //DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
   //DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_8gev_1mm.root","output_8gev_1mm.root");
-  //DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
+  DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_10mm.root","output_32gev_10mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_32mm.root","output_32gev_32mm.root");
-  DoMultiChannelStudy("../../raw/combine_32gev_75mm.root","output_32gev_75mm.root");
+  //DoMultiChannelStudy("../../raw/combine_32gev_75mm.root","output_32gev_75mm.root");
 
 
 }
