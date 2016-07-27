@@ -51,10 +51,11 @@ void SKIROCPlotPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile, int *pix
   gStyle->SetOptFit(0);
   gStyle->SetOptStat(0);
   // Add text box:
-  TPaveText *txtbox = new TPaveText(0.75, 0.3, 1, 0.6, "NDC");
-  txtbox->AddText(" "); //So the label doesn't cover up the first line
+  TPaveText *txtbox = new TPaveText(0.7, 0.45, 0.9, 0.75, "NDC");
+  txtbox->SetBorderSize(1);
+  txtbox->AddText("Pixels Passing Cuts");
+  txtbox->AddLine(0., 0.875, 1., 0.875);
   for (int i = 0; i<7; i++) txtbox->AddText( Form("%d Pixel(s):  %d Events", i+1, pixelsUsed[i]) );
-  txtbox->SetLabel("Pixels Passing Cuts");
   // Add Sigma Parameter text:
   double mean = hist->GetMean();
   double rms = hist->GetRMS();
@@ -66,6 +67,7 @@ void SKIROCPlotPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile, int *pix
   c->SaveAs( (outfile + ".pdf").c_str() ); 
   c->SaveAs( (outfile +   ".C").c_str() );
 }
+
 
 void DoMultiDeviceStudy( string filename ) {
 
