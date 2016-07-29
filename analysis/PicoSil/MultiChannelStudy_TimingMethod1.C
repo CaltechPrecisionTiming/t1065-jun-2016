@@ -126,7 +126,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   int seed = rand();
 
   // to set the smear time (this is in ns, so 0.05 means a smearing of 50 ps)
-  float smear = 0.5;
+  float smear = 0.05;
 
   // The same seed will be used in the first and second event loops to generate the same random sequence with TRandom.
   TRandom3 *r = new TRandom3(seed); 
@@ -791,10 +791,6 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     float photekAmp = amp[0];
     float photekCharge = integral[0];
 
-    float centerAmp = amp[1];
-    float centerCharge = integral[1];
-    float centerTime = linearTime45[1];
-
     float PixelAmp = 0;
     float PixelCharge = 0;
     float PixelTime = 0;
@@ -863,11 +859,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
   TH1F *histTOF_largest_smear_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_smear_ring_C[j]= new TH1F(Form("histTOF_largest_smear_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -4, 4);
+  for(int j=0; j < 6; j++) histTOF_largest_smear_ring_C[j]= new TH1F(Form("histTOF_largest_smear_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
 
   // TOF of largest pixels, with the smear added. For these, the times of each pixel will be added with equal weighting
   TH1F *histTOF_largest_smear_equal_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_smear_equal_ring_C[j]= new TH1F(Form("histTOF_largest_smear_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -4, 4);
+  for(int j=0; j < 6; j++) histTOF_largest_smear_equal_ring_C[j]= new TH1F(Form("histTOF_largest_smear_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
 
 
   // Delete memory allocated to r from first for loop. Then use same seed for the TRandom so the same random sequence is used in both event loops.
@@ -919,8 +915,8 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
 
 
-    std::vector< Pixel > vect;
-    Pixel pixel;
+    std::vector< Pixel > vect2;
+    Pixel pixel2;
     for ( int j = 2; j <= 7; j++)
     {
       // smear number is a random number choosen from a Gaussian distribution with mean 0 and sigam 0.05 (50 ps) to perform the time smearing for each pixel
@@ -933,32 +929,32 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       {
         histDeltaTshifted_smear2_C[j-2]->Fill(gauspeak[0] + smear_number - linearTime45[j] - meanT_smear_ring[j-2]);
       } 
-      pixel.index = j;
-      pixel.charge = integral[j];
-      pixel.time = gauspeak[0] - (linearTime45[j] + meanT_ring[j-2]);
-      pixel.time_smear = gauspeak[0] + smear_number - linearTime45[j] - meanT_smear_ring[j-2];
-      pixel.amp = amp[j];
-      vect.push_back( pixel ) ;
+      pixel2.index = j;
+      pixel2.charge = integral[j];
+      pixel2.time = gauspeak[0] - (linearTime45[j] + meanT_ring[j-2]);
+      pixel2.time_smear = gauspeak[0] + smear_number - linearTime45[j] - meanT_smear_ring[j-2];
+      pixel2.amp = amp[j];
+      vect2.push_back( pixel2 ) ;
     }
 
     // Sort the vect and plot the combination of the largest energy pixels
     auto sortPixel = []( Pixel a, Pixel b ) {return a.charge > b.charge ?  true : false;};
-    //std::sort( vect.begin(), vect.end(), sortPixel );
+    std::sort( vect2.begin(), vect2.end(), sortPixel );
 
     // These values will be used to determine if the pixel passes the required cuts
-    float energy2 = vect[1].charge;
-    float energy3 = vect[2].charge;
-    float energy4 = vect[3].charge;
-    float energy5 = vect[4].charge;
-    float energy6 = vect[5].charge;
-    float energy7 = vect[6].charge;
+    float energy2 = vect2[1].charge;
+    float energy3 = vect2[2].charge;
+    float energy4 = vect2[3].charge;
+    float energy5 = vect2[4].charge;
+    float energy6 = vect2[5].charge;
+    float energy7 = vect2[6].charge;
 
-    float amp2 = vect[1].amp;
-    float amp3 = vect[2].amp;
-    float amp4 = vect[3].amp;
-    float amp5 = vect[4].amp;
-    float amp6 = vect[5].amp;
-    float amp7 = vect[6].amp;
+    float amp2 = vect2[1].amp;
+    float amp3 = vect2[2].amp;
+    float amp4 = vect2[3].amp;
+    float amp5 = vect2[4].amp;
+    float amp6 = vect2[5].amp;
+    float amp7 = vect2[6].amp;
 
     float weight2 = 0;      // If the pixel passes the cuts, these weights will be changed to the charge of the pixel (and time will be charge weighted) 
     float weight3 = 0;
@@ -991,8 +987,8 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     }
 
     Energy = weight2;
-    average = vect[0].time;
-    average_smear = vect[0].time_smear;
+    average = vect2[0].time;
+    average_smear = vect2[0].time_smear;
     histTOF_largest_ring_C[0]->Fill( average );
     histTOF_largest_equal_ring_C[0]->Fill( average );
     histTOF_largest_smear_ring_C[0]->Fill( average_smear );
@@ -1005,10 +1001,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     }
 
     Energy = weight2 + weight3;
-    average = ( weight2*vect[0].time + weight3*vect[1].time )/( Energy );
-    average_equal = ( count2*vect[0].time + count3*vect[1].time )/( count2 + count3 );
-    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear )/( Energy );
-    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear )/ (count2 + count3 );
+    average = ( weight2*vect2[0].time + weight3*vect2[1].time )/( Energy );
+    average_equal = ( count2*vect2[0].time + count3*vect2[1].time )/( count2 + count3 );
+    average_smear = ( weight2*vect2[0].time_smear + weight3*vect2[1].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect2[0].time_smear + count3*vect2[1].time_smear )/ (count2 + count3 );
     histTOF_largest_ring_C[1]->Fill( average ); 
     histTOF_largest_equal_ring_C[1]->Fill ( average_equal );
     histTOF_largest_smear_ring_C[1]->Fill( average_smear );
@@ -1021,10 +1017,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     }
 
     Energy = weight2 + weight3 + weight4 ;
-    average = ( weight2*vect[0].time + weight3*vect[1].time + weight4*vect[2].time )/( Energy );
-    average_equal = ( count2*vect[0].time + count3*vect[1].time + count4*vect[2].time )/( count2 + count3 + count4 );
-    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear + weight4*vect[2].time_smear )/( Energy );
-    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear + count4*vect[2].time_smear )/( count2 + count3 + count4 );
+    average = ( weight2*vect2[0].time + weight3*vect2[1].time + weight4*vect2[2].time )/( Energy );
+    average_equal = ( count2*vect2[0].time + count3*vect2[1].time + count4*vect2[2].time )/( count2 + count3 + count4 );
+    average_smear = ( weight2*vect2[0].time_smear + weight3*vect2[1].time_smear + weight4*vect2[2].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect2[0].time_smear + count3*vect2[1].time_smear + count4*vect2[2].time_smear )/( count2 + count3 + count4 );
     histTOF_largest_ring_C[2]->Fill( average );
     histTOF_largest_equal_ring_C[2]->Fill( average_equal );
     histTOF_largest_smear_ring_C[2]->Fill( average_smear );
@@ -1037,10 +1033,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     }
 
     Energy = weight2 + weight3 + weight4 + weight5 ;
-    average = ( weight2*vect[0].time + weight3*vect[1].time + weight4*vect[2].time + weight5*vect[3].time )/( Energy );
-    average_equal = ( count2*vect[0].time + count3*vect[1].time + count4*vect[2].time + count5*vect[3].time )/( count2 + count3 + count4 + count5  );
-    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear + weight4*vect[2].time_smear + weight5*vect[3].time_smear )/( Energy );
-    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear + count4*vect[2].time_smear + count5*vect[3].time_smear )/( count2 + count3 + count4 + count5 );
+    average = ( weight2*vect2[0].time + weight3*vect2[1].time + weight4*vect2[2].time + weight5*vect2[3].time )/( Energy );
+    average_equal = ( count2*vect2[0].time + count3*vect2[1].time + count4*vect2[2].time + count5*vect2[3].time )/( count2 + count3 + count4 + count5  );
+    average_smear = ( weight2*vect2[0].time_smear + weight3*vect2[1].time_smear + weight4*vect2[2].time_smear + weight5*vect2[3].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect2[0].time_smear + count3*vect2[1].time_smear + count4*vect2[2].time_smear + count5*vect2[3].time_smear )/( count2 + count3 + count4 + count5 );
     histTOF_largest_ring_C[3]->Fill( average );
     histTOF_largest_equal_ring_C[3]->Fill( average_equal );
     histTOF_largest_smear_ring_C[3]->Fill( average_smear );
@@ -1053,10 +1049,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     }
 
     Energy = weight2 + weight3 + weight4 + weight5 + weight6;
-    average = ( weight2*vect[0].time + weight3*vect[1].time + weight4*vect[2].time + weight5*vect[3].time + weight6*vect[4].time )/( Energy );
-    average_equal = ( count2*vect[0].time + count3*vect[1].time + count4*vect[2].time + count5*vect[3].time + count6*vect[4].time )/( count2 + count3 + count4 + count5 + count6 );
-    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear + weight4*vect[2].time_smear + weight5*vect[3].time_smear + weight6*vect[4].time_smear )/( Energy );
-    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear + count4*vect[2].time_smear + count5*vect[3].time_smear + count6*vect[4].time_smear )/( count2 + count3 + count4 + count5 + count6 );
+    average = ( weight2*vect2[0].time + weight3*vect2[1].time + weight4*vect2[2].time + weight5*vect2[3].time + weight6*vect2[4].time )/( Energy );
+    average_equal = ( count2*vect2[0].time + count3*vect2[1].time + count4*vect2[2].time + count5*vect2[3].time + count6*vect2[4].time )/( count2 + count3 + count4 + count5 + count6 );
+    average_smear = ( weight2*vect2[0].time_smear + weight3*vect2[1].time_smear + weight4*vect2[2].time_smear + weight5*vect2[3].time_smear + weight6*vect2[4].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect2[0].time_smear + count3*vect2[1].time_smear + count4*vect2[2].time_smear + count5*vect2[3].time_smear + count6*vect2[4].time_smear )/( count2 + count3 + count4 + count5 + count6 );
     histTOF_largest_ring_C[4]->Fill( average );
     histTOF_largest_equal_ring_C[4]->Fill( average_equal );
     histTOF_largest_smear_ring_C[4]->Fill( average_smear );
@@ -1069,10 +1065,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     }
 
     Energy = weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
-    average = ( weight2*vect[0].time + weight3*vect[1].time + weight4*vect[2].time + weight5*vect[3].time + weight6*vect[4].time + weight7*vect[5].time )/( Energy );
-    average_equal = ( count2*vect[0].time + count3*vect[1].time + count4*vect[2].time + count5*vect[3].time + count6*vect[4].time + count7*vect[5].time )/( count2 + count3 + count4 + count5 + count6 + count7 );
-    average_smear = ( weight2*vect[0].time_smear + weight3*vect[1].time_smear + weight4*vect[2].time_smear + weight5*vect[3].time_smear + weight6*vect[4].time_smear + weight7*vect[5].time_smear )/( Energy );
-    average_smear_equal = ( count2*vect[0].time_smear + count3*vect[1].time_smear + count4*vect[2].time_smear + count5*vect[3].time_smear + count6*vect[4].time_smear + count7*vect[5].time_smear )/( count2 + count3 + count4 + count5 + count6 + count7 );
+    average = ( weight2*vect2[0].time + weight3*vect2[1].time + weight4*vect2[2].time + weight5*vect2[3].time + weight6*vect2[4].time + weight7*vect2[5].time )/( Energy );
+    average_equal = ( count2*vect2[0].time + count3*vect2[1].time + count4*vect2[2].time + count5*vect2[3].time + count6*vect2[4].time + count7*vect2[5].time )/( count2 + count3 + count4 + count5 + count6 + count7 );
+    average_smear = ( weight2*vect2[0].time_smear + weight3*vect2[1].time_smear + weight4*vect2[2].time_smear + weight5*vect2[3].time_smear + weight6*vect2[4].time_smear + weight7*vect2[5].time_smear )/( Energy );
+    average_smear_equal = ( count2*vect2[0].time_smear + count3*vect2[1].time_smear + count4*vect2[2].time_smear + count5*vect2[3].time_smear + count6*vect2[4].time_smear + count7*vect2[5].time_smear )/( count2 + count3 + count4 + count5 + count6 + count7 );
     histTOF_largest_ring_C[5]->Fill( average );
     histTOF_largest_equal_ring_C[5]->Fill( average_equal );
     histTOF_largest_smear_ring_C[5]->Fill( average_smear );
