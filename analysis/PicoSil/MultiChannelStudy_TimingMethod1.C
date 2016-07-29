@@ -768,6 +768,91 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   
 
 
+
+  // first loop fills histograms and finds their mean to shift to 0
+  delete r;
+  r = new TRandom3(seed);
+
+
+  TH1F *histDeltaT_ring[6];
+  for(int j=0; j<6; j++) histDeltaT_ring[j]= new TH1F(Form("histDeltaT_ring_%d",j),"; Time [ns];Number of Events", 250, 4.4, 5.6);
+
+  TH1F *histDeltaT_smear_ring[6];
+  for(int j=0; j<6; j++) histDeltaT_smear_ring[j]= new TH1F(Form("histDeltaT_smear_ring_%d",j),"; Time [ns];Number of Events", 250, 4.4, 5.6);
+
+
+  std::cout<<"Number of events in Sample: "<<nentries<<std::endl;  
+  for (Long64_t iEntry=0;iEntry<nentries;iEntry++)
+  {
+    if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
+    tree->GetEntry(iEntry);    
+  
+    float photekTimeGauss = gauspeak[0];
+    float photekAmp = amp[0];
+    float photekCharge = integral[0];
+
+    float centerAmp = amp[1];
+    float centerCharge = integral[1];
+    float centerTime = linearTime45[1];
+
+    float PixelAmp = 0;
+    float PixelCharge = 0;
+    float PixelTime = 0;
+
+    float largestIndexIntegral = 0;
+    int largestIndex = 0;
+
+    float DeltaT_ring[6] = {-99.};
+    float DeltaT_smear_ring[6] = {-99.};
+
+    for ( int j = 2; j <= 7; j++)
+    {
+      if ( integral[j] > largestIndexIntegral )
+      {
+        largestIndexIntegral = integral[j];
+        largestIndex = j;
+      }
+    }
+
+    PixelAmp = amp[largestIndex];
+    PixelCharge = integral[largestIndex];
+    PixelTime = linearTime45[largestIndex];
+
+    // require photek amp and charge to be above cuts (to select electron events and not background), and require one of the first ring pixels to be above amp and charge cuts
+    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    //require signal in largest of the ring pixels
+    if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
+    
+
+    for ( int j = 2; j <= 7; j++)
+    {
+      float smear_number = r->Gaus(0, smear);
+
+      if ( amp[j] > 0.01 && integral[j] > 1 ) 
+      {
+        DeltaT_ring[j-2] = gauspeak[0] - linearTime45[j];
+        DeltaT_smear_ring[j-2] = gauspeak[0] - smear_number - linearTime45[j];
+        histDeltaT_ring[j-2]->Fill(DeltaT_ring[j-2]);
+        histDeltaT_smear_ring[j-2]->Fill(DeltaT_smear_ring[j-2]);
+      }
+    }
+  }
+
+  // get the means of the delta T ring histograms, both the smear and the non-smeared one. These means will be used to shift the histograms to 0 in the next event loop
+  float meanT_ring[6];
+  for ( int i = 0; i < 6; i++ )
+  {
+    meanT_ring[i] = histDeltaT_ring[i]->GetMean();
+  }
+
+  float meanT_smear_ring[6];
+  for ( int i = 0; i < 6; i++ )
+  {
+    meanT_smear_ring[i] = histDeltaT_smear_ring[i]->GetMean();
+  }
+
+
+  // this event loop does the analysis
   // TOF of largest pixels, by charge weighting. The Gaussian fit will be done to this one.
   TH1F *histTOF_largest_ring_C[6];
   for(int j=0; j < 6; j++) histTOF_largest_ring_C[j]= new TH1F(Form("histTOF_largest_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
@@ -778,11 +863,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
   TH1F *histTOF_largest_smear_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_smear_ring_C[j]= new TH1F(Form("histTOF_largest_smear_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
+  for(int j=0; j < 6; j++) histTOF_largest_smear_ring_C[j]= new TH1F(Form("histTOF_largest_smear_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -4, 4);
 
   // TOF of largest pixels, with the smear added. For these, the times of each pixel will be added with equal weighting
   TH1F *histTOF_largest_smear_equal_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_smear_equal_ring_C[j]= new TH1F(Form("histTOF_largest_smear_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
+  for(int j=0; j < 6; j++) histTOF_largest_smear_equal_ring_C[j]= new TH1F(Form("histTOF_largest_smear_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -4, 4);
 
 
   // Delete memory allocated to r from first for loop. Then use same seed for the TRandom so the same random sequence is used in both event loops.
@@ -829,36 +914,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
 
     // require photek amp and charge to be above cuts (to select electron events and not background), and require one of the first ring pixels to be above amp and charge cuts
-
-    // 8GeV cuts
-    //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
-    //require signal in largest of the ring pixels
-    //if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
-
-    // 16GeV cuts
-    //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
-    //require signal in largest of the ring pixels
-    //if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
-
-    // 32GeV cuts, 1 mm
     if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
     //require signal in largest of the ring pixels
     if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
-
-    // 32GeV cuts, 10 mm
-    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
-    //require signal in largest of the ring pixels
-    //if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
-
-    // 32GeV cuts, 32 mm
-    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
-    //require signal in largest of the ring pixels
-    //if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
-
-    // 32GeV cuts, 75 mm
-    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
-    //require signal in largest of the ring pixels
-    //if( !(PixelCharge > 1 && PixleAmp > 0.01 ) ) continue;
 
 
     std::vector< Pixel > vect;
@@ -873,12 +931,12 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       }
       if ( amp[j] > 0.01 && integral[j] > 1 )
       {
-        histDeltaTshifted_smear2_C[j-2]->Fill(gauspeak[0] + smear_number - linearTime45[j] - meanT_smear[j-2]);
+        histDeltaTshifted_smear2_C[j-2]->Fill(gauspeak[0] + smear_number - linearTime45[j] - meanT_smear_ring[j-2]);
       } 
       pixel.index = j;
       pixel.charge = integral[j];
-      pixel.time = gauspeak[0] - (linearTime45[j] + meanT[j-1]);
-      pixel.time_smear = gauspeak[0] + smear_number - linearTime45[j] - meanT[j-1];
+      pixel.time = gauspeak[0] - (linearTime45[j] + meanT_ring[j-2]);
+      pixel.time_smear = gauspeak[0] + smear_number - linearTime45[j] - meanT_smear_ring[j-2];
       pixel.amp = amp[j];
       vect.push_back( pixel ) ;
     }
@@ -1024,15 +1082,6 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   }
 
 
-  
-  /*for ( int i = 0; i < 7; i++)
-    {
-      for ( int k = 1; k < histDeltaT[0]->GetNbinsX(); k++ )
-  {
-    histDeltaT_C[i]->Fill( histDeltaT_C[i]->GetBinContent(k)-meanT[i] );
-  }
-    }
-  */
   //Normalize hists
   histTotalCharge = NormalizeHist(histTotalCharge);
   histChargeRingOne = NormalizeHist(histChargeRingOne);
