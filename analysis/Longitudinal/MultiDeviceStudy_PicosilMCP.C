@@ -71,7 +71,7 @@ void SKIROCPlotPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile, int *pix
 }
 
 
-void DoMultiDeviceStudy( string filename ) {
+void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekChargeCut, float centerAmpCut, float centerChargeCut, float MCPAmpCut) {
 
   srand (time(NULL));
   int seed = rand();
@@ -98,10 +98,10 @@ void DoMultiDeviceStudy( string filename ) {
 
   //Create histograms
   float width = 0.3;
-  float smearWidth = 1.5;
-  float smearBins = 45;
-  float pixelSmear = 0.500; // in ps
-  float MCPSmear = 0.300;
+  float smearWidth = 0.75;
+  float smearBins = 75;
+  float pixelSmear = 0.050; // in ps
+  float MCPSmear = 0.045;
 
   TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal","; Time [ns];Number of Events", 100, -width, width); // Weights MCP and PicoSil center pixel 50-50
   TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal","; Time [ns];Number of Events", 100, -width, width);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
@@ -141,25 +141,18 @@ void DoMultiDeviceStudy( string filename ) {
   TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_EventCharge","; Time [ns];Number of Events",100,-width, width);
   TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_TotalCharge","; Time [ns];Number of Events",100,-width, width);
   TH1F *histDeltaT_PicoSil_vs_MCP[7];
-  for(int i=0; i<7; i++) histDeltaT_PicoSil_vs_MCP[i] = new TH1F(Form("histDeltaT_PicoSil_vs_MCP_%d",i),"; Time [ns];Number of Events", 300, -3, -1); // DeltaT between PicoSil and MCP instead of Photek.
+  for(int i=0; i<7; i++) histDeltaT_PicoSil_vs_MCP[i] = new TH1F(Form("histDeltaT_PicoSil_vs_MCP_%d",i),"; Time [ns];Number of Events", 100, -3, -1); // DeltaT between PicoSil and MCP instead of Photek.
 
   TH1F *histCharges[7]; // collects charge values for picosil pixels in every event in which they pass the cuts.
   for(int i=0; i<7; i++) histCharges[i] = new TH1F( Form("histCharges_%d",i),"; Charge [pC];Number of Events", 120, 0, 80);
  
-  //TH2F *histDeltaT_vs_Charge_PicoSil = new TH2F("histDeltaT_vs_Charge_PicoSil","; Event Charge [pC]; Time [ns];Number of Events", 200, 0.1, 80, 300, -0.3, 0.3);
-  //TH2F *histDeltaT_vs_Charge_MCP = new TH2F("histDeltaT_vs_Charge_MCP","; Event Charge [pC]; Time [ns];Number of Events", 200, 0.1, 80, 300, -0.3, 0.3);
-  // THE ABOVE TWO HISTOGRAMS ARE INITIALIZED BUT UNUSED CURRENTLY. -- Commented out.
+
 
 
   float totalPicoSilCharge[7] = {0.};
   float totalCenterCharge = 0; // Should be same value as totalPicoSilCharge[0]
   float totalMCPCharge = 0;
 
-  float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
-  float photekChargeCut = sqrt(10)*2;
-  float centerAmpCut = 2*0.15;
-  float centerChargeCut = 2*11;
-  float MCPAmpCut = 0.08;
 
   //read all entries and fill the histogram
   Long64_t nentries = tree->GetEntries();
@@ -635,7 +628,7 @@ void DoMultiDeviceStudy( string filename ) {
   TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge;Number of Events", 400, 0, 60);
   TH1F *histMCPAmp = new TH1F("histMCPAmp","; Amp;Number of Events", 100, 0, 0.75);
 
-  tree->Draw("sqrt(10)*amp[0]>>histPhotekAmp" );
+  tree->Draw("sqrt(10)*amp[0]>>histPhotekAmp", "", " " );
   tree->Draw("sqrt(10)*int[0]>>histPhotekCharge");
   tree->Draw("2*amp[1]>>histCenterAmp");
   tree->Draw("2*int[1]>>histCenterCharge");
@@ -675,9 +668,9 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
 }
 
 
-void makeTimeResolution( string filename ) {
+void makeTimeResolution( string filename, float photekAmpCut, float photekChargeCut, float centerAmpCut, float centerChargeCut, float MCPAmpCut ) {
 
-  DoMultiDeviceStudy( filename.c_str() );
+  DoMultiDeviceStudy( filename.c_str(), photekAmpCut, photekChargeCut, centerAmpCut, centerChargeCut, MCPAmpCut );
 
   TFile *_file = TFile::Open( ("output"+filename).c_str() ); //Should be .root
 
@@ -755,5 +748,13 @@ void makeTimeResolution( string filename ) {
 
 
 void MultiDeviceStudy_PicosilMCP() {
-  makeTimeResolution("104-116except111-114.root"); // Outputs PDFs with histograms
+
+  string infile = "104-116except111-114.root";
+  float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
+  float photekChargeCut = sqrt(10)*2;
+  float centerAmpCut = 2*0.15;
+  float centerChargeCut = 2*11;
+  float MCPAmpCut = 0.08;
+  makeTimeResolution(infile.c_str(), photekAmpCut, photekChargeCut, centerAmpCut, centerChargeCut, MCPAmpCut); // Outputs PDFs with histograms
+
 }
