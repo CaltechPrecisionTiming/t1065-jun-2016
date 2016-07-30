@@ -694,6 +694,7 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear = (TH1F*)_file->Get("histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear");
   TH1F *histDeltaT_PicoSil_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_EventCharge"); //Combination of device Delta T's after shifting distributions around 0 and then weighting event by event.
   TH1F *histDeltaT_PicoSil_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_TotalCharge"); //Combination after shifting around 0 and weighting with total charge.
+  TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_vs_MCP_TotalCharge");
 
   TCanvas *c = new TCanvas ("c","c",800, 600); 
   TLatex *tex = new TLatex();
@@ -723,6 +724,7 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   histDeltaT_PicoSilLandauCharge_MCP_Equal->SetTitle("1/2 HGC w/ Landau MPV Charge Weighting, 1/2 MCP: TOF");
   histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 MCP: TOF}");
   histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 Smeared MCP: TOF}");
+  histDeltaT_PicoSil_vs_MCP_TotalCharge->SetTitle("#Deltat b/t HGC and Photonis -- Total Charge Weighted");
 
 
   PlotDeltaTPDF(c, tex, histDeltaTCenter, "deltaTCenter.pdf");
@@ -744,6 +746,7 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal, "deltaT_PicoSilLandauCharge_MCP_Equal.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear, "deltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear, "deltaT_PicoSilLandauCharge_MCP_Equal_BothSmear.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_vs_MCP_TotalCharge, "histDeltaT_PicoSil_vs_MCP_TotalCharge.pdf");
 }
 
 
