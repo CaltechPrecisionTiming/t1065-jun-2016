@@ -99,47 +99,50 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   //Create histograms
   float width = 0.3;
   float smearWidth = 0.75;
-  float smearBins = 75;
-  float pixelSmear = 0.050; // in ps
+  int bins = 100;
+  int smearBins = 75;
+  float pixelSmear = 0.050; // in ns
   float MCPSmear = 0.045;
 
-  TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal","; Time [ns];Number of Events", 100, -width, width); // Weights MCP and PicoSil center pixel 50-50
-  TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal","; Time [ns];Number of Events", 100, -width, width);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
-  TH1F *histDeltaT_PicoSilTotalCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilTotalCharge_MCP_Equal","; Time [ns];Number of Events", 100, -width, width);// Picosil delta T found by weighting with total pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
-  TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal","; Time [ns];Number of Events", 100, -width, width);
+  TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal","; Time [ns];Number of Events", bins, -width, width); // Weights MCP and PicoSil center pixel 50-50
+  TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal","; Time [ns];Number of Events", bins, -width, width);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
+  TH1F *histDeltaT_PicoSilTotalCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilTotalCharge_MCP_Equal","; Time [ns];Number of Events", bins, -width, width);// Picosil delta T found by weighting with total pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
+  TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal","; Time [ns];Number of Events", bins, -width, width);
   TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear","; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);//Smear
   TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear","; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);//Smear
-  TH1F *histDeltaT_PicoSilEqual_MCP_Equal = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal","; Time [ns];Number of Events", 100, -width, width);//Picosil delta T found by weighting pixels equally, and then overall delta T fund by weighting PicoSil and MCP equally. Thus MCP is weighted by 1/2 and each pixel is weighted 1/14.
+  TH1F *histDeltaT_PicoSilEqual_MCP_Equal = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal","; Time [ns];Number of Events", bins, -width, width);//Picosil delta T found by weighting pixels equally, and then overall delta T fund by weighting PicoSil and MCP equally. Thus MCP is weighted by 1/2 and each pixel is weighted 1/14.
   TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear","; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);
-  TH1F *histDeltaT_PicoSil_MCP_Equal = new TH1F("histDeltaT_PicoSil_MCP_Equal","; Time [ns];Number of Events", 100, -width, width);// delta T found by placing equal emphasis on the pixels as on the MCP. Thus everything is weighted 1/8.
-  TH1F *histDeltaT_PicoSil_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_MCP_EventCharge","; Time [ns];Number of Events", 100, -width, width);// delta T found by weighting with event charge in each device.
-  TH1F *histDeltaT_PicoSil_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_MCP_TotalCharge","; Time [ns];Number of Events", 100, -width, width);// delta T found by constant weighting with charge in device over entire run.
+  TH1F *histDeltaT_PicoSil_MCP_Equal = new TH1F("histDeltaT_PicoSil_MCP_Equal","; Time [ns];Number of Events", bins, -width, width);// delta T found by placing equal emphasis on the pixels as on the MCP. Thus everything is weighted 1/8.
+  TH1F *histDeltaT_PicoSil_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_MCP_EventCharge","; Time [ns];Number of Events", bins, -width, width);// delta T found by weighting with event charge in each device.
+  TH1F *histDeltaT_PicoSil_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_MCP_TotalCharge","; Time [ns];Number of Events", bins, -width, width);// delta T found by constant weighting with charge in device over entire run.
   TH1F *histDeltaT_Center_MCP_EventCharge_NoShift = new TH1F("histDeltaT_Center_MCP_EventCharge_NoShift","; Time [ns];Number of Events", 100, 2, 6); //Weights each event based on charge. Poor resolution.
   TH1F *histDeltaTPicoSil[7];
+  TH1F *histDeltaTPicoSilAt0[7];
   TH1F *histDeltaTPicoSilSmear[7];
   TH1F *histDeltaTPicoSilSmearAt0[7];
   for(int i=0; i<7; i++) {
     histDeltaTPicoSil[i] = new TH1F(Form("histDeltaTPicoSil_%d",i),"; Time [ns];Number of Events", 50, 3, 6); //DeltaT of PicoSil pixels
+    histDeltaTPicoSilAt0[i] = new TH1F(Form("histDeltaTPicoSilAt0_%d",i),"; Time [ns];Number of Events", bins/2, -width, width); 
     histDeltaTPicoSilSmear[i] = new TH1F(Form("histDeltaTPicoSilSmear_%d",i),"; Time [ns];Number of Events", 50, 3, 6);
     histDeltaTPicoSilSmearAt0[i] = new TH1F(Form("histDeltaTPicoSilSmearAt0_%d",i),"; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth); 
   }
   TH1F *histDeltaTCenter = new TH1F("histDeltaTCenter","; Time [ns];Number of Events", 50, 4, 5); //DeltaT of center picosil pixel
   TH1F *histDeltaTMCP = new TH1F("histDeltaTMCP","; Time [ns];Number of Events", 50, 2, 3); //DeltaT of MCP
   TH1F *histDeltaTMCPSmear = new TH1F("histDeltaTMCPSmear","; Time [ns];Number of Events", 50, 2, 3); //DeltaT of MCP  
-  TH1F *histDeltaTPicoSilAt0TotalCharge = new TH1F("histDeltaTPicoSilAt0TotalCharge","; Time [ns];Number of Events", 100, -width, width); //All pixels combined
-  TH1F *histDeltaTPicoSilAt0EventCharge = new TH1F("histDeltaTPicoSilAt0EventCharge","; Time [ns];Number of Events", 100, -width, width);
-  TH1F *histDeltaTPicoSilAt0LandauCharge = new TH1F("histDeltaTPicoSilAt0LandauCharge","; Time [ns];Number of Events", 100, -width, width);// uses charge MPV
+  TH1F *histDeltaTPicoSilAt0TotalCharge = new TH1F("histDeltaTPicoSilAt0TotalCharge","; Time [ns];Number of Events", bins, -width, width); //All pixels combined
+  TH1F *histDeltaTPicoSilAt0EventCharge = new TH1F("histDeltaTPicoSilAt0EventCharge","; Time [ns];Number of Events", bins, -width, width);
+  TH1F *histDeltaTPicoSilAt0LandauCharge = new TH1F("histDeltaTPicoSilAt0LandauCharge","; Time [ns];Number of Events", bins, -width, width);// uses charge MPV
   TH1F *histDeltaTPicoSilAt0LandauChargeSmear = new TH1F("histDeltaTPicoSilAt0LandauChargeSmear", "; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);//SKIROC
   TH1F *histDeltaTPicoSilAt0EqualSmear = new TH1F("histDeltaTPicoSilAt0EqualSmear", "; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);//SKIROC
   TH1F *histDeltaTPicoSilAt0EqualSmear_nEventsCombine[7];//Central pixel smear is [0], central + second highest nEvents is [1], etc...
   for(int i=0; i<7; i++) histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i] = 
       new TH1F(Form("histDeltaTPicoSilAt0EqualSmear_nEventsCombine_%dPixels",i+1), "; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);//SKIROC
-  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0","; Time [ns];Number of Events", 100, -width, width); //shifted to be centered at zero
-  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0","; Time [ns];Number of Events", 100, -width, width); //shifted to be centered at zero
+  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0","; Time [ns];Number of Events", bins, -width, width); //shifted to be centered at zero
+  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0","; Time [ns];Number of Events", bins, -width, width); //shifted to be centered at zero
   TH1F *histDeltaTMCPAt0Smear = new TH1F("histDeltaTMCPAt0Smear","; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth); //shifted to be centered at zero
 
-  TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_EventCharge","; Time [ns];Number of Events",100,-width, width);
-  TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_TotalCharge","; Time [ns];Number of Events",100,-width, width);
+  TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_EventCharge","; Time [ns];Number of Events",bins,-width, width);
+  TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_TotalCharge","; Time [ns];Number of Events",bins,-width, width);
   TH1F *histDeltaT_PicoSil_vs_MCP[7];
   for(int i=0; i<7; i++) histDeltaT_PicoSil_vs_MCP[i] = new TH1F(Form("histDeltaT_PicoSil_vs_MCP_%d",i),"; Time [ns];Number of Events", 100, -3, -1); // DeltaT between PicoSil and MCP instead of Photek.
 
@@ -344,6 +347,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
     for ( int j = 1; j <= 7; j++){
       if ( (amp[j] > 0.01 && integral[j] > 1) || j == 1 ) {
         DeltaTPicoSil[j-1] = photekTimeGauss0 - linearTime45[j] - meanPicoSil[j-1];
+        histDeltaTPicoSilAt0[j-1]->Fill(DeltaTPicoSil[j-1]);
         DeltaTPicoSilSmear[j-1] = photekTimeGauss0 - linearTime45Smear[j-1] - meanPicoSilSmear[j-1];
         histDeltaTPicoSilSmearAt0[j-1]->Fill(DeltaTPicoSilSmear[j-1]);
         DeltaTPicoSil_vs_MCP[j-1] = (linearTime45[j] - photekTimeGauss0) - (MCPTime - photekTimeGauss1) - meanPicoSil_vs_MCP[j-1];
@@ -546,6 +550,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
 
   for (int i = 0; i < 7; i++) {
     Fitter(histDeltaTPicoSilSmearAt0[i]);
+    Fitter(histDeltaTPicoSilAt0[i]);
     Fitter(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i]);
     Fitter(histDeltaT_PicoSil_vs_MCP[i]);
   }
@@ -596,18 +601,12 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   file->WriteTObject(histDeltaT_PicoSil_MCP_TotalCharge,"histDeltaT_PicoSil_MCP_TotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_vs_MCP_TotalCharge,"histDeltaT_PicoSil_vs_MCP_TotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_vs_MCP_EventCharge,"histDeltaT_PicoSil_vs_MCP_EventCharge", "WriteDelete");
-  for(int i=0; i<=6; i++) {
-    file->WriteTObject(histDeltaT_PicoSil_vs_MCP[i],Form("histDeltaT_PicoSil_vs_MCP[%d]",i),"WriteDelete");
-  }
-  for(int i=0; i<=6; i++) {
-    file->WriteTObject(histCharges[i],Form("histCharges[%d]",i),"WriteDelete");
-  }
-  for(int i=0; i<=6; i++) {
-    file->WriteTObject(histDeltaTPicoSilSmearAt0[i],Form("histDeltaTPicoSilSmear[%d]",i),"WriteDelete");
-  }
-  for(int i=0; i<=6; i++) {
-    file->WriteTObject(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i], pixels_added[i].c_str(), "WriteDelete");
-  }
+  for(int i=0; i<=6; i++) file->WriteTObject(histDeltaTPicoSilAt0[i], Form("histDeltaTPicoSil[%d]",i),"WriteDelete");
+  for(int i=0; i<=6; i++) file->WriteTObject(histCharges[i],Form("histCharges[%d]",i),"WriteDelete");
+  for(int i=0; i<=6; i++) file->WriteTObject(histDeltaTPicoSilSmearAt0[i],Form("histDeltaTPicoSilSmear[%d]",i),"WriteDelete");
+  for(int i=0; i<=6; i++) file->WriteTObject(histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i], pixels_added[i].c_str(), "WriteDelete");
+  for(int i=0; i<=6; i++) file->WriteTObject(histDeltaT_PicoSil_vs_MCP[i],Form("histDeltaT_PicoSil_vs_MCP[%d]",i),"WriteDelete");
+  // Above are in separate loops to be organized in the TBrowser
 
 
   TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 400, 0, 2.5);
@@ -695,6 +694,9 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   TH1F *histDeltaT_PicoSil_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_EventCharge"); //Combination of device Delta T's after shifting distributions around 0 and then weighting event by event.
   TH1F *histDeltaT_PicoSil_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_TotalCharge"); //Combination after shifting around 0 and weighting with total charge.
   TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_vs_MCP_TotalCharge");
+  TH1F *histDeltaTPicoSil[6];
+  for(int i=1; i<=6; i++) histDeltaTPicoSil[i-1] = (TH1F*)_file->Get( Form("histDeltaTPicoSil[%d]",i) ); //Already wrote center pixel
+
 
   TCanvas *c = new TCanvas ("c","c",800, 600); 
   TLatex *tex = new TLatex();
@@ -725,6 +727,7 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 MCP: TOF}");
   histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 Smeared MCP: TOF}");
   histDeltaT_PicoSil_vs_MCP_TotalCharge->SetTitle("#Deltat b/t HGC and Photonis -- Total Charge Weighted");
+  for(int i=0; i<6; i++) histDeltaTPicoSil[i]->SetTitle( Form("HGC Pixel %d: TOF",i+1) ); //pixel 0 is center pixel
 
 
   PlotDeltaTPDF(c, tex, histDeltaTCenter, "deltaTCenter.pdf");
@@ -746,7 +749,8 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal, "deltaT_PicoSilLandauCharge_MCP_Equal.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear, "deltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear, "deltaT_PicoSilLandauCharge_MCP_Equal_BothSmear.pdf");
-  PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_vs_MCP_TotalCharge, "histDeltaT_PicoSil_vs_MCP_TotalCharge.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_vs_MCP_TotalCharge, "deltaT_PicoSil_vs_MCP_TotalCharge.pdf");
+  for(int i=0; i<6; i++) PlotDeltaTPDF(c, tex, histDeltaTPicoSil[i], Form("deltaTPicoSilPixel%d.pdf",i+1) );
 }
 
 
