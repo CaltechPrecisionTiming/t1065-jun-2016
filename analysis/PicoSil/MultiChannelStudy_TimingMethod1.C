@@ -126,13 +126,13 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   int seed = rand();
 
   // to set the smear time (this is in ns, so 0.05 means a smearing of 50 ps)
-  float smear = 0.5;
+  float smear = 0.05;
 
   // to set the range for the histograms
   // 50 ps smearing
-  //float width = 0.5;
+  float width = 0.5;
   // 500 ps smearing
-  float width = 2;
+  //float width = 4;
 
   // The same seed will be used in the first and second event loops to generate the same random sequence with TRandom.
   TRandom3 *r = new TRandom3(seed); 
@@ -171,15 +171,20 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerAmp > 0.03 && centerCharge > 2) ) continue;
 
 
-    // 8GeV cuts
+    // 8GeV cuts, 1 mm
     //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
     //require signal in the central pixel
     //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
 
-    // 16GeV cuts, 1 mm
-    if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
+    // 8GeV cuts, 32 mm
+    if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
     //require signal in the central pixel
-    if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
+    if( !(centerCharge > 1 && centerAmp > 0.01 ) ) continue;
+
+    // 16GeV cuts, 1 mm
+    //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
 
     // 32GeV cuts, 1 mm
     //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
@@ -319,7 +324,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF of largest pixels, by equal weighting. The Gaussian fit will be done to this one.
   TH1F *histTOF_largest_equal_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_equal_C[j]= new TH1F(Form("histTOF_largest_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 7; j++) histTOF_largest_equal_C[j]= new TH1F(Form("histTOF_largest_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.3, 0.3);
 
   // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
   TH1F *histTOF_largest_smear_C[7];
@@ -430,7 +435,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     histEnergyRatio_C->Fill( ratio1 );
     histEnergyPhotekAmp_C->Fill( photekAmp, ratio1 );
 
-    if ( !(photekAmp > 0.03 && photekCharge > 0.8 )) continue;
+    if ( !(photekAmp > 0.04 && photekCharge > 1 )) continue;
 
     float energy_center3 = vect1[0].charge;
     float energy_total3 = vect1[0].charge + vect1[1].charge + vect1[2].charge + vect1[3].charge + vect1[4].charge + vect1[5].charge + vect1[6].charge;
@@ -444,15 +449,20 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
     // require photek amp and charge to be above cuts (to select electron events and not background), and require central pixel to be above amp and charge cuts
 
-    // 8GeV cuts
+    // 8GeV cuts, 1 mm 
     //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
     //require signal in the central pixel
     //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
 
-    // 16GeV cuts, 1 mm
-    if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
+    // 8GeV cuts, 32 mm
+    if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
     //require signal in the central pixel
-    if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
+    if( !(centerCharge > 1 && centerAmp > 0.01 ) ) continue;
+
+    // 16GeV cuts, 1 mm
+    //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
 
     // 32GeV cuts, 1 mm
     //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
@@ -857,7 +867,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   // this event loop does the analysis
   // TOF of largest pixels, by charge weighting. The Gaussian fit will be done to this one.
   TH1F *histTOF_largest_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_ring_C[j]= new TH1F(Form("histTOF_largest_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 6; j++) histTOF_largest_ring_C[j]= new TH1F(Form("histTOF_largest_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -1, 1);
 
   // TOF of largest pixels, by equal weighting. The Gaussian fit will be done to this one.
   TH1F *histTOF_largest_equal_ring_C[6];
@@ -1428,8 +1438,9 @@ void MultiChannelStudy_TimingMethod1()
   // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
   // DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
-  DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
+  //DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_8gev_1mm.root","output_8gev_1mm.root");
+  DoMultiChannelStudy("../../raw/combine_8gev_32mm.root","output_8gev_32mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_10mm.root","output_32gev_10mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_32mm.root","output_32gev_32mm.root");
