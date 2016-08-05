@@ -126,13 +126,13 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   int seed = rand();
 
   // to set the smear time (this is in ns, so 0.05 means a smearing of 50 ps)
-  float smear = 0.05;
+  float smear = 0.5;
 
   // to set the range for the histograms
   // 50 ps smearing
-  float width = 0.5;
+  //float width = 0.5;
   // 500 ps smearing
-  //float width = 4;
+  float width = 4;
 
   // The same seed will be used in the first and second event loops to generate the same random sequence with TRandom.
   TRandom3 *r = new TRandom3(seed); 
@@ -353,8 +353,8 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F *histChargeContained[7];
   for(int j=0; j < 7; j++) histChargeContained[j]= new TH1F(Form("histChargeContained_%d",j),"; Charge (pC);Number of Events", 100, -10, 150);
 
-  TH1F* histTOFEnergyCut_C = new TH1F("histTOFEnergyCut","; Time (ns);Number of Events", 300, -0.5 , 0.5);
-  TH1F* histTOFEnergyCutCenter_C = new TH1F("histTOFEnergyCutCenter","; Time (ns);Number of Events", 300, -0.5 , 0.5);
+  TH1F* histTOFEnergyCut_C = new TH1F("histTOFEnergyCut","; Time (ns);Number of Events", 80, -1, 4);
+  TH1F* histTOFEnergyCutCenter_C = new TH1F("histTOFEnergyCutCenter","; Time (ns);Number of Events", 80, -0.3, 0.3);
   
   TH2F* histDeltaTCharge_C = new TH2F("histDeltaTCharge","; Charge (pC);Time (ns);Number of Events", 300, -5, 100, 300, -0.3 , 0.3 );
   TH2F* histDeltaTChargeCorr_C = new TH2F("histDeltaTChargeCorr","; Charge (pC);Time (ns);Number of Events", 300, -5, 100, 300, -0.3 , 0.3 );
@@ -768,7 +768,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     // Makes histogram of time vs number of events (to determine time resolution) using events based on center pixel and photek passing charge and amplitude cuts
     // Apply cuts such that only a specific energy (or charge) range is used for the events plotted
     // Time is weighted by charge in the pixel, same as the histTOF_largest above
-    if ( Energy >= 40 && Energy <= 50 )
+    if ( Energy >= 0 && Energy <= 20 )
     {
       histTOFEnergyCut_C->Fill( average );
     }
@@ -867,7 +867,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   // this event loop does the analysis
   // TOF of largest pixels, by charge weighting. The Gaussian fit will be done to this one.
   TH1F *histTOF_largest_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_ring_C[j]= new TH1F(Form("histTOF_largest_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -1, 1);
+  for(int j=0; j < 6; j++) histTOF_largest_ring_C[j]= new TH1F(Form("histTOF_largest_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
 
   // TOF of largest pixels, by equal weighting. The Gaussian fit will be done to this one.
   TH1F *histTOF_largest_equal_ring_C[6];
@@ -928,7 +928,31 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
 
     // require photek amp and charge to be above cuts (to select electron events and not background), and require one of the first ring pixels to be above amp and charge cuts
-    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+
+
+
+    // 8GeV cuts, 1 mm 
+    //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
+
+    // 8GeV cuts, 32 mm
+    if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
+
+    // 16GeV cuts, 1 mm
+    //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
+
+    // 32GeV cuts, 1 mm
+    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+
+    // 32GeV cuts, 10 mm
+    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+
+    // 32GeV cuts, 32 mm
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+
+    // 32GeV cuts, 75 mm
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+
     //require signal in largest of the ring pixels
     if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
 
@@ -1359,6 +1383,21 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   histPixelsCombinedRing_C->Draw();
   c->SaveAs( Form("PixelsCombinedRing.pdf"));
+
+
+
+  // plots of energy contained and time resolution with energy cuts on event selection
+  histTOFEnergyCut_C->Draw();
+  gStyle->SetOptFit(1);
+  gStyle->SetOptStat(1);
+  c->SaveAs( Form("time_res_energy.pdf"));
+
+  // plot of total energy contained
+  histTotalChargeContained_C->Draw();
+  gStyle->SetOptFit(1);
+  gStyle->SetOptStat(1);
+  c->SaveAs( Form("total_charge_contained.pdf"));
+
 
   // all pixel plots
   for (int i = 0; i < 7; i++ )
