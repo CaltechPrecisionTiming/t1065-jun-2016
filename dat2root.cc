@@ -355,6 +355,24 @@ int main(int argc, char **argv){
 	  channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
 	}
 
+  // DRS-glitch finder: zero out bins which have large difference
+  // with respect to neighbors in only one or two bins
+  for(int j = 0; j < 1024; j++) {
+    short a0 = abs(channel[realGroup[group]*9 + i][j-1]);
+    short a1 = abs(channel[realGroup[group]*9 + i][j]);
+    short a2 = abs(channel[realGroup[group]*9 + i][j+1]);
+    short a3 = abs(channel[realGroup[group]*9 + i][j+2]);
+    
+    if ( ( a1>3*a0 && a2>3*a0 && a2>3*a3 && a1>30) )
+      {
+        channel[realGroup[group]*9 + i][j] = 0;
+        channel[realGroup[group]*9 + i][j+1] = 0;
+      }
+    
+    if ( ( a1>3*a0 && a1>3*a2 && a1>30) )
+      channel[realGroup[group]*9 + i][j] = 0;
+  }
+
 	//Find the absolute minimum. This is only used as a rough determination to decide if we'll use the early time samples
 	//or the late time samples to do the baseline fit
 	int index_min = FindMinAbsolute(1024, channel[realGroup[group]*9 + i]); // return index of the minc
@@ -375,30 +393,13 @@ int main(int argc, char **argv){
 	  channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
 	}
 
-	// DRS-glitch finder: zero out bins which have large difference
-	// with respect to neighbors in only one or two bins
-	for(int j = 0; j < 1024; j++) {
-	  short a0 = abs(channel[realGroup[group]*9 + i][j-1]);
-	  short a1 = abs(channel[realGroup[group]*9 + i][j]);
-	  short a2 = abs(channel[realGroup[group]*9 + i][j+1]);
-	  short a3 = abs(channel[realGroup[group]*9 + i][j+2]);
-	  
-	  if ( ( a1>3*a0 && a2>3*a0 && a2>3*a3 && a1>30) )
-	    {
-	      channel[realGroup[group]*9 + i][j] = 0;
-	      channel[realGroup[group]*9 + i][j+1] = 0;
-	    }
-	  
-	  if ( ( a1>3*a0 && a1>3*a2 && a1>30) )
-	    channel[realGroup[group]*9 + i][j] = 0;
-	}
 	
 	delete pulse;
 
 	// Find Peak Location using the improved algorithm
 	pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
 	//	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
-	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
+	index_min = FindMinAbsolute (1024, channel[realGroup[group]*9 + i]); // return index of the min
 	//if ( index_min > 0 ) std::cout << "ch: " << totalIndex << std::endl;
 	xmin[realGroup[group]*9 + i] = index_min;
 	
