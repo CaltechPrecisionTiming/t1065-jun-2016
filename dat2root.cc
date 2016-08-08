@@ -184,6 +184,7 @@ int main(int argc, char **argv){
   float channelCorrected[36][1024];
   float xmin[36];
   float base[36];
+  float noise[36];
   float amp[36];
   float integral[36];
   float integralFull[36];
@@ -209,6 +210,7 @@ int main(int argc, char **argv){
   tree->Branch("xmin", xmin, "xmin[36]/F");
   tree->Branch("amp", amp, "amp[36]/F");
   tree->Branch("base", base, "base[36]/F");
+  tree->Branch("noise", noise, "noise[36]/F");
   tree->Branch("int", integral, "int[36]/F");
   tree->Branch("intfull", integralFull, "intfull[36]/F");
   tree->Branch("gauspeak", gauspeak, "gauspeak[36]/F");
@@ -399,7 +401,7 @@ int main(int argc, char **argv){
 	// Find Peak Location using the improved algorithm
 	pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
 	//	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
-	index_min = FindMinAbsolute (1024, channel[realGroup[group]*9 + i]); // return index of the min
+	index_min,noise[realGroup[group]*9+i] = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
 	//if ( index_min > 0 ) std::cout << "ch: " << totalIndex << std::endl;
 	xmin[realGroup[group]*9 + i] = index_min;
 	

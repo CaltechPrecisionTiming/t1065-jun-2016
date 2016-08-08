@@ -159,7 +159,7 @@ int FindRealMin( int n, short *a) {
     xmin_new = a[5]
   }
   */
-  return loc_new;
+  return loc_new,noise;
 }
 
 int FindMinFirstPeakAboveNoise( int n, short *a) {
