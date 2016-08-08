@@ -115,7 +115,7 @@ int FindRealMin( int n, short *a) {
   float xmin_init = xmin;
   float xmin_new = a[5];
   int loc_new = loc;
-  //std::cout << "1st peak @ " << loc <<",\tymin: "<<xmin<<std::endl;
+  std::cout << "1st peak @ " << loc <<",\tymin: "<<xmin<<std::endl;
 
   // In case initial peak found is due to ringing, search for leftmost peak 
   // above non-ringing noise:
@@ -123,7 +123,7 @@ int FindRealMin( int n, short *a) {
     {
       for ( int i = 5; i < loc_new -25; i++ )
         {
-          if ( a[i] < xmin_new && a[i+1] < 0.5*a[i] && a[i] < 0.15* xmin_init )
+          if ( a[i] < xmin_new && a[i+1] < 0.5*a[i] && a[i] < 0.30* xmin_init )
             {
               xmin_new = a[i];
               loc_new = i;
@@ -133,7 +133,7 @@ int FindRealMin( int n, short *a) {
       xmin_init = xmin_new;
 
       if( loc_new == loc ) break;
-      //std::cout << "new peak @ " << loc_new << ",\tymin: " << xmin_new <<", noise: "<<noise<< std::endl;
+      std::cout << "new peak @ " << loc_new << ",\tymin: " << xmin_new <<", noise: "<<noise<< std::endl;
       if ( xmin_new > -2*noise ) loc_new = 0;
       xmin_new = a[5];
       loc = loc_new;
