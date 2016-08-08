@@ -401,8 +401,11 @@ int main(int argc, char **argv){
 	// Find Peak Location using the improved algorithm
 	pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
 	//	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
-	index_min,noise[realGroup[group]*9+i] = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
+  std::cout<<"ind1: "<<index_min<<std::endl;
+	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
+  noise[realGroup[group]*9 + i] = FindNoise(1024, channel[realGroup[group]*9 + i]);
 	//if ( index_min > 0 ) std::cout << "ch: " << totalIndex << std::endl;
+  std::cout<<"ind2: "<<index_min<<std::endl;
 	xmin[realGroup[group]*9 + i] = index_min;
 	
 
