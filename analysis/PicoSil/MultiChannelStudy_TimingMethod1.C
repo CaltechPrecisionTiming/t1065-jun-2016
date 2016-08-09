@@ -77,16 +77,22 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   float gauspeak[36];
   float linearTime45[36];
 
+  int event;
+
   tree->SetBranchStatus("*",0);
   tree->SetBranchStatus("gauspeak",1);
   tree->SetBranchStatus("linearTime45",1);
   tree->SetBranchStatus("amp",1);
   tree->SetBranchStatus("int",1);
+
+  tree->SetBranchStatus("event",1);
   
   tree->SetBranchAddress("gauspeak",gauspeak);
   tree->SetBranchAddress("linearTime45",linearTime45);
   tree->SetBranchAddress("amp",amp);
   tree->SetBranchAddress("int",integral);
+
+  tree->SetBranchAddress("event",&event);
 
   TH1F *histTotalCharge;
   TH1F *histTOFCenter;
@@ -177,9 +183,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
 
     // 8GeV cuts, 32 mm
-    if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
+    //if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
     //require signal in the central pixel
-    if( !(centerCharge > 1 && centerAmp > 0.01 ) ) continue;
+    //if( !(centerCharge > 1 && centerAmp > 0.01 ) ) continue;
 
     // 16GeV cuts, 1 mm
     //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
@@ -187,9 +193,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
 
     // 32GeV cuts, 1 mm
-    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    //if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
+    if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
 
     // 32GeV cuts, 10 mm
     //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
@@ -353,7 +359,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F *histChargeContained[7];
   for(int j=0; j < 7; j++) histChargeContained[j]= new TH1F(Form("histChargeContained_%d",j),"; Charge (pC);Number of Events", 100, -10, 150);
 
-  TH1F* histTOFEnergyCut_C = new TH1F("histTOFEnergyCut","; Time (ns);Number of Events", 80, -1, 4);
+  TH2F* histEnergyDeltaT2D_C = new TH2F("histEnergyDeltaT2D","; Energy (pC); #Deltat (ns); Number of Events", 1000, 0, 100, 1000, -25, 25);
+
+  TH1F* histTOFEnergyCut_C = new TH1F("histTOFEnergyCut","; Time (ns);Number of Events", 80, -0.3, 0.3);
   TH1F* histTOFEnergyCutCenter_C = new TH1F("histTOFEnergyCutCenter","; Time (ns);Number of Events", 80, -0.3, 0.3);
   
   TH2F* histDeltaTCharge_C = new TH2F("histDeltaTCharge","; Charge (pC);Time (ns);Number of Events", 300, -5, 100, 300, -0.3 , 0.3 );
@@ -435,7 +443,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     histEnergyRatio_C->Fill( ratio1 );
     histEnergyPhotekAmp_C->Fill( photekAmp, ratio1 );
 
-    if ( !(photekAmp > 0.04 && photekCharge > 1 )) continue;
+    if ( !(photekAmp > 0.1 && photekCharge > 2 )) continue;
 
     float energy_center3 = vect1[0].charge;
     float energy_total3 = vect1[0].charge + vect1[1].charge + vect1[2].charge + vect1[3].charge + vect1[4].charge + vect1[5].charge + vect1[6].charge;
@@ -455,9 +463,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
 
     // 8GeV cuts, 32 mm
-    if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
+    //if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
     //require signal in the central pixel
-    if( !(centerCharge > 1 && centerAmp > 0.01 ) ) continue;
+    //if( !(centerCharge > 1 && centerAmp > 0.01 ) ) continue;
 
     // 16GeV cuts, 1 mm
     //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
@@ -465,9 +473,9 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
 
     // 32GeV cuts, 1 mm
-    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
     //require signal in the central pixel
-    //if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
+    if( !(centerCharge > 11 && centerAmp > 0.15 ) ) continue;
 
     // 32GeV cuts, 10 mm
     //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
@@ -772,6 +780,13 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     {
       histTOFEnergyCut_C->Fill( average );
     }
+    if ( average <= -0.1 )
+    {
+      histEnergyDeltaT2D_C->Fill( Energy, average );
+      cout << "delta T " << average << ":\n" << endl;
+      cout << "Event " << event << ":\n" << endl; 
+    }
+
     // same but only use center pixel
     if ( energy_center >= 30 && energy_center <= 40 )
     {
@@ -936,13 +951,13 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
 
     // 8GeV cuts, 32 mm
-    if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
+    //if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
 
     // 16GeV cuts, 1 mm
     //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
 
     // 32GeV cuts, 1 mm
-    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+    if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
 
     // 32GeV cuts, 10 mm
     //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
@@ -1141,7 +1156,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g1[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax);
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histDeltaT_C[j]->Fit(Form("g_fit_%d",j),"QMLES","",xmin,xmax);
   }
 
@@ -1154,7 +1169,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g2[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax);
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histDeltaTshifted_smear_C[j]->Fit(Form("g_fit_%d",j),"QMLES","",xmin,xmax);
   }
 
@@ -1167,7 +1182,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g3[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1180,7 +1195,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g4[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_equal_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1193,7 +1208,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g5[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_smear_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1206,7 +1221,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g6[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_smear_equal_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1217,7 +1232,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   double xmin = mean - 2.0 * rms;
   double xmax = mean + 2.0 * rms;
   f1_g7 = new TF1(Form("g_fit"), "gaus(0)", xmin, xmax);
-  cout << "\nFitting Corrected Time Resolution" << endl;
+  //cout << "\nFitting Corrected Time Resolution" << endl;
   histTOF_corr_fit_C->Fit(Form("g_fit"),"QMLES","", xmin, xmax);
 
   // Do Gaussian fit of time resolution for 7 pixels combined time resolution, with charge cuts performed.
@@ -1227,7 +1242,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   double xmin_2 = mean_2 - 2.0 * rms_2;
   double xmax_2 = mean_2 + 2.0 * rms_2;
   f1_g8 = new TF1(Form("g_fit"), "gaus(0)", xmin_2, xmax_2);
-  cout << "\nFitting Corrected Time Resolution" << endl;
+  //cout << "\nFitting Corrected Time Resolution" << endl;
   histTOFEnergyCut_C->Fit(Form("g_fit"),"QMLES","", xmin_2, xmax_2);
 
   // Do Gaussian fit of time resolution for ring largest pixels with charge weighing
@@ -1239,7 +1254,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g9[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1252,7 +1267,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g10[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_equal_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1265,7 +1280,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g11[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_smear_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1278,7 +1293,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g12[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_smear_equal_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1329,6 +1344,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   file->WriteTObject(histTotalChargeContained_C,"Total Charge Contained", "WriteDelete");
 
   file->WriteTObject(histChargeCenterContained_C,"ChargeCenterContained", "WriteDelete");
+  file->WriteTObject(histEnergyDeltaT2D_C,"EnergyDeltaT","WriteDelete");
   file->WriteTObject(histTOFEnergyCut_C,"TOF with energy cut", "WriteDelete");
   file->WriteTObject(histTOFEnergyCutCenter_C,"TOF with energy cut for center pixel", "WriteDelete");
 
@@ -1398,7 +1414,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   gStyle->SetOptStat(1);
   c->SaveAs( Form("total_charge_contained.pdf"));
 
-
+/*
   // all pixel plots
   for (int i = 0; i < 7; i++ )
   {
@@ -1464,7 +1480,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     gStyle->SetOptStat(1);
     c->SaveAs( Form("ring_smear_equal_%d.pdf", i+1) );
   }
-
+*/
 
   file->Close();
   delete file;
@@ -1479,9 +1495,13 @@ void MultiChannelStudy_TimingMethod1()
   //DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
   //DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_8gev_1mm.root","output_8gev_1mm.root");
-  DoMultiChannelStudy("../../raw/combine_8gev_32mm.root","output_8gev_32mm.root");
+  //DoMultiChannelStudy("../../raw/combine_8gev_32mm.root","output_8gev_32mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_10mm.root","output_32gev_10mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_32mm.root","output_32gev_32mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_75mm.root","output_32gev_75mm.root");
+
+  DoMultiChannelStudy("../../raw/t1065-jun-2016-116.root","output_116.root");
+
+  //DoMultiChannelStudy("../../raw/combine_120GeV_1mm.root","output_120gev_1mm.root");
 }
