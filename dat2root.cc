@@ -414,7 +414,7 @@ int main(int argc, char **argv){
 	//Compute Amplitude : use units V
 	Double_t tmpAmp = 0.0;
 	Double_t tmpMin = 0.0;
-	pulse->GetPoint(index_min, tmpMin, tmpAmp);
+	if (index_min != 0) pulse->GetPoint(index_min, tmpMin, tmpAmp);
 	amp[realGroup[group]*9 + i] = tmpAmp* (1.0 / 4096.0); 
 
 	//Get Pulse Integral
