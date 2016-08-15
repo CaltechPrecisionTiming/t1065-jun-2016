@@ -77,16 +77,22 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   float gauspeak[36];
   float linearTime45[36];
 
+  int event;
+
   tree->SetBranchStatus("*",0);
   tree->SetBranchStatus("gauspeak",1);
   tree->SetBranchStatus("linearTime45",1);
   tree->SetBranchStatus("amp",1);
   tree->SetBranchStatus("int",1);
+
+  tree->SetBranchStatus("event",1);
   
   tree->SetBranchAddress("gauspeak",gauspeak);
   tree->SetBranchAddress("linearTime45",linearTime45);
   tree->SetBranchAddress("amp",amp);
   tree->SetBranchAddress("int",integral);
+
+  tree->SetBranchAddress("event",&event);
 
   TH1F *histTotalCharge;
   TH1F *histTOFCenter;
@@ -126,7 +132,13 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   int seed = rand();
 
   // to set the smear time (this is in ns, so 0.05 means a smearing of 50 ps)
-  float smear = 0.05;
+  float smear = 0.5;
+
+  // to set the range for the histograms
+  // 50 ps smearing
+  //float width = 0.5;
+  // 500 ps smearing
+  float width = 4;
 
   // The same seed will be used in the first and second event loops to generate the same random sequence with TRandom.
   TRandom3 *r = new TRandom3(seed); 
@@ -165,12 +177,17 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     //if( !(centerAmp > 0.03 && centerCharge > 2) ) continue;
 
 
-    // 8GeV cuts
+    // 8GeV cuts, 1 mm
     //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
     //require signal in the central pixel
     //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
 
-    // 16GeV cuts
+    // 8GeV cuts, 32 mm
+    //if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 1 && centerAmp > 0.01 ) ) continue;
+
+    // 16GeV cuts, 1 mm
     //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
     //require signal in the central pixel
     //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
@@ -295,33 +312,33 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF histograms of each pixel with the smear added
   TH1F *histDeltaTshifted_smear_C[7];
-  for(int j=0; j < 7; j++) histDeltaTshifted_smear_C[j]= new TH1F(Form("histDeltaTshifted_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
+  for(int j=0; j < 7; j++) histDeltaTshifted_smear_C[j]= new TH1F(Form("histDeltaTshifted_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -1 * width, width);
   
   // TOF histogram of each pixel with the smear added, for the code that only uses the ring
   TH1F *histDeltaTshifted_smear2_C[6];
-  for(int j=0; j < 6; j ++) histDeltaTshifted_smear2_C[j]= new TH1F(Form("histDeltaTshifted_smear2_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
+  for(int j=0; j < 6; j ++) histDeltaTshifted_smear2_C[j]= new TH1F(Form("histDeltaTshifted_smear2_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -1 * width, width);
   
   histTOFCenter_C = new TH1F("histTOFCenter_C","; Time [ns];Number of Events", 200, -6,-4);
 
   // TOF of largest pixels, by charge weighting. No fit is done on this histogram.
   TH1F *histTOF_largest[7];
-  for(int j=0; j < 7; j++) histTOF_largest[j]= new TH1F(Form("histTOF_largest_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 7; j++) histTOF_largest[j]= new TH1F(Form("histTOF_largest_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.3, 0.3);
 
   // TOF of largest pixels, by charge weighting. The Gaussian fit will be done to this one.
   TH1F *histTOF_largest_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_C[j]= new TH1F(Form("histTOF_largest_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 7; j++) histTOF_largest_C[j]= new TH1F(Form("histTOF_largest_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.3, 0.3);
 
   // TOF of largest pixels, by equal weighting. The Gaussian fit will be done to this one.
   TH1F *histTOF_largest_equal_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_equal_C[j]= new TH1F(Form("histTOF_largest_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 7; j++) histTOF_largest_equal_C[j]= new TH1F(Form("histTOF_largest_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.3, 0.3);
 
   // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
   TH1F *histTOF_largest_smear_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_smear_C[j]= new TH1F(Form("histTOF_largest_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
+  for(int j=0; j < 7; j++) histTOF_largest_smear_C[j]= new TH1F(Form("histTOF_largest_smear_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -1 * width, width);
 
   // TOF of largest pixels, with the smear added. For these, the times of each pixel will be added with equal weighting
   TH1F *histTOF_largest_smear_equal_C[7];
-  for(int j=0; j < 7; j++) histTOF_largest_smear_equal_C[j]= new TH1F(Form("histTOF_largest_smear_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -2, 2);
+  for(int j=0; j < 7; j++) histTOF_largest_smear_equal_C[j]= new TH1F(Form("histTOF_largest_smear_equal_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -1 * width, width);
 
   TH1F* histMaxIndex_C = new TH1F("histMaxIndex","; Index;Number of Events", 7, 0.5,7.5);
   TH1F* histPixelsCombined_C = new TH1F("histPixelsCombined","; Number of Pixels;Number of Events", 7, 0.5,7.5);
@@ -342,8 +359,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F *histChargeContained[7];
   for(int j=0; j < 7; j++) histChargeContained[j]= new TH1F(Form("histChargeContained_%d",j),"; Charge (pC);Number of Events", 100, -10, 150);
 
-  TH1F* histTOFEnergyCut_C = new TH1F("histTOFEnergyCut","; Time (ns);Number of Events", 300, -0.5 , 0.5);
-  TH1F* histTOFEnergyCutCenter_C = new TH1F("histTOFEnergyCutCenter","; Time (ns);Number of Events", 300, -0.5 , 0.5);
+  TH2F* histEnergyDeltaT2D_C = new TH2F("histEnergyDeltaT2D","; Energy (pC); #Deltat (ns); Number of Events", 1000, 0, 100, 1000, -25, 25);
+
+  TH1F* histTOFEnergyCut_C = new TH1F("histTOFEnergyCut","; Time (ns);Number of Events", 80, -0.3, 0.3);
+  TH1F* histTOFEnergyCutCenter_C = new TH1F("histTOFEnergyCutCenter","; Time (ns);Number of Events", 80, -0.3, 0.3);
   
   TH2F* histDeltaTCharge_C = new TH2F("histDeltaTCharge","; Charge (pC);Time (ns);Number of Events", 300, -5, 100, 300, -0.3 , 0.3 );
   TH2F* histDeltaTChargeCorr_C = new TH2F("histDeltaTChargeCorr","; Charge (pC);Time (ns);Number of Events", 300, -5, 100, 300, -0.3 , 0.3 );
@@ -438,12 +457,17 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
     // require photek amp and charge to be above cuts (to select electron events and not background), and require central pixel to be above amp and charge cuts
 
-    // 8GeV cuts
+    // 8GeV cuts, 1 mm 
     //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
     //require signal in the central pixel
     //if( !(centerCharge > 2.5 && centerAmp > 0.02 ) ) continue;
 
-    // 16GeV cuts
+    // 8GeV cuts, 32 mm
+    //if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
+    //require signal in the central pixel
+    //if( !(centerCharge > 1 && centerAmp > 0.01 ) ) continue;
+
+    // 16GeV cuts, 1 mm
     //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
     //require signal in the central pixel
     //if( !(centerCharge > 6 && centerAmp > 0.07 ) ) continue;
@@ -752,10 +776,17 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     // Makes histogram of time vs number of events (to determine time resolution) using events based on center pixel and photek passing charge and amplitude cuts
     // Apply cuts such that only a specific energy (or charge) range is used for the events plotted
     // Time is weighted by charge in the pixel, same as the histTOF_largest above
-    if ( Energy >= 40 && Energy <= 50 )
+    if ( Energy >= 0 && Energy <= 20 )
     {
       histTOFEnergyCut_C->Fill( average );
     }
+    if ( average <= -0.1 )
+    {
+      histEnergyDeltaT2D_C->Fill( Energy, average );
+      cout << "delta T " << average << ":\n" << endl;
+      cout << "Event " << event << ":\n" << endl; 
+    }
+
     // same but only use center pixel
     if ( energy_center >= 30 && energy_center <= 40 )
     {
@@ -859,11 +890,13 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   // TOF of largest pixels, with the smear added. For this, the times will be added with charge weighting.
   TH1F *histTOF_largest_smear_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_smear_ring_C[j]= new TH1F(Form("histTOF_largest_smear_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 6; j++) histTOF_largest_smear_ring_C[j]= new TH1F(Form("histTOF_largest_smear_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -1 * width, width);
 
   // TOF of largest pixels, with the smear added. For these, the times of each pixel will be added with equal weighting
   TH1F *histTOF_largest_smear_equal_ring_C[6];
-  for(int j=0; j < 6; j++) histTOF_largest_smear_equal_ring_C[j]= new TH1F(Form("histTOF_largest_smear_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -0.4, 0.4);
+  for(int j=0; j < 6; j++) histTOF_largest_smear_equal_ring_C[j]= new TH1F(Form("histTOF_largest_smear_equal_ring_C_%d",j),"; #Deltat (ns) ; Entries / (0.01 ns)", 80, -1 * width, width);
+
+  TH1F* histPixelsCombinedRing_C = new TH1F("histPixelsCombinedRing","; Number of Pixels;Number of Events", 6, 0.5,6.5);
 
 
   // Delete memory allocated to r from first for loop. Then use same seed for the TRandom so the same random sequence is used in both event loops.
@@ -910,7 +943,31 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
 
     // require photek amp and charge to be above cuts (to select electron events and not background), and require one of the first ring pixels to be above amp and charge cuts
+    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+
+
+
+    // 8GeV cuts, 1 mm 
+    //if( !(photekAmp > 0.015 && photekCharge > 0.4 ) ) continue;
+
+    // 8GeV cuts, 32 mm
+    //if( !(photekAmp > 0.04 && photekCharge > 1 ) ) continue;
+
+    // 16GeV cuts, 1 mm
+    //if( !(photekAmp > 0.03 && photekCharge > 0.8 ) ) continue;
+
+    // 32GeV cuts, 1 mm
     if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+
+    // 32GeV cuts, 10 mm
+    //if( !(photekAmp > 0.1 && photekCharge > 2 ) ) continue;
+
+    // 32GeV cuts, 32 mm
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+
+    // 32GeV cuts, 75 mm
+    //if( !(photekAmp > 0.09 && photekCharge > 2 ) ) continue;
+
     //require signal in largest of the ring pixels
     if( !(PixelCharge > 1 && PixelAmp > 0.01 ) ) continue;
 
@@ -1074,6 +1131,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     histTOF_largest_smear_ring_C[5]->Fill( average_smear );
     histTOF_largest_smear_equal_ring_C[5]->Fill( average_smear_equal ); 
 
+    // Makes histogram of number of pixels combined (number of pixels above noise)
+    Pixels = count2 + count3 + count4 + count5 + count6 + count7;
+    histPixelsCombinedRing_C->Fill( Pixels );
+
     //std::cout << "event: " << iEntry << "-->" << vect[0].charge << " " << vect[1].charge << " " << vect[2].charge << std::endl;
   }
 
@@ -1095,7 +1156,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g1[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax);
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histDeltaT_C[j]->Fit(Form("g_fit_%d",j),"QMLES","",xmin,xmax);
   }
 
@@ -1108,7 +1169,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g2[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax);
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histDeltaTshifted_smear_C[j]->Fit(Form("g_fit_%d",j),"QMLES","",xmin,xmax);
   }
 
@@ -1121,7 +1182,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g3[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1134,7 +1195,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g4[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_equal_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1147,7 +1208,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g5[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_smear_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1160,7 +1221,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g6[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_smear_equal_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1171,7 +1232,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   double xmin = mean - 2.0 * rms;
   double xmax = mean + 2.0 * rms;
   f1_g7 = new TF1(Form("g_fit"), "gaus(0)", xmin, xmax);
-  cout << "\nFitting Corrected Time Resolution" << endl;
+  //cout << "\nFitting Corrected Time Resolution" << endl;
   histTOF_corr_fit_C->Fit(Form("g_fit"),"QMLES","", xmin, xmax);
 
   // Do Gaussian fit of time resolution for 7 pixels combined time resolution, with charge cuts performed.
@@ -1181,7 +1242,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   double xmin_2 = mean_2 - 2.0 * rms_2;
   double xmax_2 = mean_2 + 2.0 * rms_2;
   f1_g8 = new TF1(Form("g_fit"), "gaus(0)", xmin_2, xmax_2);
-  cout << "\nFitting Corrected Time Resolution" << endl;
+  //cout << "\nFitting Corrected Time Resolution" << endl;
   histTOFEnergyCut_C->Fit(Form("g_fit"),"QMLES","", xmin_2, xmax_2);
 
   // Do Gaussian fit of time resolution for ring largest pixels with charge weighing
@@ -1193,7 +1254,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g9[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1206,7 +1267,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g10[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_equal_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1219,7 +1280,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g11[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_smear_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1232,7 +1293,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     double xmin = mean-2.0*rms;
     double xmax = mean+2.0*rms;
     f1_g12[j] = new TF1( Form("g_fit_%d",j), "gaus(0)", xmin, xmax); 
-    cout << "\nFitting Channel #" << j << ":\n" << endl;
+    //cout << "\nFitting Channel #" << j << ":\n" << endl;
     histTOF_largest_smear_equal_ring_C[j]->Fit(Form("g_fit_%d",j),"QMLES","", xmin,xmax);
   }
 
@@ -1268,6 +1329,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   file->WriteTObject(histMaxIndex_C,"Max Index", "WriteDelete");
   file->WriteTObject(histPixelsCombined_C,"Pixels Combined", "WriteDelete");
+  file->WriteTObject(histPixelsCombinedRing_C,"Pixels Combined Ring", "WriteDelete");
 
   file->WriteTObject(histEnergyPhotekAmp_C,"Energy Ratio vs Photek Amp");
   file->WriteTObject(histEnergyPhotekAmpPhotekCut_C,"Energy Ratio vs Photek Amp, Photek cut");
@@ -1282,6 +1344,7 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   file->WriteTObject(histTotalChargeContained_C,"Total Charge Contained", "WriteDelete");
 
   file->WriteTObject(histChargeCenterContained_C,"ChargeCenterContained", "WriteDelete");
+  file->WriteTObject(histEnergyDeltaT2D_C,"EnergyDeltaT","WriteDelete");
   file->WriteTObject(histTOFEnergyCut_C,"TOF with energy cut", "WriteDelete");
   file->WriteTObject(histTOFEnergyCutCenter_C,"TOF with energy cut for center pixel", "WriteDelete");
 
@@ -1315,24 +1378,130 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     histTOF_largest_smear_equal_ring_C[i]->Write( Form("TOF_largest_smear_equal_ring_%d", i+1) );
   }
 
+
+
+
+  // plot fits and sigmas on pdf files
+  TCanvas *c = new TCanvas ("c","c",800, 600); 
+  TLatex *tex = new TLatex();
+  tex->SetNDC(); // Sets coords such that (0,0) is bottom left & (1,1) is top right.
+  tex->SetTextSize(0.060);
+  tex->SetTextFont(42);
+  tex->SetTextColor(kBlack);
+
+  c->cd();
+
+  histMaxIndex_C->Draw();
+  c->SaveAs( Form("MaxIndex.pdf"));
+
+  histPixelsCombined_C->Draw();
+  c->SaveAs( Form("PixelsCombined.pdf"));
+
+  histPixelsCombinedRing_C->Draw();
+  c->SaveAs( Form("PixelsCombinedRing.pdf"));
+
+
+
+  // plots of energy contained and time resolution with energy cuts on event selection
+  histTOFEnergyCut_C->Draw();
+  gStyle->SetOptFit(1);
+  gStyle->SetOptStat(1);
+  c->SaveAs( Form("time_res_energy.pdf"));
+
+  // plot of total energy contained
+  histTotalChargeContained_C->Draw();
+  gStyle->SetOptFit(1);
+  gStyle->SetOptStat(1);
+  c->SaveAs( Form("total_charge_contained.pdf"));
+
+/*
+  // all pixel plots
+  for (int i = 0; i < 7; i++ )
+  {
+    histTOF_largest_C[i]->Draw();
+    gStyle->SetOptFit(1);
+    gStyle->SetOptStat(1);
+    c->SaveAs( Form("all_charge_%d.pdf", i+1) );
+  }
+
+  for (int i = 0; i < 7; i++ )
+  {
+    histTOF_largest_equal_C[i]->Draw();
+    gStyle->SetOptFit(1);
+    gStyle->SetOptStat(1);
+    c->SaveAs( Form("all_equal_%d.pdf", i+1) );
+  }
+
+  for (int i = 0; i < 7; i++ )
+  {
+    histTOF_largest_smear_C[i]->Draw();
+    gStyle->SetOptFit(1);
+    gStyle->SetOptStat(1);
+    c->SaveAs( Form("all_smear_charge_%d.pdf", i+1) );
+  }
+
+  for (int i = 0; i < 7; i++ )
+  {
+    histTOF_largest_smear_equal_C[i]->Draw();
+    gStyle->SetOptFit(1);
+    gStyle->SetOptStat(1);
+    c->SaveAs( Form("all_smear_equal_%d.pdf", i+1) );
+  }
+
+  // ring pixels plots
+  for (int i = 0; i < 6; i++ )
+  {
+    histTOF_largest_ring_C[i]->Draw();
+    gStyle->SetOptFit(1);
+    gStyle->SetOptStat(1);
+    c->SaveAs( Form("ring_charge_%d.pdf", i+1) );
+  }
+
+  for (int i = 0; i < 6; i++ )
+  {
+    histTOF_largest_equal_ring_C[i]->Draw();
+    gStyle->SetOptFit(1);
+    gStyle->SetOptStat(1);
+    c->SaveAs( Form("ring_equal_%d.pdf", i+1) );
+  }
+
+  for (int i = 0; i < 6; i++ )
+  {
+    histTOF_largest_smear_ring_C[i]->Draw();
+    gStyle->SetOptFit(1);
+    gStyle->SetOptStat(1);
+    c->SaveAs( Form("ring_smear_charge_%d.pdf", i+1) );
+  }
+
+  for (int i = 0; i < 6; i++ )
+  {
+    histTOF_largest_smear_equal_ring_C[i]->Draw();
+    gStyle->SetOptFit(1);
+    gStyle->SetOptStat(1);
+    c->SaveAs( Form("ring_smear_equal_%d.pdf", i+1) );
+  }
+*/
+
   file->Close();
   delete file;
-  
 }
 
 
-void MultiChannelStudy_TimingMethod1() {
-
+void MultiChannelStudy_TimingMethod1()
+{
   // DoMultiChannelStudy("t1065-jun-2016-90.dat-full.root","output.90.root");
   // DoMultiChannelStudy("t1065-jun-2016-94.dat-full.root","output.94.root");
   // DoMultiChannelStudy("t1065-jun-2016-81.dat-full.root","output.81.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_1cm.root","output_32gev_1cm.root");
   //DoMultiChannelStudy("../../raw/combine_16gev_1mm.root","output_16gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_8gev_1mm.root","output_8gev_1mm.root");
-  DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
+  //DoMultiChannelStudy("../../raw/combine_8gev_32mm.root","output_8gev_32mm.root");
+  //DoMultiChannelStudy("../../raw/combine_32gev_1mm.root","output_32gev_1mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_10mm.root","output_32gev_10mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_32mm.root","output_32gev_32mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_75mm.root","output_32gev_75mm.root");
 
+  DoMultiChannelStudy("../../raw/t1065-jun-2016-116.root","output_116.root");
 
+  //DoMultiChannelStudy("../../raw/combine_120GeV_1mm.root","output_120gev_1mm.root");
 }
