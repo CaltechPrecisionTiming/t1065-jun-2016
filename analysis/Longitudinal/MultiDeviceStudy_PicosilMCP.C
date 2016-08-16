@@ -97,7 +97,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   tree->SetBranchAddress("int",integral);
 
   //Create histograms
-  float width = 0.3;
+  float width = 0.15;
   float smearWidth = 0.75;
   int bins = 100;
   int smearBins = 75;
@@ -699,6 +699,7 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   TH1F *histDeltaT_PicoSil_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_EventCharge"); //Combination of device Delta T's after shifting distributions around 0 and then weighting event by event.
   TH1F *histDeltaT_PicoSil_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_TotalCharge"); //Combination after shifting around 0 and weighting with total charge.
   TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_vs_MCP_TotalCharge");
+  TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_vs_MCP_EventCharge");
   TH1F *histDeltaTPicoSil[6];
   for(int i=1; i<=6; i++) histDeltaTPicoSil[i-1] = (TH1F*)_file->Get( Form("histDeltaTPicoSil[%d]",i) ); //Already wrote center pixel
 
@@ -732,6 +733,7 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 MCP: TOF}");
   histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 Smeared MCP: TOF}");
   histDeltaT_PicoSil_vs_MCP_TotalCharge->SetTitle("#Deltat b/t HGC and Photonis -- Total Charge Weighted");
+  histDeltaT_PicoSil_vs_MCP_EventCharge->SetTitle("#Deltat b/t HGC and Photonis -- Event Charge Weighted");
   for(int i=0; i<6; i++) histDeltaTPicoSil[i]->SetTitle( Form("HGC Pixel %d: TOF",i+1) ); //pixel 0 is center pixel
 
 
@@ -755,6 +757,7 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear, "deltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear, "deltaT_PicoSilLandauCharge_MCP_Equal_BothSmear.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_vs_MCP_TotalCharge, "deltaT_PicoSil_vs_MCP_TotalCharge.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_vs_MCP_EventCharge, "deltaT_PicoSil_vs_MCP_EventCharge.pdf");
   for(int i=0; i<6; i++) PlotDeltaTPDF(c, tex, histDeltaTPicoSil[i], Form("deltaTPicoSilPixel%d.pdf",i+1) );
 
   c->Close();
