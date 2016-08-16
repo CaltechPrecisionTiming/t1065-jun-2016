@@ -609,6 +609,8 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   // Above are in separate loops to be organized in the TBrowser
 
 
+  gStyle->SetOptFit(1);
+  gStyle->SetOptStat(1);
   TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 400, 0, 2.5);
   TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge;Number of Events", 400, 0, 30);
   TH1F *histCenterAmpCut = new TH1F("histCenterAmpCut","; Amp;Number of Events", 200, 0, 1.5);
@@ -769,7 +771,7 @@ void MultiDeviceStudy_PicosilMCP() {
   float MCPAmpCut = 0.08;
   makeTimeResolution(infile.c_str(), photekAmpCut, photekChargeCut, centerAmpCut, centerChargeCut, MCPAmpCut); // Outputs PDFs with histograms
   //Un-comment following lines to make all output files at once:
-  cout<<"\n\n 65-83:"<<endl;
+  /*cout<<"\n\n 65-83:"<<endl;
   makeTimeResolution("65-83.root",                sqrt(10)*0.1,   sqrt(10)*2,    2*0.15, 2*10,  0.05);
 
   cout<<"\n\n 84-93:"<<endl;
@@ -797,6 +799,6 @@ void MultiDeviceStudy_PicosilMCP() {
   makeTimeResolution("178-185.root",              sqrt(10)*0.015, sqrt(10)*0.3,  2*0.01, 2*1,   0.03);
 
   cout<<"\n\n 186-200:"<<endl;
-  makeTimeResolution("186-200.root",              sqrt(10)*0.03,  sqrt(10)*0.75, 2*0.02, 2*1,   0.05);
+  makeTimeResolution("186-200.root",              sqrt(10)*0.03,  sqrt(10)*0.75, 2*0.02, 2*1,   0.05);*/
 
 }
