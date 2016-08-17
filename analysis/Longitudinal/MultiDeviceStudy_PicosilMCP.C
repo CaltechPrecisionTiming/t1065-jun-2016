@@ -98,7 +98,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
 
   //Create histograms
   float width = 0.15;
-  float smearWidth = 0.75;
+  float smearWidth = 0.3;
   int bins = 100;
   int smearBins = 75;
   float pixelSmear = 0.050; // in ns
@@ -147,7 +147,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   for(int i=0; i<7; i++) histDeltaT_PicoSil_vs_MCP[i] = new TH1F(Form("histDeltaT_PicoSil_vs_MCP_%d",i),"; Time [ns];Number of Events", 100, -3, -1); // DeltaT between PicoSil and MCP instead of Photek.
 
   TH1F *histCharges[7]; // collects charge values for picosil pixels in every event in which they pass the cuts.
-  for(int i=0; i<7; i++) histCharges[i] = new TH1F( Form("histCharges_%d",i),"; Charge [pC];Number of Events", 120, 0, 80);
+  for(int i=0; i<7; i++) histCharges[i] = new TH1F( Form("histCharges_%d",i),"; Charge [pC];Number of Events", 50, 0, 80);
  
 
 
@@ -611,11 +611,11 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
 
   gStyle->SetOptFit(1);
   gStyle->SetOptStat(1);
-  TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 400, 0, 2.5);
-  TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge;Number of Events", 400, 0, 30);
-  TH1F *histCenterAmpCut = new TH1F("histCenterAmpCut","; Amp;Number of Events", 200, 0, 1.5);
-  TH1F *histCenterChargeCut = new TH1F("histCenterChargeCut","; Charge;Number of Events", 400, 0, 60);
-  TH1F *histMCPAmpCut = new TH1F("histMCPAmpCut","; Amp;Number of Events", 100, 0, 0.75);
+  TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp [mA];Number of Events", 75, 0, 2.5);
+  TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge [pC];Number of Events", 75, 0, 30);
+  TH1F *histCenterAmpCut = new TH1F("histCenterAmpCut","; Amp [mA];Number of Events", 100, 0, 1.5);
+  TH1F *histCenterChargeCut = new TH1F("histCenterChargeCut","; Charge [pC];Number of Events", 75, 0, 60);
+  TH1F *histMCPAmpCut = new TH1F("histMCPAmpCut","; Amp [mA];Number of Events", 100, 0, 0.75);
 
   tree->Draw("sqrt(10)*amp[0]>>histPhotekAmpCut", Form("sqrt(10)*amp[0]>%f",photekAmpCut) );
   tree->Draw("sqrt(10)*int[0]>>histPhotekChargeCut", Form("sqrt(10)*int[0]>%f",photekChargeCut));
@@ -623,11 +623,11 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   tree->Draw("2*int[1]>>histCenterChargeCut", Form("2*int[1]>%f",centerChargeCut));
   tree->Draw("amp[11]>>histMCPAmpCut", Form("amp[11]>%f",MCPAmpCut));
 
-  TH1F *histPhotekAmp = new TH1F("histPhotekAmp","; Amp;Number of Events", 400, 0, 2.5);
-  TH1F *histPhotekCharge = new TH1F("histPhotekCharge","; Charge;Number of Events", 400, 0, 30);
-  TH1F *histCenterAmp = new TH1F("histCenterAmp","; Amp;Number of Events", 200, 0, 1.5);
-  TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge;Number of Events", 400, 0, 60);
-  TH1F *histMCPAmp = new TH1F("histMCPAmp","; Amp;Number of Events", 100, 0, 0.75);
+  TH1F *histPhotekAmp = new TH1F("histPhotekAmp","; Amp [mA];Number of Events", 75, 0, 2.5);
+  TH1F *histPhotekCharge = new TH1F("histPhotekCharge","; Charge [pC];Number of Events", 75, 0, 30);
+  TH1F *histCenterAmp = new TH1F("histCenterAmp","; Amp [mA];Number of Events", 100, 0, 1.5);
+  TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge [pC];Number of Events", 75, 0, 60);
+  TH1F *histMCPAmp = new TH1F("histMCPAmp","; Amp [mA];Number of Events", 100, 0, 0.75);
 
   tree->Draw("sqrt(10)*amp[0]>>histPhotekAmp", "", " " );
   tree->Draw("sqrt(10)*int[0]>>histPhotekCharge");
