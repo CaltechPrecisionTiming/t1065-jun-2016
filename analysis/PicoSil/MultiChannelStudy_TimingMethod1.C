@@ -359,7 +359,8 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F *histChargeContained[7];
   for(int j=0; j < 7; j++) histChargeContained[j]= new TH1F(Form("histChargeContained_%d",j),"; Charge (pC);Number of Events", 100, -10, 150);
 
-  TH2F* histEnergyDeltaT2D_C = new TH2F("histEnergyDeltaT2D","; Energy (pC); #Deltat (ns); Number of Events", 1000, 0, 100, 1000, -25, 25);
+  TH2F* histEnergyDeltaT2D_C = new TH2F("histEnergyDeltaT2D","; Energy (pC); #Deltat (ns); Number of Events", 100, 0, 100, 100, -0.15, 0.15);
+  TH2F* histEnergyDeltaT2D_adj_C = new TH2F("histEnergyDeltaT2D_adj","; Energy (pC); #Deltat (ns); Number of Events", 100, 0, 100, 100, -0.15, 0.15);
 
   TH1F* histTOFEnergyCut_C = new TH1F("histTOFEnergyCut","; Time (ns);Number of Events", 80, -0.3, 0.3);
   TH1F* histTOFEnergyCutCenter_C = new TH1F("histTOFEnergyCutCenter","; Time (ns);Number of Events", 80, -0.3, 0.3);
@@ -370,10 +371,10 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
   TH1F* histTOF_corr_fit_C = new TH1F("histTOF_corr_fit","; Time (ns); Number of Events", 300, -0.3, 0.3);
 
   // histograms to plot the distibution of the variable being cut on. Cuts change based on the beam energy.
-  TH1F* histPhotekAmpCut_C = new TH1F("histPhotekAmpCut","; Photek Amplitude;Number of Events", 300, -0.5 , 0.5);
+  TH1F* histPhotekAmpCut_C = new TH1F("histPhotekAmpCut","; Photek Amplitude (V);Number of Events", 300, -0.5 , 0.5);
   TH1F* histPhotekChargeCut_C = new TH1F("histPhotekChargeCut","; Photek Charge (pC);Number of Events", 300, -0.5 , 20);
   TH1F* histCenterChargeCut_C = new TH1F("histCenterChargeCut","; Center Charge (pC);Number of Events", 300, -0.5 , 100);
-  TH1F* histCenterAmpCut_C = new TH1F("histCenterAmplitudeCut","; Center Amplitude;Number of Events", 300, -0.5 , 1);
+  TH1F* histCenterAmpCut_C = new TH1F("histCenterAmplitudeCut","; Center Amplitude (V);Number of Events", 300, -0.5 , 1);
 
   histTOFFlatAvg_C = new TH1F("histTOFFlatAvg_C","; Time [ns];Number of Events", 200, -6,-4);
   histTOFChargeWeightedAvg_C = new TH1F("histTOFChargeWeightedAvg_C","; Time [ns];Number of Events", 200, -1,-1);
@@ -724,11 +725,11 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
       count7 = 1;
     }
       
-    // values of offset are from the cubic fit of the 
-    offset_correction = 0.02167;
-    offset_slope = 0.0006389;
-    offset_quadratic = -0.00004141;
-    offset_cubic = 0.0000003572;
+    // values of offset are from the cubic fit of the TProfile, pol3 
+    offset_correction = 0.06116;
+    offset_slope = -0.003860;
+    offset_quadratic = 0.00004994;
+    offset_cubic = -0.0000000007116;
 
     Energy = weight1 + weight2 + weight3 + weight4 + weight5 + weight6 + weight7;
     average = ( weight1*vect[0].time + weight2*vect[1].time + weight3*vect[2].time + weight4*vect[3].time + weight5*vect[4].time + weight6*vect[5].time + weight7*vect[6].time )/( Energy );
@@ -776,13 +777,16 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
     // Makes histogram of time vs number of events (to determine time resolution) using events based on center pixel and photek passing charge and amplitude cuts
     // Apply cuts such that only a specific energy (or charge) range is used for the events plotted
     // Time is weighted by charge in the pixel, same as the histTOF_largest above
-    if ( Energy >= 0 && Energy <= 20 )
+    if ( Energy >= 20 && Energy <= 40 )
     {
-      histTOFEnergyCut_C->Fill( average );
+      histTOFEnergyCut_C->Fill( average_corrected );
     }
-    if ( average <= -0.1 )
+
+    histEnergyDeltaT2D_C->Fill( Energy, average );
+    histEnergyDeltaT2D_adj_C->Fill( Energy, average_corrected );
+
+    if ( average >= 0.1 )
     {
-      histEnergyDeltaT2D_C->Fill( Energy, average );
       cout << "delta T " << average << ":\n" << endl;
       cout << "Event " << event << ":\n" << endl; 
     }
@@ -1345,6 +1349,8 @@ void DoMultiChannelStudy( string filename , string outputFilename) {
 
   file->WriteTObject(histChargeCenterContained_C,"ChargeCenterContained", "WriteDelete");
   file->WriteTObject(histEnergyDeltaT2D_C,"EnergyDeltaT","WriteDelete");
+  file->WriteTObject(histEnergyDeltaT2D_adj_C,"EnergyDeltaT_adj","WriteDelete");
+
   file->WriteTObject(histTOFEnergyCut_C,"TOF with energy cut", "WriteDelete");
   file->WriteTObject(histTOFEnergyCutCenter_C,"TOF with energy cut for center pixel", "WriteDelete");
 
@@ -1500,8 +1506,11 @@ void MultiChannelStudy_TimingMethod1()
   //DoMultiChannelStudy("../../raw/combine_32gev_10mm.root","output_32gev_10mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_32mm.root","output_32gev_32mm.root");
   //DoMultiChannelStudy("../../raw/combine_32gev_75mm.root","output_32gev_75mm.root");
+  DoMultiChannelStudy("../../raw/combine_32gev_1mm_fixed.root","output_32gev_1mm_fix.root");
+  //DoMultiChannelStudy("../../raw/combine_32gev_32mm_fixed.root","output_32gev_32mm_fix.root");
+  //DoMultiChannelStudy("../../raw/combine_16gev_1mm_fixed.root","output_16gev_1mm_fix.root");
+  //DoMultiChannelStudy("../../raw/combine_8gev_1mm_fixed.root","output_8gev_1mm_fix.root");
 
-  DoMultiChannelStudy("../../raw/t1065-jun-2016-116.root","output_116.root");
-
+  //DoMultiChannelStudy("../../raw/144-155/t1065-jun-2016-148.dat-full.root","output_148.root");
   //DoMultiChannelStudy("../../raw/combine_120GeV_1mm.root","output_120gev_1mm.root");
 }
