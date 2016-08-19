@@ -19,7 +19,6 @@
 #include <TPaveStats.h>
 
 
-
 #include <fstream>
 #include <iomanip>
 #include <string>
@@ -41,17 +40,20 @@
 
 using namespace std;
 
+
+std::map<int, bool> badEvents;
+
 std::string ParseCommandLine( int argc, char* argv[], std::string opt )
 {
   for (int i = 1; i < argc; i++ )
+  {
+    std::string tmp( argv[i] );
+    if ( tmp.find( opt ) != std::string::npos )
     {
-      std::string tmp( argv[i] );
-      if ( tmp.find( opt ) != std::string::npos )
-        {
-          if ( tmp.find( "=" )  != std::string::npos ) return tmp.substr( tmp.find_last_of("=") + 1 );
-	  if ( tmp.find( "--" ) != std::string::npos ) return "yes";
-	}
+      if ( tmp.find( "=" )  != std::string::npos ) return tmp.substr( tmp.find_last_of("=") + 1 );
+      if ( tmp.find( "--" ) != std::string::npos ) return "yes";
     }
+  }
   
   return "";
 };
@@ -62,7 +64,35 @@ int graphic_init();
 TStyle* style;
 
 
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
+
+  //list the events with a large delta T here, and they will be removed during the analysis
+  //if there are multiple events, the later ones need to be decreased by the number of bad events prior to them
+  badEvents[83] = false;
+  badEvents[413] = false;
+  badEvents[446] = false;
+  badEvents[831] = false;
+  badEvents[844] = false;
+  badEvents[949] = false;
+  badEvents[1938] = false;
+  //badEvents[1202] = false;
+  //badEvents[1546] = false;
+  //badEvents[1708] = false;
+
+  // run 105
+  //if ( eventn == 500 || eventn == 1098 )
+  // run 108
+  //if ( eventn == 1868 )
+  // run 109
+  //if (eventn == 746 )
+  // run 115
+  //if ( eventn == 531 )
+  // run 116
+  //if ( eventn == 15 || eventn == 340 )
+  //{
+    //continue;
+  //}
 
   FILE* fp1;
   char stitle[200];
@@ -80,18 +110,18 @@ int main(int argc, char **argv){
   std::string boardNumber = "1";
   std::string bNumber = ParseCommandLine( argc, argv, "--boardNumber" );
   if ( bNumber == ""  )
-    {
-      std::cerr << "[ERROR]: WRONG BOARD NUMBER--> " << bNumber << std::endl;
-      boardNumber = "1";
-    }
+  {
+    std::cerr << "[ERROR]: WRONG BOARD NUMBER--> " << bNumber << std::endl;
+    boardNumber = "1";
+  }
   else if ( bNumber == "1" || bNumber == "2" )
-    {
-       boardNumber = bNumber;
-    }
+  {
+    boardNumber = bNumber;
+  }
   else
-    {
-      std::cerr << "[ERROR]: WRONG BOARD NUMBER--> " << bNumber << std::endl;
-    }
+  {
+    std::cerr << "[ERROR]: WRONG BOARD NUMBER--> " << bNumber << std::endl;
+  }
   
  
   std::cout << "Using Calibration files for board number " << boardNumber << "\n";
@@ -103,7 +133,8 @@ int main(int argc, char **argv){
 
   std::string _drawDebugPulses = ParseCommandLine( argc, argv, "--debug" );
   bool drawDebugPulses = false;
-  if ( _drawDebugPulses == "yes" ) {
+  if ( _drawDebugPulses == "yes" ) 
+  {
     drawDebugPulses = true;
     std::cout << "draw: " << drawDebugPulses << std::endl;
   }
@@ -124,18 +155,20 @@ int main(int argc, char **argv){
   //**************************************
   std::cout << "===Loading Voltage Calibration===" << std::endl;
   double off_mean[4][9][1024];
-  for( int i = 0; i < 4; i++){
+  for( int i = 0; i < 4; i++)
+  {
     sprintf( stitle, "v1740_bd%s_group_%d_offset.txt", boardNumber.c_str(), i);
 
     fp1 = fopen( stitle, "r");
     printf("offset data : %s\n", stitle);
 
     for( int k = 0; k < 1024; k++)      
-      for( int j = 0; j < 9; j++){      
-	dummy = fscanf( fp1, "%lf ", &off_mean[i][j][k]);       
-	if( k < 2 && 0)
-	  printf("%5d  %8.4f\n", j, off_mean[i][j][k]);
-      }
+    for( int j = 0; j < 9; j++)
+    {      
+      dummy = fscanf( fp1, "%lf ", &off_mean[i][j][k]);       
+      if( k < 2 && 0)
+      printf("%5d  %8.4f\n", j, off_mean[i][j][k]);
+    }
   
     fclose(fp1);
   }
@@ -146,29 +179,30 @@ int main(int argc, char **argv){
   //**************************************
   double fdummy;
   double tcal_dV[4][1024];
-  for( int i = 0; i < 4; i++){
+  for( int i = 0; i < 4; i++)
+  {
     sprintf( stitle, "v1740_bd%s_group_%d_dV.txt", boardNumber.c_str(), i);
 
     fp1 = fopen( stitle, "r");
     printf("dV data : %s\n", stitle);
 
     for( int k = 0; k < 1024; k++)      
-	dummy = fscanf( fp1, "%lf %lf %lf %lf %lf ", 
-		        &fdummy, &fdummy, &fdummy, &fdummy, &tcal_dV[i][k]);       
+    dummy = fscanf( fp1, "%lf %lf %lf %lf %lf ", 
+            &fdummy, &fdummy, &fdummy, &fdummy, &tcal_dV[i][k]);       
     fclose(fp1);
   }
   double dV_sum[4] = {0, 0, 0, 0};
   for( int i = 0; i < 4; i++)
-    for( int j = 0; j < 1024; j++)
-    dV_sum[i] += tcal_dV[i][j];
+  for( int j = 0; j < 1024; j++)
+  dV_sum[i] += tcal_dV[i][j];
 
 
   double tcal[4][1024];
   for( int i = 0; i < 4; i++)
-    for( int j = 0; j < 1024; j++)
-      {
-	tcal[i][j] = tcal_dV[i][j]/dV_sum[i]*200.0;
-      }
+  for( int j = 0; j < 1024; j++)
+  {
+    tcal[i][j] = tcal_dV[i][j]/dV_sum[i]*200.0;
+  }
 
   
   //**************************************
@@ -199,11 +233,13 @@ int main(int argc, char **argv){
  
   tree->Branch("event", &event, "event/I");
   tree->Branch("tc",   tc, "tc[4]/s");
-  if (saveRaw) {
+  if (saveRaw) 
+  {
     tree->Branch("b_c",  b_c, "b_c[36864]/s"); //this is for 9 channels per group
     tree->Branch("raw", raw, "raw[36][1024]/S");   
     tree->Branch("t",  t, "t[36864]/I");    
   }
+
   tree->Branch("channel", channel, "channel[36][1024]/S");
   tree->Branch("t0",  t0, "t0[1024]/I");
   tree->Branch("time", time, "time[4][1024]/F");
@@ -240,7 +276,8 @@ int main(int argc, char **argv){
   //*************************
   //Event Loop
   //*************************
-  for( int eventn = 0; eventn < nEvents; eventn++){ 
+  for( int eventn = 0; eventn < nEvents; eventn++)
+  { 
 
     //if reached end of file, then quit
     if (feof(fpin)) break;
@@ -248,7 +285,7 @@ int main(int argc, char **argv){
     if ( eventn%100 == 0 ) std::cout << "event: " << eventn << std::endl;
     // printf("---- loop  %5d\n", loop);
     event = goodEvents;
-
+    
     //Reading First Header Word
     dummy = fread( &event_header, sizeof(uint), 1, fpin);
     uint evtSize =  event_header & 0x0fffffff;
@@ -275,26 +312,27 @@ int main(int argc, char **argv){
     int ActiveGroupsN = 0;
     int realGroup[4] = {-1, -1, -1, -1};
     for ( int l = 0; l < 4; l++ )
+    {
+      if ( _isGR_On[l] ) 
       {
-	if ( _isGR_On[l] ) 
-	  {
-	    realGroup[ActiveGroupsN] = l; 
-	    ActiveGroupsN++;
-	  }
+        realGroup[ActiveGroupsN] = l; 
+        ActiveGroupsN++;
       }
+    }
     
     if ( ActiveGroupsN < 4 )
-      {
-	std::cout << "----------------WARNING--------------" << std::endl;
-	std::cout << "evtSize: " << evtSize << " grM: " << grM << " pattern: " << pattern 
-		  << " bID: " << bID  << " number of Active groups: " << ActiveGroupsN << std::endl;
-	std::cout << "------------------------------" << std::endl;
-      }
+    {
+      std::cout << "----------------WARNING--------------" << std::endl;
+      std::cout << "evtSize: " << evtSize << " grM: " << grM << " pattern: " << pattern 
+      << " bID: " << bID  << " number of Active groups: " << ActiveGroupsN << std::endl;
+      std::cout << "------------------------------" << std::endl;
+    }
 
     //************************************
     //Loop Over Channel Groups
     //************************************
-    for( int group = 0; group < ActiveGroupsN; group++){
+    for( int group = 0; group < ActiveGroupsN; group++)
+    {
       //Reading Group Header
       dummy = fread( &event_header, sizeof(uint), 1, fpin);  
       
@@ -307,190 +345,213 @@ int main(int argc, char **argv){
       
       //Define Time coordinate
       time[realGroup[group]][0] = 0.0;
-      for( int i = 1; i < 1024; i++){
-	time[realGroup[group]][i] = float(i);
-	//std::cout << "realGroup " << realGroup[group] << " " << i << " tcal --> " << tcal[0][i] << " " << time[realGroup[group]][i]  << " :::" << (i-1+tcn)%1024 << "\n";
-	time[realGroup[group]][i] = float(tcal[realGroup[group]][(i-1+tcn)%1024] + time[realGroup[group]][i-1]);
-	
+      for( int i = 1; i < 1024; i++)
+      {
+        time[realGroup[group]][i] = float(i);
+        //std::cout << "realGroup " << realGroup[group] << " " << i << " tcal --> " << tcal[0][i] << " " << time[realGroup[group]][i]  << " :::" << (i-1+tcn)%1024 << "\n";
+        time[realGroup[group]][i] = float(tcal[realGroup[group]][(i-1+tcn)%1024] + time[realGroup[group]][i-1]);
       }      
 
       //************************************
       //Read Sample Info
       //************************************      
-      for(int i = 0; i < nsample; i++){
-	dummy = fread( &temp, sizeof(uint), 3, fpin);  
-	samples[0][i] =  temp[0] & 0xfff;
-	samples[1][i] = (temp[0] >> 12) & 0xfff;
-	samples[2][i] = (temp[0] >> 24) | ((temp[1] & 0xf) << 8);
-	samples[3][i] = (temp[1] >>  4) & 0xfff;
-	samples[4][i] = (temp[1] >> 16) & 0xfff;
-	samples[5][i] = (temp[1] >> 28) | ((temp[2] & 0xff) << 4);
-	samples[6][i] = (temp[2] >>  8) & 0xfff;
-	samples[7][i] =  temp[2] >> 20;	
+      for(int i = 0; i < nsample; i++)
+      {
+        dummy = fread( &temp, sizeof(uint), 3, fpin);  
+        samples[0][i] =  temp[0] & 0xfff; 
+        samples[1][i] = (temp[0] >> 12) & 0xfff;
+        samples[2][i] = (temp[0] >> 24) | ((temp[1] & 0xf) << 8);
+        samples[3][i] = (temp[1] >>  4) & 0xfff;
+        samples[4][i] = (temp[1] >> 16) & 0xfff;
+        samples[5][i] = (temp[1] >> 28) | ((temp[2] & 0xff) << 4);
+        samples[6][i] = (temp[2] >>  8) & 0xfff;
+        samples[7][i] =  temp[2] >> 20; 
       }
 
-      for(int j = 0; j < nsample/8; j++){
-	fread( &temp, sizeof(uint), 3, fpin);  
-	samples[8][j*8+0] =  temp[0] & 0xfff;
-	samples[8][j*8+1] = (temp[0] >> 12) & 0xfff;
-	samples[8][j*8+2] = (temp[0] >> 24) | ((temp[1] & 0xf) << 8);
-	samples[8][j*8+3] = (temp[1] >>  4) & 0xfff;
-	samples[8][j*8+4] = (temp[1] >> 16) & 0xfff;
-	samples[8][j*8+5] = (temp[1] >> 28) | ((temp[2] & 0xff) << 4);
-	samples[8][j*8+6] = (temp[2] >>  8) & 0xfff;
-	samples[8][j*8+7] =  temp[2] >> 20;
+      for(int j = 0; j < nsample/8; j++)
+      {
+        fread( &temp, sizeof(uint), 3, fpin);  
+        samples[8][j*8+0] =  temp[0] & 0xfff;
+        samples[8][j*8+1] = (temp[0] >> 12) & 0xfff;
+        samples[8][j*8+2] = (temp[0] >> 24) | ((temp[1] & 0xf) << 8);
+        samples[8][j*8+3] = (temp[1] >>  4) & 0xfff;
+        samples[8][j*8+4] = (temp[1] >> 16) & 0xfff;
+        samples[8][j*8+5] = (temp[1] >> 28) | ((temp[2] & 0xff) << 4);
+        samples[8][j*8+6] = (temp[2] >>  8) & 0xfff;
+        samples[8][j*8+7] =  temp[2] >> 20;
       }
 
       //std::cout << "====Event: " << event << std::endl;
       //************************************
       //Loop Over Channels 0 - 8
       //************************************      
-      for(int i = 0; i < 9; i++) {
+      for(int i = 0; i < 9; i++) 
+      {
+        int totalIndex = realGroup[group]*9 + i;
+  
+        //Fill pulses
+        for(int j = 0; j < 1024; j++) 
+        {
+          b_c[realGroup[group]][i][j] = (short)(samples[i][j]);
+          raw[realGroup[group]*9 + i][j] = (short)(samples[i][j]);
+          channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
+        }
 
-	int totalIndex = realGroup[group]*9 + i;
-	
-	//Fill pulses
-	for(int j = 0; j < 1024; j++) {
-	  b_c[realGroup[group]][i][j] = (short)(samples[i][j]);
-	  raw[realGroup[group]*9 + i][j] = (short)(samples[i][j]);
-	  channel[realGroup[group]*9 + i][j] = (short)((double)(samples[i][j]) - (double)(off_mean[realGroup[group]][i][(j+tcn)%1024]));
-	}
+        //Find the absolute minimum. This is only used as a rough determination to decide if we'll use the early time samples
+        //or the late time samples to do the baseline fit
+        int index_min = FindMinAbsolute(1024, channel[realGroup[group]*9 + i]); // return index of the minc
 
-	//Find the absolute minimum. This is only used as a rough determination to decide if we'll use the early time samples
-	//or the late time samples to do the baseline fit
-	int index_min = FindMinAbsolute(1024, channel[realGroup[group]*9 + i]); // return index of the minc
+        //Make Pulse shape Graph
+        TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
+        TGraphErrors* pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
 
-	//Make Pulse shape Graph
-	TString pulseName = Form("pulse_event%d_group%d_ch%d", eventn, realGroup[group], i);
-	TGraphErrors* pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
-
-	//estimate baseline
-	float baseline;
-        if ( index_min < 105 ) { baseline = GetBaseline( pulse, 850, 1020, pulseName);}
-        else { baseline = GetBaseline( pulse, 5 ,150, pulseName);}
+        //estimate baseline
+        float baseline;
+        if ( index_min < 105 ) 
+        {
+          baseline = GetBaseline( pulse, 850, 1020, pulseName);
+        }
+        else 
+        { 
+          baseline = GetBaseline( pulse, 5 ,150, pulseName);
+        }
         base[realGroup[group]*9 + i] = baseline;
 
-	//Correct pulse shape for baseline offset
-	for(int j = 0; j < 1024; j++) {
-	  channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]) + baseline);
-	  channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
-	}
+        //Correct pulse shape for baseline offset
+        for(int j = 0; j < 1024; j++) 
+        {
+          channel[realGroup[group]*9 + i][j] = (short)((double)(channel[realGroup[group]*9 + i][j]) + baseline);
+          channelCorrected[realGroup[group]*9 + i][j] = channel[realGroup[group]*9 + i][j];
+        }
 
-	// DRS-glitch finder: zero out bins which have large difference
-	// with respect to neighbors in only one or two bins
-	for(int j = 0; j < 1024; j++) {
-	  short a0 = abs(channel[realGroup[group]*9 + i][j-1]);
-	  short a1 = abs(channel[realGroup[group]*9 + i][j]);
-	  short a2 = abs(channel[realGroup[group]*9 + i][j+1]);
-	  short a3 = abs(channel[realGroup[group]*9 + i][j+2]);
-	  
-	  if ( ( a1>3*a0 && a2>3*a0 && a2>3*a3 && a1>30) )
-	    {
-	      channel[realGroup[group]*9 + i][j] = 0;
-	      channel[realGroup[group]*9 + i][j+1] = 0;
-	    }
-	  
-	  if ( ( a1>3*a0 && a1>3*a2 && a1>30) )
-	    channel[realGroup[group]*9 + i][j] = 0;
-	}
-	
-	delete pulse;
+        // DRS-glitch finder: zero out bins which have large difference
+        // with respect to neighbors in only one or two bins
+        for(int j = 0; j < 1024; j++) 
+        {
+          short a0 = abs(channel[realGroup[group]*9 + i][j-1]);
+          short a1 = abs(channel[realGroup[group]*9 + i][j]);
+          short a2 = abs(channel[realGroup[group]*9 + i][j+1]);
+          short a3 = abs(channel[realGroup[group]*9 + i][j+2]);
 
-	// Find Peak Location using the improved algorithm
-	pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
-	//	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
-	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
-	//if ( index_min > 0 ) std::cout << "ch: " << totalIndex << std::endl;
-	xmin[realGroup[group]*9 + i] = index_min;
-	
+          if ( ( a1>3*a0 && a2>3*a0 && a2>3*a3 && a1>30) )
+          {
+            channel[realGroup[group]*9 + i][j] = 0;
+            channel[realGroup[group]*9 + i][j+1] = 0;
+          }
+    
+          if ( ( a1>3*a0 && a1>3*a2 && a1>30) )
+          {
+            channel[realGroup[group]*9 + i][j] = 0;
+          }
+        }
 
-	if (doFilter) {
-	  pulse = GetTGraphFilter( channel[realGroup[group]*9 + i], time[realGroup[group]], pulseName , false);
-	}
-	
-	//Compute Amplitude : use units V
-	Double_t tmpAmp = 0.0;
-	Double_t tmpMin = 0.0;
-	pulse->GetPoint(index_min, tmpMin, tmpAmp);
-	amp[realGroup[group]*9 + i] = tmpAmp* (1.0 / 4096.0); 
+        delete pulse;
 
-	//Get Pulse Integral
-	if ( xmin[realGroup[group]*9 + i] != 0 )
-	  {
-	    integral[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i]);
-	    integralFull[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i], "full");
-	  }
-	else
-	  {
-	    integral[realGroup[group]*9 + i] = 0.0;
-	    integralFull[realGroup[group]*9 + i] = 0.0;
-	  }
+        // Find Peak Location using the improved algorithm
+        pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
+        //  pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
+        index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
+        //if ( index_min > 0 ) std::cout << "ch: " << totalIndex << std::endl;
+        xmin[realGroup[group]*9 + i] = index_min;
+  
 
-	//Gauss Time-Stamping 
-	Double_t min = 0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.; 
-	pulse->GetPoint(index_min, min, y);	
-	pulse->GetPoint(index_min-3, low_edge, y); // get the time of the low edge of the fit range
-	pulse->GetPoint(index_min+3, high_edge, y);  // get the time of the upper edge of the fit range	
+        if (doFilter)
+        {
+          pulse = GetTGraphFilter( channel[realGroup[group]*9 + i], time[realGroup[group]], pulseName , false);
+        }
 
-	float timepeak = 0;
-	float timecf0   = 0;
-	float timecf15   = 0;
-	float timecf30   = 0;
-	float timecf45   = 0;
-	float timecf60   = 0;
-	if( drawDebugPulses)
-	  {
-	    if ( !(totalIndex == 8 || totalIndex == 17 || totalIndex == 26 || totalIndex == 35) ) timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
-	    float fs[5];
-	    if ( xmin[realGroup[group]*9 + i] != 0.0 )
-	      {
-		if ( !(totalIndex == 8 || totalIndex == 17 || totalIndex == 26 || totalIndex == 35) ) RisingEdgeFitTime( pulse, index_min, fs, event, "linearFit_" + pulseName, true);
-	      }
-	    else
-	      {
-		for ( int kk = 0; kk < 5; kk++ ) fs[kk] = -999;
-	      }
-	    timecf0  = fs[0];
-	    timecf15 = fs[1];
-	    timecf30 = fs[2];
-	    timecf45 = fs[3];
-	    timecf60 = fs[4];	 
-	  }
-	else
-	  {
-	    timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
-	    float fs[5];
-	    if ( xmin[realGroup[group]*9 + i] != 0.0 )
-	      {
-		RisingEdgeFitTime( pulse, index_min, fs, event, "");
-	      }
-	   else
-	     {
-	       for ( int kk = 0; kk < 5; kk++ ) fs[kk] = -999;
-	     }
-	    timecf0  = fs[0];
-	    timecf15 = fs[1];
-	    timecf30 = fs[2];
-	    timecf45 = fs[3];
-	    timecf60 = fs[4];
-	  }
-	gauspeak[realGroup[group]*9 + i]   = timepeak;
-	linearTime0[realGroup[group]*9 + i] = timecf0;
-	linearTime15[realGroup[group]*9 + i] = timecf15;
-	linearTime30[realGroup[group]*9 + i] = timecf30;
-	linearTime45[realGroup[group]*9 + i] = timecf45;
-	linearTime60[realGroup[group]*9 + i] = timecf60;
+        //Compute Amplitude : use units V
+        Double_t tmpAmp = 0.0;
+        Double_t tmpMin = 0.0;
+        pulse->GetPoint(index_min, tmpMin, tmpAmp);
+        amp[realGroup[group]*9 + i] = tmpAmp* (1.0 / 4096.0); 
 
-	delete pulse;
+        //Get Pulse Integral
+        if ( xmin[realGroup[group]*9 + i] != 0 )
+        {
+          integral[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i]);
+          integralFull[realGroup[group]*9 + i] = GetPulseIntegral( index_min , channel[realGroup[group]*9 + i], "full");
+        }
+        else
+        {
+          integral[realGroup[group]*9 + i] = 0.0;
+          integralFull[realGroup[group]*9 + i] = 0.0;
+        }
+
+        //Gauss Time-Stamping 
+        Double_t min = 0.; Double_t low_edge =0.; Double_t high_edge =0.; Double_t y = 0.; 
+        pulse->GetPoint(index_min, min, y); 
+        pulse->GetPoint(index_min-3, low_edge, y); // get the time of the low edge of the fit range
+        pulse->GetPoint(index_min+3, high_edge, y);  // get the time of the upper edge of the fit range
+        float timepeak = 0;
+        float timecf0   = 0;
+        float timecf15   = 0;
+        float timecf30   = 0;
+        float timecf45   = 0;
+        float timecf60   = 0;
+        if( drawDebugPulses)
+        {
+          if ( !(totalIndex == 8 || totalIndex == 17 || totalIndex == 26 || totalIndex == 35) ) timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge, pulseName); // get the time stamp
+          float fs[5];
+          if ( xmin[realGroup[group]*9 + i] != 0.0 )
+          {
+            if ( !(totalIndex == 8 || totalIndex == 17 || totalIndex == 26 || totalIndex == 35) ) RisingEdgeFitTime( pulse, index_min, fs, event, "linearFit_" + pulseName, true);
+          }
+          else
+          {
+            for ( int kk = 0; kk < 5; kk++ ) fs[kk] = -999;
+          }
+          timecf0  = fs[0];
+          timecf15 = fs[1];
+          timecf30 = fs[2];
+          timecf45 = fs[3];
+          timecf60 = fs[4];  
+        }
+        else
+        {
+          timepeak =  GausFit_MeanTime(pulse, low_edge, high_edge); // get the time stamp
+          float fs[5];
+          if ( xmin[realGroup[group]*9 + i] != 0.0 )
+          {
+            RisingEdgeFitTime( pulse, index_min, fs, event, "");
+          }
+          else
+          {
+            for ( int kk = 0; kk < 5; kk++ ) fs[kk] = -999;
+          }
+          timecf0  = fs[0];
+          timecf15 = fs[1];
+          timecf30 = fs[2];
+          timecf45 = fs[3];
+          timecf60 = fs[4];
+        } 
+        gauspeak[realGroup[group]*9 + i]   = timepeak;
+        linearTime0[realGroup[group]*9 + i] = timecf0;
+        linearTime15[realGroup[group]*9 + i] = timecf15;
+        linearTime30[realGroup[group]*9 + i] = timecf30;
+        linearTime45[realGroup[group]*9 + i] = timecf45;
+        linearTime60[realGroup[group]*9 + i] = timecf60;
+
+        delete pulse;
       }
       
       dummy = fread( &event_header, sizeof(uint), 1, fpin);
     }
-    
+
     if ( ActiveGroupsN < 4 ) continue;
+
+    //this is for removing bad events, events with a large delta t value
+    if (  badEvents.find(goodEvents) != badEvents.end() ) 
+    {
+      if( !badEvents[goodEvents] ) 
+      {
+        badEvents[goodEvents] = true;
+        continue;
+      } 
+    } 
+    if( goodEvents % 100 == 0 ) std::cout  << "goodEvents: " << goodEvents << std::endl;
     tree->Fill();
     goodEvents++;
-    
   }
 
   fclose(fpin);
@@ -506,7 +567,8 @@ int main(int argc, char **argv){
 
 
 int
-graphic_init( void){
+graphic_init( void)
+{
 
   style = new TStyle("style", "style");
   
