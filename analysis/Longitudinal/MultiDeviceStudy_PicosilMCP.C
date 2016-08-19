@@ -97,8 +97,8 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   tree->SetBranchAddress("int",integral);
 
   //Create histograms
-  float width = 0.3;
-  float smearWidth = 0.75;
+  float width = 0.15;
+  float smearWidth = 0.3;
   int bins = 100;
   int smearBins = 75;
   float pixelSmear = 0.050; // in ns
@@ -147,7 +147,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   for(int i=0; i<7; i++) histDeltaT_PicoSil_vs_MCP[i] = new TH1F(Form("histDeltaT_PicoSil_vs_MCP_%d",i),"; Time [ns];Number of Events", 100, -3, -1); // DeltaT between PicoSil and MCP instead of Photek.
 
   TH1F *histCharges[7]; // collects charge values for picosil pixels in every event in which they pass the cuts.
-  for(int i=0; i<7; i++) histCharges[i] = new TH1F( Form("histCharges_%d",i),"; Charge [pC];Number of Events", 120, 0, 80);
+  for(int i=0; i<7; i++) histCharges[i] = new TH1F( Form("histCharges_%d",i),"; Charge [pC];Number of Events", 50, 0, 80);
  
 
 
@@ -574,7 +574,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
     for (int j = 0; j<7; j++) tempArray[j] = pixelsUsed[i][j];
     SKIROCPlotPDF(c, tex, histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i], Form("SKIROC_%d_Pixels",i+1), tempArray );
   }
-
+  c->Close();
 
   // Creates output root file
   TFile *file = TFile::Open(("output"+filename).c_str(), "RECREATE");
@@ -609,11 +609,13 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   // Above are in separate loops to be organized in the TBrowser
 
 
-  TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 400, 0, 2.5);
-  TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge;Number of Events", 400, 0, 30);
-  TH1F *histCenterAmpCut = new TH1F("histCenterAmpCut","; Amp;Number of Events", 200, 0, 1.5);
-  TH1F *histCenterChargeCut = new TH1F("histCenterChargeCut","; Charge;Number of Events", 400, 0, 60);
-  TH1F *histMCPAmpCut = new TH1F("histMCPAmpCut","; Amp;Number of Events", 100, 0, 0.75);
+  gStyle->SetOptFit(1);
+  gStyle->SetOptStat(1);
+  TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp [mA];Number of Events", 75, 0, 2.5);
+  TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge [pC];Number of Events", 75, 0, 30);
+  TH1F *histCenterAmpCut = new TH1F("histCenterAmpCut","; Amp [mA];Number of Events", 100, 0, 1.5);
+  TH1F *histCenterChargeCut = new TH1F("histCenterChargeCut","; Charge [pC];Number of Events", 75, 0, 60);
+  TH1F *histMCPAmpCut = new TH1F("histMCPAmpCut","; Amp [mA];Number of Events", 100, 0, 0.75);
 
   tree->Draw("sqrt(10)*amp[0]>>histPhotekAmpCut", Form("sqrt(10)*amp[0]>%f",photekAmpCut) );
   tree->Draw("sqrt(10)*int[0]>>histPhotekChargeCut", Form("sqrt(10)*int[0]>%f",photekChargeCut));
@@ -621,11 +623,11 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   tree->Draw("2*int[1]>>histCenterChargeCut", Form("2*int[1]>%f",centerChargeCut));
   tree->Draw("amp[11]>>histMCPAmpCut", Form("amp[11]>%f",MCPAmpCut));
 
-  TH1F *histPhotekAmp = new TH1F("histPhotekAmp","; Amp;Number of Events", 400, 0, 2.5);
-  TH1F *histPhotekCharge = new TH1F("histPhotekCharge","; Charge;Number of Events", 400, 0, 30);
-  TH1F *histCenterAmp = new TH1F("histCenterAmp","; Amp;Number of Events", 200, 0, 1.5);
-  TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge;Number of Events", 400, 0, 60);
-  TH1F *histMCPAmp = new TH1F("histMCPAmp","; Amp;Number of Events", 100, 0, 0.75);
+  TH1F *histPhotekAmp = new TH1F("histPhotekAmp","; Amp [mA];Number of Events", 75, 0, 2.5);
+  TH1F *histPhotekCharge = new TH1F("histPhotekCharge","; Charge [pC];Number of Events", 75, 0, 30);
+  TH1F *histCenterAmp = new TH1F("histCenterAmp","; Amp [mA];Number of Events", 100, 0, 1.5);
+  TH1F *histCenterCharge = new TH1F("histCenterCharge","; Charge [pC];Number of Events", 75, 0, 60);
+  TH1F *histMCPAmp = new TH1F("histMCPAmp","; Amp [mA];Number of Events", 100, 0, 0.75);
 
   tree->Draw("sqrt(10)*amp[0]>>histPhotekAmp", "", " " );
   tree->Draw("sqrt(10)*int[0]>>histPhotekCharge");
@@ -669,6 +671,9 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
 
 void makeTimeResolution( string filename, float photekAmpCut, float photekChargeCut, float centerAmpCut, float centerChargeCut, float MCPAmpCut ) {
 
+  gStyle->SetOptFit(1);
+  gStyle->SetOptStat(1);
+
   DoMultiDeviceStudy( filename.c_str(), photekAmpCut, photekChargeCut, centerAmpCut, centerChargeCut, MCPAmpCut );
 
   TFile *_file = TFile::Open( ("output"+filename).c_str() ); //Should be .root
@@ -694,6 +699,7 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   TH1F *histDeltaT_PicoSil_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_EventCharge"); //Combination of device Delta T's after shifting distributions around 0 and then weighting event by event.
   TH1F *histDeltaT_PicoSil_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_TotalCharge"); //Combination after shifting around 0 and weighting with total charge.
   TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_vs_MCP_TotalCharge");
+  TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_vs_MCP_EventCharge");
   TH1F *histDeltaTPicoSil[6];
   for(int i=1; i<=6; i++) histDeltaTPicoSil[i-1] = (TH1F*)_file->Get( Form("histDeltaTPicoSil[%d]",i) ); //Already wrote center pixel
 
@@ -727,6 +733,7 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 MCP: TOF}");
   histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear->SetTitle("#splitline{SKIROC Emulation: 1/2 Smeared HGC w/ Landau}{MPV Charge Weighting, 1/2 Smeared MCP: TOF}");
   histDeltaT_PicoSil_vs_MCP_TotalCharge->SetTitle("#Deltat b/t HGC and Photonis -- Total Charge Weighted");
+  histDeltaT_PicoSil_vs_MCP_EventCharge->SetTitle("#Deltat b/t HGC and Photonis -- Event Charge Weighted");
   for(int i=0; i<6; i++) histDeltaTPicoSil[i]->SetTitle( Form("HGC Pixel %d: TOF",i+1) ); //pixel 0 is center pixel
 
 
@@ -750,7 +757,10 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear, "deltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear, "deltaT_PicoSilLandauCharge_MCP_Equal_BothSmear.pdf");
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_vs_MCP_TotalCharge, "deltaT_PicoSil_vs_MCP_TotalCharge.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_vs_MCP_EventCharge, "deltaT_PicoSil_vs_MCP_EventCharge.pdf");
   for(int i=0; i<6; i++) PlotDeltaTPDF(c, tex, histDeltaTPicoSil[i], Form("deltaTPicoSilPixel%d.pdf",i+1) );
+
+  c->Close();
 }
 
 
@@ -763,5 +773,35 @@ void MultiDeviceStudy_PicosilMCP() {
   float centerChargeCut = 2*11;
   float MCPAmpCut = 0.08;
   makeTimeResolution(infile.c_str(), photekAmpCut, photekChargeCut, centerAmpCut, centerChargeCut, MCPAmpCut); // Outputs PDFs with histograms
+  //Un-comment following lines to make all output files at once:
+  /*cout<<"\n\n 65-83:"<<endl;
+  makeTimeResolution("65-83.root",                sqrt(10)*0.1,   sqrt(10)*2,    2*0.15, 2*10,  0.05);
+
+  cout<<"\n\n 84-93:"<<endl;
+  makeTimeResolution("84-93.root",                sqrt(10)*0.1,   sqrt(10)*2,    2*0.03, 2*2.5, 0.05);
+
+  cout<<"\n\n 94-103:"<<endl;
+  makeTimeResolution("94-103.root",               sqrt(10)*0.1,   sqrt(10)*2.5,  2*0.1,  2*7,   0.05);
+
+  cout<<"\n\n 104-110,115-116:"<<endl;
+  makeTimeResolution("104-116except111-114.root", sqrt(10)*0.1,   sqrt(10)*2,    2*0.15, 2*11,  0.08);
+
+  cout<<"\n\n 117-122:"<<endl;
+  makeTimeResolution("117-122.root",              sqrt(10)*0.09,  sqrt(10)*2,    2*0.05, 2*3,   0.055);
+
+  cout<<"\n\n 129-138:"<<endl;
+  makeTimeResolution("129-138.root",              sqrt(10)*0.1,   sqrt(10)*2,    2*0.1,  2*8,   0.075);
+
+  cout<<"\n\n 144-155:"<<endl;
+  makeTimeResolution("144-155.root",              sqrt(10)*0.03,  sqrt(10)*0.8,  2*0.07, 2*6,   0.025);
+
+  cout<<"\n\n 167-171:"<<endl;
+  makeTimeResolution("167-171.root",              sqrt(10)*0.015, sqrt(10)*0.4,  2*0.01, 2*2.5, 0.01);
+
+  cout<<"\n\n 178-185:"<<endl;
+  makeTimeResolution("178-185.root",              sqrt(10)*0.015, sqrt(10)*0.3,  2*0.01, 2*1,   0.03);
+
+  cout<<"\n\n 186-200:"<<endl;
+  makeTimeResolution("186-200.root",              sqrt(10)*0.03,  sqrt(10)*0.75, 2*0.02, 2*1,   0.05);*/
 
 }
