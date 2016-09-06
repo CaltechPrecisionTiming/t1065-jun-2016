@@ -21,11 +21,29 @@
 #include "TGraphErrors.h"
 #include "TLatex.h"
 #include <math.h> 
+#include <time.h>
+#include <algorithm>
+#include <functional>
+#include "TRandom3.h"
 
 // This code generates the combined Delta T histogram for the picosil center pixel, the SiPad, and the MCP for the re-cabled configuration. 
 // In order to use in early runs (prior to recabling), the array numbers and reference photek signals must be changed.
 
-void DoMultiDeviceStudy( string filename, string outputFilename ) {
+// Author: Daniel Gawerc
+
+
+void Fitter(TH1F *hist) {
+  //Helper function for fitting Gaussian
+  double xmin = hist->GetMean() - 2.0*hist->GetRMS();
+  double xmax = hist->GetMean() + 2.0*hist->GetRMS();
+  hist->Fit("gaus","QMLES","",xmin,xmax); // Q suppresses fit results
+  gStyle->SetOptFit(1);
+  gStyle->SetOptStat(0);
+}
+
+
+void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekChargeCut, float centerAmpCut, float centerChargeCut, float MCPAmpCut, float SiPadAmpCut ) {
+
 
   TFile *inputfile = TFile::Open(filename.c_str(),"READ");
   TTree *tree = (TTree*)inputfile->Get("pulse");
@@ -47,12 +65,21 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   tree->SetBranchAddress("amp",amp);
   tree->SetBranchAddress("int",integral);
 
-  //Create histogram
-  TH1F *histDeltaT = new TH1F("histDeltaT","; Time [ns];Number of Events", 50, -10,4); // Weights 33-33-33
-  TH1F *histDeltaTWeighted = new TH1F("histDeltaTWeighted","; Time [ns];Number of Events", 50, -10,4); //Weights each event based on charge
-  TH1F *histDeltaTCenter = new TH1F("histDeltaTCenter","; Time [ns];Number of Events", 50, 4, 5); //DeltaT of center picosil pixel
-  TH1F *histDeltaTSiPad = new TH1F("histDeltaTSiPad","; Time [ns];Number of Events", 50, -10,4); //DeltaT of SiPad
-  TH1F *histDeltaTMCP = new TH1F("histDeltaTMCP","; Time [ns];Number of Events", 50, 2, 3); //DeltaT of MCP
+  //Create histograms
+  float width = 0.5;
+  float SiPadWidth = 1.5;
+  int bins = 100;
+
+  TH1F *histDeltaTCenter = new TH1F("histDeltaTCenter",";#Deltat (ns);Entries/(0.012 ns)", 500, 0, 6); //DeltaT of center HGC pixel
+  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); 
+  TH1F *histDeltaTMCP = new TH1F("histDeltaTMCP",";#Deltat (ns);Entries/(0.01 ns)", 500, 0, 5); //DeltaT of MCP
+  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); 
+  TH1F *histDeltaTSiPad = new TH1F("histDeltaTSiPad",";#Deltat (ns);Entries/(0.06 ns)", 500, -15, 15); //DeltaT of SiPad
+  TH1F *histDeltaTSiPadAt0 = new TH1F("histDeltaTSiPadAt0",";#Deltat (ns);Entries/(0.03 ns)", bins, -SiPadWidth, SiPadWidth);
+  TH1F *histDeltaT_Center_MCP_SiPad_Equal = new TH1F("histDeltaT_Center_MCP_SiPad_Equal",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); // Weights HGC center pixel, MCP, and SiPad equally
+  TH1F *histDeltaT_Center_MCP_SiPad_EventCharge = new TH1F("histDeltaT_Center_MCP_SiPad_EventCharge",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); //Event charge weighting
+TH1F *histDeltaT_Center_MCP_SiPad_TotalCharge = new TH1F("histDeltaT_Center_MCP_SiPad_TotalCharge",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); //Total Charge Weighting
+
   
 
   float totalCenterCharge = 0;
@@ -63,25 +90,25 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
   Long64_t nentries = tree->GetEntries();
 
   //Loop through every event in .root file
-  std::cout<<"Number of events in Sample: "<<nentries<<std::endl;  
+  std::cout<<"Number of events in sample: "<<nentries<<std::endl;  
   for (Long64_t iEntry=0; iEntry<nentries; iEntry++) {
     if (iEntry %1000 == 0) cout << "Processing Event " << iEntry << "\n";
     tree->GetEntry(iEntry);    
   
     float photekTimeGauss0 = gauspeak[0];
-    float photekAmp0 = amp[0];
-    float photekCharge0 = integral[0];
+    float photekAmp0 = sqrt(10)*amp[0]; //Acct for attenuator
+    float photekCharge0 = sqrt(10)*integral[0];
 
     float photekTimeGauss1 = gauspeak[9];
-    float photekAmp1 = amp[9];
-    float photekCharge1 = integral[9];
+    float photekAmp1 = sqrt(10)*amp[9];
+    float photekCharge1 = sqrt(10)*integral[9];
 
-    float centerAmp = amp[1];
-    float centerCharge = integral[1];
+    float centerAmp = 2*amp[1];
+    float centerCharge = 2*integral[1];
     float centerTime = linearTime45[1];
 
-    float SiPadAmp = amp[10];
-    float SiPadCharge = integral[10];
+    float SiPadAmp = sqrt(10)*amp[10];
+    float SiPadCharge = sqrt(10)*integral[10];
     float SiPadTime = linearTime45[10];
 
     float MCPAmp = amp[11];
@@ -91,79 +118,35 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
 
     // APPLY EVENT CUTS:
     //require photek (for electron selection)
-    if( !(photekAmp0 > 0.05 && photekCharge0 > 2) ) continue;
+    if( !(photekAmp0 > photekAmpCut && photekCharge0 > photekChargeCut) ) continue;
     
     //require signal in the central pixel
-    if( !(centerAmp > 0.03 && centerCharge > 2) ) continue;
+    if( !(centerAmp > centerAmpCut && centerCharge > centerChargeCut) ) continue;
 
     //require Si Pad and MCP minimum amplitude. Possibly will include cut for charge at some point...
-    if( !(SiPadAmp > 0.03 && MCPAmp > 0.03) ) continue;
+    if( !(SiPadAmp > MCPAmpCut && SiPadAmp > SiPadAmpCut) ) continue;
 
     //Calculates the Delta T's if the event passes the cuts:
     float DeltaTCenter = photekTimeGauss0 - centerTime; // Will be used to fill the histogram at every event
     float DeltaTSiPad = photekTimeGauss1 - SiPadTime;
     float DeltaTMCP = photekTimeGauss1 - MCPTime;
 
-    float DeltaT = (DeltaTCenter + DeltaTSiPad + DeltaTMCP)/3; //Evenly weighted
-    float DeltaTWeighted = (DeltaTCenter*centerCharge + DeltaTSiPad*SiPadCharge + DeltaTMCP*MCPCharge) / (centerCharge+SiPadCharge+MCPCharge);
-    //Note: the above weights each individual event being added by the charge of each event. 
-    //Another method of creating this histogram would be to use the total charge (summed over all events) 
-    // to determine how much to weight each event by. This way, each device is always weighted the same way.
-
-    //Note#2: Cristian pointed out that we must subtract the mean from the individual DeltaT histograms 
-    // before combining them by their weights, since not doing that will increase the timing resolution.
 
     totalCenterCharge += centerCharge;
     totalSiPadCharge += SiPadCharge;
     totalMCPCharge += MCPCharge;
 
-    histDeltaT->Fill(DeltaT);
-    histDeltaTWeighted->Fill(DeltaTWeighted);
     histDeltaTCenter->Fill(DeltaTCenter);
     histDeltaTSiPad->Fill(DeltaTSiPad);
     histDeltaTMCP->Fill(DeltaTMCP);
     
-    
   }
 
-  // Do Gaussian fit of delta T distributions from (mean-2RMS) to (mean+2RMS)
-  double mean = histDeltaT->GetMean();
-  double rms = histDeltaT->GetRMS();
-  double xmin = mean-2.0*rms;
-  double xmax = mean+2.0*rms;
-  histDeltaT->Fit("gaus","MLES","",xmin,xmax);
-
-  mean = histDeltaTWeighted->GetMean();
-  rms = histDeltaTWeighted->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTWeighted->Fit("gaus","MLES","",xmin,xmax);
 
   double meanCenter = histDeltaTCenter->GetMean();
-  rms = histDeltaTCenter->GetRMS();
-  xmin = meanCenter-2.0*rms;
-  xmax = meanCenter+2.0*rms;
-  histDeltaTCenter->Fit("gaus","MLES","",xmin,xmax);
-
-  double meanSiPad = histDeltaTSiPad->GetMean();
-  rms = histDeltaTSiPad->GetRMS();
-  xmin = meanSiPad-2.0*rms;
-  xmax = meanSiPad+2.0*rms;
-  histDeltaTSiPad->Fit("gaus","MLES","",xmin,xmax);
-
   double meanMCP = histDeltaTMCP->GetMean();
-  rms = histDeltaTMCP->GetRMS();
-  xmin = meanMCP-2.0*rms;
-  xmax = meanMCP+2.0*rms;
-  histDeltaTMCP->Fit("gaus","MLES","",xmin,xmax);
+  double meanSiPad = histDeltaTSiPad->GetMean();
 
-
-  TH1F *histDeltaTWeightsCorrected = new TH1F("histDeltaTWeightsCorrected","; Time [ns];Number of Events", 50, -2,2);//Corrects for histograms not initially centered at 0.
-  TH1F *histDeltaTWeightsCorrected_totalcharge = new TH1F("histDeltaTWeightsCorrected_totalcharge","; Time [ns];Number of Events", 50, -2,2);
-
-  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0","; Time [ns];Number of Events", 50, -0.3, 0.3); //shifted to be centered at zero
-  TH1F *histDeltaTSiPadAt0 = new TH1F("histDeltaTSiPadAt0","; Time [ns];Number of Events", 50, -1.5, 1.5); //shifted to be centered at zero
-  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0","; Time [ns];Number of Events", 50, -0.3, 0.3); //shifted to be centered at zero
 
 
   //Loop through again. This time, subtracting the respective means. Process is almost the same.
@@ -172,90 +155,86 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
     tree->GetEntry(iEntry);    
   
     float photekTimeGauss0 = gauspeak[0];
-    float photekAmp0 = amp[0];
-    float photekCharge0 = integral[0];
+    float photekAmp0 = sqrt(10)*amp[0]; //Acct for attenuator
+    float photekCharge0 = sqrt(10)*integral[0];
 
     float photekTimeGauss1 = gauspeak[9];
-    float photekAmp1 = amp[9];
-    float photekCharge1 = integral[9];
+    float photekAmp1 = sqrt(10)*amp[9];
+    float photekCharge1 = sqrt(10)*integral[9];
 
-    float centerAmp = amp[1];
-    float centerCharge = integral[1];
+    float centerAmp = 2*amp[1];
+    float centerCharge = 2*integral[1];
     float centerTime = linearTime45[1];
 
-    float SiPadAmp = amp[10];
-    float SiPadCharge = integral[10];
+    float SiPadAmp = sqrt(10)*amp[10];
+    float SiPadCharge = sqrt(10)*integral[10];
     float SiPadTime = linearTime45[10];
 
     float MCPAmp = amp[11];
     float MCPCharge = integral[11];
     float MCPTime = linearTime45[11];
 
-    if( !(photekAmp0 > 0.05 && photekCharge0 > 2) ) continue;
-    if( !(centerAmp > 0.03 && centerCharge > 2) ) continue;
-    if( !(SiPadAmp > 0.03 && MCPAmp > 0.03) ) continue;
+    if( !(photekAmp0 > photekAmpCut && photekCharge0 > photekChargeCut) ) continue;
+    if( !(centerAmp > centerAmpCut && centerCharge > centerChargeCut) ) continue;
+    if( !(SiPadAmp > MCPAmpCut && SiPadAmp > SiPadAmpCut) ) continue;
 
-    //Here are the corrections that center the histograms at 0.
+    //shift histograms to 0.
     float DeltaTCenter = photekTimeGauss0 - centerTime - meanCenter; 
     float DeltaTSiPad = photekTimeGauss1 - SiPadTime - meanSiPad;
     float DeltaTMCP = photekTimeGauss1 - MCPTime - meanMCP;
-    float DeltaTWeighted = (DeltaTCenter*centerCharge + DeltaTSiPad*SiPadCharge + DeltaTMCP*MCPCharge) / (centerCharge+SiPadCharge+MCPCharge);
-    float DeltaTWeightsCorrected_totalcharge = (DeltaTCenter*totalCenterCharge + DeltaTSiPad*totalSiPadCharge + DeltaTMCP*totalMCPCharge) / (totalCenterCharge+totalSiPadCharge+totalMCPCharge);
+    float DeltaT_Center_MCP_SiPad_Equal = (DeltaTCenter + DeltaTMCP + DeltaTSiPad)/3;
+    float DeltaT_Center_MCP_SiPad_EventCharge = (DeltaTCenter*centerCharge + DeltaTSiPad*SiPadCharge + DeltaTMCP*MCPCharge) / (centerCharge+SiPadCharge+MCPCharge);
+    float DeltaT_Center_MCP_SiPad_TotalCharge = (DeltaTCenter*totalCenterCharge + DeltaTSiPad*totalSiPadCharge + DeltaTMCP*totalMCPCharge) / (totalCenterCharge+totalSiPadCharge+totalMCPCharge);
 
-    histDeltaTWeightsCorrected->Fill(DeltaTWeighted); // Uses charge in each device over each individual event as weighting.
-    histDeltaTWeightsCorrected_totalcharge->Fill(DeltaTWeightsCorrected_totalcharge); // Uses total charge in each device over whole run as weighting.
 
     histDeltaTCenterAt0->Fill(DeltaTCenter);
     histDeltaTSiPadAt0->Fill(DeltaTSiPad);
     histDeltaTMCPAt0->Fill(DeltaTMCP);
+    histDeltaT_Center_MCP_SiPad_Equal->Fill(DeltaT_Center_MCP_SiPad_Equal);
+    histDeltaT_Center_MCP_SiPad_EventCharge->Fill(DeltaT_Center_MCP_SiPad_EventCharge);
+    histDeltaT_Center_MCP_SiPad_TotalCharge->Fill(DeltaT_Center_MCP_SiPad_TotalCharge);
   }
 
-  mean = histDeltaTWeightsCorrected->GetMean();
-  rms = histDeltaTWeightsCorrected->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTWeightsCorrected->Fit("gaus","MLES","",xmin,xmax);
+  // Do Gaussian fit of delta T distributions from (mean-2RMS) to (mean+2RMS)
+  TCanvas *c1 = new TCanvas ("c1","c1",800, 600);
+  Fitter(histDeltaTCenterAt0);
+  Fitter(histDeltaTMCPAt0);
+  Fitter(histDeltaTSiPadAt0);
+  Fitter(histDeltaT_Center_MCP_SiPad_Equal);
+  Fitter(histDeltaT_Center_MCP_SiPad_EventCharge);
+  Fitter(histDeltaT_Center_MCP_SiPad_TotalCharge);
 
-  mean = histDeltaTWeightsCorrected_totalcharge->GetMean();
-  rms = histDeltaTWeightsCorrected_totalcharge->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTWeightsCorrected_totalcharge->Fit("gaus","MLES","",xmin,xmax);
-
-  mean = histDeltaTCenterAt0->GetMean();
-  rms = histDeltaTCenterAt0->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTCenterAt0->Fit("gaus","MLES","",xmin,xmax);
-
-  mean = histDeltaTSiPadAt0->GetMean();
-  rms = histDeltaTSiPadAt0->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTSiPadAt0->Fit("gaus","MLES","",xmin,xmax);
-
-  mean = histDeltaTMCPAt0->GetMean();
-  rms = histDeltaTMCPAt0->GetRMS();
-  xmin = mean-2.0*rms;
-  xmax = mean+2.0*rms;
-  histDeltaTMCPAt0->Fit("gaus","MLES","",xmin,xmax);
 
 
   // Creates output root file
-  TFile *file = TFile::Open(outputFilename.c_str(), "RECREATE");
+  TFile *file = TFile::Open(("output"+filename).c_str(), "RECREATE");
   file->cd();
-  file->WriteTObject(histDeltaT,"histDeltaT", "WriteDelete");
-  file->WriteTObject(histDeltaTWeighted,"histDeltaTWeighted", "WriteDelete");
-  file->WriteTObject(histDeltaTCenterAt0,"histDeltaTCenter", "WriteDelete"); //Uses hist centered near 0
-  file->WriteTObject(histDeltaTSiPadAt0,"histDeltaTSiPad", "WriteDelete"); //Uses hist centered near 0
-  file->WriteTObject(histDeltaTMCPAt0,"histDeltaTMCP", "WriteDelete"); //Uses hist centered near 0
-  file->WriteTObject(histDeltaTWeightsCorrected,"histDeltaTWeightsCorrected", "WriteDelete");
-  file->WriteTObject(histDeltaTWeightsCorrected_totalcharge,"histDeltaTWeightsCorrected_totalcharge", "WriteDelete");
+  file->WriteTObject(histDeltaTCenterAt0,"histDeltaTCenter", "WriteDelete");
+  file->WriteTObject(histDeltaTMCPAt0,"histDeltaTMCP", "WriteDelete");
+  file->WriteTObject(histDeltaTSiPadAt0,"histDeltaTSiPad", "WriteDelete");
+  file->WriteTObject(histDeltaT_Center_MCP_SiPad_Equal, "histDeltaT_Center_MCP_SiPad_Equal", "WriteDelete");
+  file->WriteTObject(histDeltaT_Center_MCP_SiPad_EventCharge, "histDeltaT_Center_MCP_SiPad_EventCharge", "WriteDelete");
+  file->WriteTObject(histDeltaT_Center_MCP_SiPad_TotalCharge, "histDeltaT_Center_MCP_SiPad_TotalCharge", "WriteDelete");
 
 
+  c1->Close();
   file->Close();
   delete file;
 
+}
+
+
+void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
+  hist->Draw();
+  gStyle->SetOptFit(0); //Hides the parameter box
+  gStyle->SetOptStat(0);
+  double mean = hist->GetMean();
+  double rms = hist->GetRMS();
+  TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
+  hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.13, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.13, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
 
@@ -263,18 +242,20 @@ void DoMultiDeviceStudy( string filename, string outputFilename ) {
 
 
 
-void makeTimeResolution( string filename ) {
+void makeTimeResolution( string filename, float photekAmpCut, float photekChargeCut, float centerAmpCut, float centerChargeCut, float MCPAmpCut, float SiPadAmpCut ) {
 
-  TFile *_file = TFile::Open( filename.c_str() ); //Should be .root file
+  DoMultiDeviceStudy( filename.c_str(), photekAmpCut, photekChargeCut, centerAmpCut, centerChargeCut, MCPAmpCut, SiPadAmpCut );
+
+  TFile *_file = TFile::Open( ("output"+filename).c_str() ); //Should be .root file
 
   //Create variables containing hists:
-  TH1F* histDeltaT = (TH1F*)_file->Get("histDeltaT"); // each device weighted equally
-  // Not doing histDeltaTWeighted, since it gives bad results.
-  TH1F* histDeltaTCenter = (TH1F*)_file->Get("histDeltaTCenter"); //Picosil center pixel
-  TH1F* histDeltaTSiPad = (TH1F*)_file->Get("histDeltaTSiPad"); // MCP
-  TH1F* histDeltaTMCP = (TH1F*)_file->Get("histDeltaTMCP"); // MCP
-  TH1F* histDeltaTWeightsCorrected = (TH1F*)_file->Get("histDeltaTWeightsCorrected"); //Combination of device Delta T's after shifting distributions around 0 and then weighting event by event.
-  TH1F* histDeltaTWeightsCorrected_totalcharge = (TH1F*)_file->Get("histDeltaTWeightsCorrected_totalcharge"); //Combination after shifting around 0 and weighting with total charge.
+  TH1F *histDeltaTCenter = (TH1F*)_file->Get("histDeltaTCenter"); //Picosil center pixel
+  TH1F *histDeltaTMCP = (TH1F*)_file->Get("histDeltaTMCP"); // MCP
+  TH1F *histDeltaTSiPad = (TH1F*)_file->Get("histDeltaTSiPad"); 
+  TH1F *histDeltaT_Center_MCP_SiPad_Equal = (TH1F*)_file->Get("histDeltaT_Center_MCP_SiPad_Equal");
+  TH1F *histDeltaT_Center_MCP_SiPad_EventCharge = (TH1F*)_file->Get("histDeltaT_Center_MCP_SiPad_EventCharge");
+  TH1F *histDeltaT_Center_MCP_SiPad_TotalCharge = (TH1F*)_file->Get("histDeltaT_Center_MCP_SiPad_TotalCharge");
+
 
   TCanvas *c = new TCanvas ("c","c",800, 600); 
   TLatex *tex = new TLatex();
@@ -284,74 +265,26 @@ void makeTimeResolution( string filename ) {
   tex->SetTextColor(kBlack);
 
   c->cd();
-  gStyle->SetOptStat(0); // Hides the parameter box
 
-
-  histDeltaT->Draw();
-  double mean = histDeltaT->GetMean();
-  double rms = histDeltaT->GetRMS();
-  TF1* fgausEqual = new TF1("fgausEqual","gaus", mean - 2.0*rms, mean + 2.0*rms); // 1-D gaus func defined around hist peak
-  histDeltaT->Fit("fgausEqual","QMLE","", mean - 2.0*rms, mean + 2.0*rms); // Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
-  histDeltaT->GetXaxis()->SetTitle("Time Resolution [ns]");
-  histDeltaT->SetTitle("");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausEqual->GetParameter(2), 1000*fgausEqual->GetParError(2)));
-  c->SaveAs("deltaTEqual.pdf");
-
-  histDeltaTCenter->Draw();
-  mean = histDeltaTCenter->GetMean();
-  rms = histDeltaTCenter->GetRMS();
-  TF1* fgausCenter = new TF1("fgausCenter","gaus", mean - 2.0*rms, mean + 2.0*rms); 
-  histDeltaTCenter->Fit("fgausCenter","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
-  histDeltaTCenter->GetXaxis()->SetTitle("Time Resolution [ns]");
-  histDeltaTCenter->SetTitle("");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausCenter->GetParameter(2), 1000*fgausCenter->GetParError(2)));
-  c->SaveAs("deltaTCenter.pdf");
-
-  histDeltaTSiPad->Draw();
-  mean = histDeltaTSiPad->GetMean();
-  rms = histDeltaTSiPad->GetRMS();
-  TF1* fgausSiPad = new TF1("fgausSiPad","gaus", mean - 2.0*rms, mean + 2.0*rms); 
-  histDeltaTSiPad->Fit("fgausSiPad","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
-  histDeltaTSiPad->GetXaxis()->SetTitle("Time Resolution [ns]");
-  histDeltaTSiPad->SetTitle("");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausSiPad->GetParameter(2), 1000*fgausSiPad->GetParError(2)));
-  c->SaveAs("deltaTSiPad.pdf");
-
-  histDeltaTMCP->Draw();
-  mean = histDeltaTMCP->GetMean();
-  rms = histDeltaTMCP->GetRMS();
-  TF1* fgausMCP = new TF1("fgausMCP","gaus", mean - 2.0*rms, mean + 2.0*rms); 
-  histDeltaTMCP->Fit("fgausMCP","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
-  histDeltaTMCP->GetXaxis()->SetTitle("Time Resolution [ns]");
-  histDeltaTMCP->SetTitle("");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausMCP->GetParameter(2), 1000*fgausMCP->GetParError(2)));
-  c->SaveAs("deltaTMCP.pdf");
-  
-  histDeltaTWeightsCorrected->Draw();
-  mean = histDeltaTWeightsCorrected->GetMean();
-  rms = histDeltaTWeightsCorrected->GetRMS();
-  TF1* fgausWC = new TF1("fgausWC","gaus", mean - 2.0*rms, mean + 2.0*rms); 
-  histDeltaTWeightsCorrected->Fit("fgausWC","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
-  histDeltaTWeightsCorrected->GetXaxis()->SetTitle("Time Resolution [ns]");
-  histDeltaTWeightsCorrected->SetTitle("");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausWC->GetParameter(2), 1000*fgausWC->GetParError(2)));
-  c->SaveAs("deltaTWeightsCorrected.pdf");
-
-  histDeltaTWeightsCorrected_totalcharge->Draw();
-  mean = histDeltaTWeightsCorrected_totalcharge->GetMean();
-  rms = histDeltaTWeightsCorrected_totalcharge->GetRMS();
-  TF1* fgausWCtc = new TF1("fgausWCtc","gaus", mean - 2.0*rms, mean + 2.0*rms); 
-  histDeltaTWeightsCorrected_totalcharge->Fit("fgausWCtc","QMLE","", mean - 2.0*rms, mean + 2.0*rms);
-  histDeltaTWeightsCorrected_totalcharge->GetXaxis()->SetTitle("Time Resolution [ns]");
-  histDeltaTWeightsCorrected_totalcharge->SetTitle("");
-  tex->DrawLatex(0.6, 0.80, Form("#sigma = %.0f #pm %.2f ps", 1000*fgausWCtc->GetParameter(2), 1000*fgausWCtc->GetParError(2)));
-  c->SaveAs("deltaTWeightsCorrected_totalcharge.pdf");
-
+ 
+  PlotDeltaTPDF(c, tex, histDeltaTCenter, "deltaTCenter.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaTMCP, "deltaTMCP.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaTSiPad, "deltaTSiPad.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaT_Center_MCP_SiPad_Equal, "deltaT_Center_MCP_SiPad_Equal.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaT_Center_MCP_SiPad_EventCharge, "deltaT_Center_MCP_SiPad_EventCharge.pdf");
+  PlotDeltaTPDF(c, tex, histDeltaT_Center_MCP_SiPad_TotalCharge, "deltaT_Center_MCP_SiPad_TotalCharge.pdf");
   
 }
 
 
 void MultiDeviceStudy() {
-  DoMultiDeviceStudy("t1065-jun-2016-66.dat-full.root","output66.root");
-  makeTimeResolution( "output66.root" );
+
+  string infile = "65-83.root";
+  float photekAmpCut = sqrt(10)*0.1; 
+  float photekChargeCut = sqrt(10)*2;
+  float centerAmpCut = 2*0.15;
+  float centerChargeCut = 2*10;
+  float MCPAmpCut = 0.05;
+  float SiPadAmpCut = 0.0001;
+  makeTimeResolution(infile.c_str(), photekAmpCut, photekChargeCut, centerAmpCut, centerChargeCut, MCPAmpCut, SiPadAmpCut); // Outputs PDFs with histograms
 }
