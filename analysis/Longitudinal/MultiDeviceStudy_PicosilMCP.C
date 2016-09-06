@@ -149,8 +149,9 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
 
   TH1F *histCharges[7]; // collects charge values for picosil pixels in every event in which they pass the cuts.
   for(int i=0; i<7; i++) histCharges[i] = new TH1F( Form("histCharges_%d",i),";Charge (pC);Entries/(1.6 pC)", 50, 0, 80);
-  TH1F *histAllCharges = new TH1F("histAllCharges",";Charge (pC);Entries/(1.6 pC)",50,0,80); // histogram filled with charge values from every pixel *after* cuts. Basically just adding all histCharges[i].
- 
+  //TH1F *histAllCharges = new TH1F("histAllCharges",";Charge (pC);Entries/(1.6 pC)",50,0,80); // histogram filled with charge values from every pixel *after* cuts. Basically just adding all histCharges[i].
+  //Above hist removed because cutting at 20pC is basically just histCharges[0] -->The center pixel charge dist 
+
 
 
 
@@ -527,7 +528,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
     histDeltaT_PicoSil_vs_MCP_EventCharge->Fill(DeltaT_PicoSil_vs_MCP_EventCharge);
   }
 
-  for(int i=0;i<7;i++) { histAllCharges->Add(histCharges[i]); }
+  //for(int i=0;i<7;i++) { histAllCharges->Add(histCharges[i]); }
 
   // Add Gaussian fit
   Fitter(histDeltaT_Center_MCP_Equal);
@@ -551,7 +552,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   Fitter(histDeltaTPicoSilAt0EqualSmear);
   Fitter(histDeltaT_PicoSil_vs_MCP_TotalCharge);
   Fitter(histDeltaT_PicoSil_vs_MCP_EventCharge);
-  Fitter(histAllCharges);
+  //Fitter(histAllCharges);
 
   for (int i = 0; i < 7; i++) {
     Fitter(histDeltaTPicoSilSmearAt0[i]);
@@ -606,7 +607,7 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   file->WriteTObject(histDeltaT_PicoSil_MCP_TotalCharge,"histDeltaT_PicoSil_MCP_TotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_vs_MCP_TotalCharge,"histDeltaT_PicoSil_vs_MCP_TotalCharge", "WriteDelete");
   file->WriteTObject(histDeltaT_PicoSil_vs_MCP_EventCharge,"histDeltaT_PicoSil_vs_MCP_EventCharge", "WriteDelete");
-  file->WriteTObject(histAllCharges,"histAllCharges","WriteDelete");
+  //file->WriteTObject(histAllCharges,"histAllCharges","WriteDelete");
   for(int i=0; i<=6; i++) file->WriteTObject(histDeltaTPicoSilAt0[i], Form("histDeltaTPicoSil[%d]",i),"WriteDelete");
   for(int i=0; i<=6; i++) file->WriteTObject(histCharges[i],Form("histCharges[%d]",i),"WriteDelete");
   for(int i=0; i<=6; i++) file->WriteTObject(histDeltaTPicoSilSmearAt0[i],Form("histDeltaTPicoSilSmear[%d]",i),"WriteDelete");
@@ -670,8 +671,8 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   // Just use original X axis titles:
   //hist->GetXaxis()->SetTitle("#Deltat (ns)");
-  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.12, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
-  else tex->DrawLatex(0.12, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.13, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.13, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 

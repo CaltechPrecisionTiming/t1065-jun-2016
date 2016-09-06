@@ -40,7 +40,7 @@ void Fitter(TH1F *hist) {
   gStyle->SetOptFit(0);
 }
 
-void DoMultiDeviceStudy( string filename ) {
+void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekChargeCut, float MCPAmpCut ) {
 
   srand (time(NULL));
   int seed = rand();
@@ -85,9 +85,9 @@ void DoMultiDeviceStudy( string filename ) {
   for(int i=0; i<6; i++) histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i] = 
       new TH1F(Form("histDeltaTPicoSilAt0EqualSmear_nEventsCombine_%dPixels",i+1), ";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth);
 
-  float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
-  float photekChargeCut = sqrt(10)*2;
-  float MCPAmpCut = 0.08;
+  //float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
+  //float photekChargeCut = sqrt(10)*2;
+  //float MCPAmpCut = 0.08;
 
   //read all entries and fill the histogram
   Long64_t nentries = tree->GetEntries();
@@ -300,16 +300,16 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
 //  hist->GetXaxis()->SetTitle("Time Resolution [ns]");
-  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.12, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
-  else tex->DrawLatex(0.12, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.13, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.13, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
 
 
-void makeTimeResolution( string filename ) {
+void makeTimeResolution( string filename, float photekAmpCut, float photekChargeCut, float MCPAmpCut ) {
 
-  DoMultiDeviceStudy( filename.c_str() );
+  DoMultiDeviceStudy( filename.c_str(), photekAmpCut, photekChargeCut, MCPAmpCut );
 
   TFile *_file = TFile::Open( ("output_nocenter"+filename).c_str() ); //Should be .root
 
@@ -344,5 +344,32 @@ void makeTimeResolution( string filename ) {
 
 
 void SKIROC_CenterPixelRemoved() {
-  makeTimeResolution("104-116except111-114.root"); // Outputs PDFs with histograms
+
+  string infile = "104-116except111-114.root";
+  float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
+  float photekChargeCut = sqrt(10)*2;
+  float MCPAmpCut = 0.08;
+  makeTimeResolution(infile.c_str(), photekAmpCut, photekChargeCut, MCPAmpCut); // Outputs PDFs with histograms
+
+//Un-comment following lines to make all output files at once:
+  /*cout<<"\n\n 65-83:"<<endl;
+  makeTimeResolution("65-83.root",                sqrt(10)*0.1,   sqrt(10)*2,  0.05);
+  cout<<"\n\n 84-93:"<<endl;
+  makeTimeResolution("84-93.root",                sqrt(10)*0.1,   sqrt(10)*2, 0.05);
+  cout<<"\n\n 94-103:"<<endl;
+  makeTimeResolution("94-103.root",               sqrt(10)*0.1,   sqrt(10)*2.5,   0.05);
+  cout<<"\n\n 104-110,115-116:"<<endl;
+  makeTimeResolution("104-116except111-114.root", sqrt(10)*0.1,   sqrt(10)*2,  0.08);
+  cout<<"\n\n 117-122:"<<endl;
+  makeTimeResolution("117-122.root",              sqrt(10)*0.09,  sqrt(10)*2,   0.055);
+  cout<<"\n\n 129-138:"<<endl;
+  makeTimeResolution("129-138.root",              sqrt(10)*0.1,   sqrt(10)*2,   0.075);
+  cout<<"\n\n 144-155:"<<endl;
+  makeTimeResolution("144-155.root",              sqrt(10)*0.03,  sqrt(10)*0.8,   0.025);
+  cout<<"\n\n 167-171:"<<endl;
+  makeTimeResolution("167-171.root",              sqrt(10)*0.015, sqrt(10)*0.4, 0.01);
+  cout<<"\n\n 178-185:"<<endl;
+  makeTimeResolution("178-185.root",              sqrt(10)*0.015, sqrt(10)*0.3,   0.03);
+  cout<<"\n\n 186-200:"<<endl;
+  makeTimeResolution("186-200.root",              sqrt(10)*0.03,  sqrt(10)*0.75,   0.05);*/
 }
