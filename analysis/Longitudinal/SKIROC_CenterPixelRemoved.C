@@ -37,7 +37,7 @@ void Fitter(TH1F *hist) {
   double xmin = hist->GetMean() - 2.0*hist->GetRMS();
   double xmax = hist->GetMean() + 2.0*hist->GetRMS();
   hist->Fit("gaus","QMLES","",xmin,xmax); // Q suppresses fit results
-  gStyle->SetOptFit(1);
+  gStyle->SetOptFit(0);
 }
 
 void DoMultiDeviceStudy( string filename ) {
@@ -66,24 +66,24 @@ void DoMultiDeviceStudy( string filename ) {
   tree->SetBranchAddress("int",integral);
 
   //Create histograms
-  float smearWidth = 1.5;
-  float smearBins = 45;
-  float pixelSmear = 0.500; // in ps
-  float MCPSmear = 0.350;
+  float smearWidth = 0.75;
+  float smearBins = 75;
+  float pixelSmear = 0.050; // in ps
+  float MCPSmear = 0.045;
 
-  TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear","; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);
+  TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear",";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth);
   TH1F *histDeltaTPicoSilSmear[6];
   TH1F *histDeltaTPicoSilSmearAt0[6];
   for(int i=0; i<6; i++) {
-    histDeltaTPicoSilSmear[i] = new TH1F(Form("histDeltaTPicoSilSmear_%d",i),"; Time [ns];Number of Events", 50, 3, 6);
-    histDeltaTPicoSilSmearAt0[i] = new TH1F(Form("histDeltaTPicoSilSmearAt0_%d",i),"; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth); 
+    histDeltaTPicoSilSmear[i] = new TH1F(Form("histDeltaTPicoSilSmear_%d",i),";#Deltat (ns);Entries/(0.06 ns)", 50, 3, 6);
+    histDeltaTPicoSilSmearAt0[i] = new TH1F(Form("histDeltaTPicoSilSmearAt0_%d",i),";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth); 
   }
-  TH1F *histDeltaTMCPSmear = new TH1F("histDeltaTMCPSmear","; Time [ns];Number of Events", 50, 2, 3); 
-  TH1F *histDeltaTMCPAt0Smear = new TH1F("histDeltaTMCPAt0Smear","; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth); //shifted to be centered at zero
-  TH1F *histDeltaTPicoSilAt0EqualSmear = new TH1F("histDeltaTPicoSilAt0EqualSmear", "; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);
+  TH1F *histDeltaTMCPSmear = new TH1F("histDeltaTMCPSmear",";#Deltat (ns);Entries/(0.02 ns)", 50, 2, 3); 
+  TH1F *histDeltaTMCPAt0Smear = new TH1F("histDeltaTMCPAt0Smear",";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth); //shifted to be centered at zero
+  TH1F *histDeltaTPicoSilAt0EqualSmear = new TH1F("histDeltaTPicoSilAt0EqualSmear", ";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth);
   TH1F *histDeltaTPicoSilAt0EqualSmear_nEventsCombine[6];
   for(int i=0; i<6; i++) histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i] = 
-      new TH1F(Form("histDeltaTPicoSilAt0EqualSmear_nEventsCombine_%dPixels",i+1), "; Time [ns];Number of Events", smearBins, -smearWidth, smearWidth);
+      new TH1F(Form("histDeltaTPicoSilAt0EqualSmear_nEventsCombine_%dPixels",i+1), ";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth);
 
   float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
   float photekChargeCut = sqrt(10)*2;
@@ -260,17 +260,17 @@ void DoMultiDeviceStudy( string filename ) {
   }
 
 
-  TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut","; Amp;Number of Events", 400, 0, 2.5);
-  TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut","; Charge;Number of Events", 400, 0, 30);
-  TH1F *histMCPAmpCut = new TH1F("histMCPAmpCut","; Amp;Number of Events", 100, 0, 0.75);
+  TH1F *histPhotekAmpCut = new TH1F("histPhotekAmpCut",";Amplitude (mA);Entries/(0.016 mA)", 150, 0, 2.4);
+  TH1F *histPhotekChargeCut = new TH1F("histPhotekChargeCut",";Charge (pC);Entries/(0.15 pC)", 200, 0, 30);
+  TH1F *histMCPAmpCut = new TH1F("histMCPAmpCut",";Amplitude (mA);Entries/(0.0075 mA)", 100, 0, 0.75);
 
   tree->Draw("sqrt(10)*amp[0]>>histPhotekAmpCut", Form("sqrt(10)*amp[0]>%f",photekAmpCut) );
   tree->Draw("sqrt(10)*int[0]>>histPhotekChargeCut", Form("sqrt(10)*int[0]>%f",photekChargeCut));
   tree->Draw("amp[11]>>histMCPAmpCut", Form("amp[11]>%f",MCPAmpCut));
 
-  TH1F *histPhotekAmp = new TH1F("histPhotekAmp","; Amp;Number of Events", 400, 0, 2.5);
-  TH1F *histPhotekCharge = new TH1F("histPhotekCharge","; Charge;Number of Events", 400, 0, 30);
-  TH1F *histMCPAmp = new TH1F("histMCPAmp","; Amp;Number of Events", 100, 0, 0.75);
+  TH1F *histPhotekAmp = new TH1F("histPhotekAmp",";Amplitude (mA);Entries/(0.016 mA)", 150, 0, 2.4);
+  TH1F *histPhotekCharge = new TH1F("histPhotekCharge",";Charge (pC);Entries/(0.15 pC)", 200, 0, 30);
+  TH1F *histMCPAmp = new TH1F("histMCPAmp",";Amplitude (mA);Entries/(0.0075 mA)", 100, 0, 0.75);
 
   tree->Draw("sqrt(10)*amp[0]>>histPhotekAmp" );
   tree->Draw("sqrt(10)*int[0]>>histPhotekCharge");
@@ -299,9 +299,9 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   double rms = hist->GetRMS();
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
-  hist->GetXaxis()->SetTitle("Time Resolution [ns]");
-  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.8, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
-  else tex->DrawLatex(0.6, 0.8, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+//  hist->GetXaxis()->SetTitle("Time Resolution [ns]");
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.12, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.12, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
@@ -329,10 +329,12 @@ void makeTimeResolution( string filename ) {
 
   c->cd();
 
+  /* REMOVE TITLES:
   histDeltaTPicoSilEqualSmear->SetTitle("SKIROC Emulation: HGC Ring 1 TOF w/ Equal Weighting");
   histDeltaTMCPSmear->SetTitle("SKIROC Emulation: MCP TOF");
   histDeltaT_PicoSilEqual_MCP_Equal_BothSmear->SetTitle("1/12 HGC Smeared Ring 1 Pixels, 1/2 MCP Smeared: TOF");
   for (int i=0; i<6; i++) combo[i]->SetTitle( pixels_added[i].c_str() );
+  */
 
   PlotDeltaTPDF(c, tex, histDeltaTPicoSilEqualSmear, "deltaTPicoSilEqualSmear_NoCenter.pdf");
   PlotDeltaTPDF(c, tex, histDeltaTMCPSmear, "deltaTMCPSmear_NoCenter.pdf");
