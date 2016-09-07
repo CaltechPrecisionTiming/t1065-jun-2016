@@ -66,19 +66,19 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   tree->SetBranchAddress("int",integral);
 
   //Create histograms
-  float width = 0.5;
+  float width = 0.15;
   float SiPadWidth = 1.5;
-  int bins = 100;
+  int bins = 75;
 
   TH1F *histDeltaTCenter = new TH1F("histDeltaTCenter",";#Deltat (ns);Entries/(0.012 ns)", 500, 0, 6); //DeltaT of center HGC pixel
-  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); 
+  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width); 
   TH1F *histDeltaTMCP = new TH1F("histDeltaTMCP",";#Deltat (ns);Entries/(0.01 ns)", 500, 0, 5); //DeltaT of MCP
-  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); 
+  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width); 
   TH1F *histDeltaTSiPad = new TH1F("histDeltaTSiPad",";#Deltat (ns);Entries/(0.06 ns)", 500, -15, 15); //DeltaT of SiPad
-  TH1F *histDeltaTSiPadAt0 = new TH1F("histDeltaTSiPadAt0",";#Deltat (ns);Entries/(0.03 ns)", bins, -SiPadWidth, SiPadWidth);
-  TH1F *histDeltaT_Center_MCP_SiPad_Equal = new TH1F("histDeltaT_Center_MCP_SiPad_Equal",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); // Weights HGC center pixel, MCP, and SiPad equally
-  TH1F *histDeltaT_Center_MCP_SiPad_EventCharge = new TH1F("histDeltaT_Center_MCP_SiPad_EventCharge",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); //Event charge weighting
-TH1F *histDeltaT_Center_MCP_SiPad_TotalCharge = new TH1F("histDeltaT_Center_MCP_SiPad_TotalCharge",";#Deltat (ns);Entries/(0.01 ns)", bins, -width, width); //Total Charge Weighting
+  TH1F *histDeltaTSiPadAt0 = new TH1F("histDeltaTSiPadAt0",";#Deltat (ns);Entries/(0.04 ns)", bins, -SiPadWidth, SiPadWidth);
+  TH1F *histDeltaT_Center_MCP_SiPad_Equal = new TH1F("histDeltaT_Center_MCP_SiPad_Equal",";#Deltat (ns);Entries/(0.012 ns)", bins, -3*width, 3*width); // Weights HGC center pixel, MCP, and SiPad equally
+  TH1F *histDeltaT_Center_MCP_SiPad_EventCharge = new TH1F("histDeltaT_Center_MCP_SiPad_EventCharge",";#Deltat (ns);Entries/(0.012 ns)", bins, -3*width, 3*width); //Event charge weighting
+TH1F *histDeltaT_Center_MCP_SiPad_TotalCharge = new TH1F("histDeltaT_Center_MCP_SiPad_TotalCharge",";#Deltat (ns);Entries/(0.012 ns)", bins, -3*width, 3*width); //Total Charge Weighting
 
   
 
@@ -232,8 +232,8 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   double rms = hist->GetRMS();
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
-  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.13, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
-  else tex->DrawLatex(0.13, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.6, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
@@ -278,6 +278,13 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
 
 
 void MultiDeviceStudy() {
+  gStyle->SetTitleOffset(0.8,"x");
+  gStyle->SetTitleOffset(0.85,"y");
+  gStyle->SetTitleSize(0.055,"x");
+  gStyle->SetTitleSize(0.055,"y");
+  gStyle->SetLabelSize(0.045,"x");
+  gStyle->SetLabelSize(0.045,"y");
+
 
   string infile = "65-83.root";
   float photekAmpCut = sqrt(10)*0.1; 

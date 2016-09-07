@@ -99,22 +99,22 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   //Create histograms
   float width = 0.15;
   float smearWidth = 0.3;
-  int bins = 100;
+  int bins = 75;
   int smearBins = 75;
   float pixelSmear = 0.050; // in ns
   float MCPSmear = 0.045;
 
-  TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width); // Weights MCP and PicoSil center pixel 50-50
-  TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
-  TH1F *histDeltaT_PicoSilTotalCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilTotalCharge_MCP_Equal",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width);// Picosil delta T found by weighting with total pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
-  TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width);
+  TH1F *histDeltaT_Center_MCP_Equal = new TH1F("histDeltaT_Center_MCP_Equal",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width); // Weights MCP and PicoSil center pixel 50-50
+  TH1F *histDeltaT_PicoSilEventCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilEventCharge_MCP_Equal",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width);// Picosil delta T found by weighting with event pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
+  TH1F *histDeltaT_PicoSilTotalCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilTotalCharge_MCP_Equal",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width);// Picosil delta T found by weighting with total pixel charge, but then overall delta T fund by weighting PicoSil and MCP equally.
+  TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width);
   TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal_PicoSilSmear",";#Deltat (ns);Entries/(0.008 ns)", smearBins, -smearWidth, smearWidth);//Smear
   TH1F *histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilLandauCharge_MCP_Equal_BothSmear",";#Deltat (ns);Entries/(0.008 ns)", smearBins, -smearWidth, smearWidth);//Smear
-  TH1F *histDeltaT_PicoSilEqual_MCP_Equal = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width);//Picosil delta T found by weighting pixels equally, and then overall delta T fund by weighting PicoSil and MCP equally. Thus MCP is weighted by 1/2 and each pixel is weighted 1/14.
+  TH1F *histDeltaT_PicoSilEqual_MCP_Equal = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width);//Picosil delta T found by weighting pixels equally, and then overall delta T fund by weighting PicoSil and MCP equally. Thus MCP is weighted by 1/2 and each pixel is weighted 1/14.
   TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear",";#Deltat (ns);Entries/(0.008 ns)", smearBins, -smearWidth, smearWidth);
-  TH1F *histDeltaT_PicoSil_MCP_Equal = new TH1F("histDeltaT_PicoSil_MCP_Equal",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width);// delta T found by placing equal emphasis on the pixels as on the MCP. Thus everything is weighted 1/8.
-  TH1F *histDeltaT_PicoSil_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_MCP_EventCharge",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width);// delta T found by weighting with event charge in each device.
-  TH1F *histDeltaT_PicoSil_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_MCP_TotalCharge",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width);// delta T found by constant weighting with charge in device over entire run.
+  TH1F *histDeltaT_PicoSil_MCP_Equal = new TH1F("histDeltaT_PicoSil_MCP_Equal",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width);// delta T found by placing equal emphasis on the pixels as on the MCP. Thus everything is weighted 1/8.
+  TH1F *histDeltaT_PicoSil_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_MCP_EventCharge",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width);// delta T found by weighting with event charge in each device.
+  TH1F *histDeltaT_PicoSil_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_MCP_TotalCharge",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width);// delta T found by constant weighting with charge in device over entire run.
   TH1F *histDeltaT_Center_MCP_EventCharge_NoShift = new TH1F("histDeltaT_Center_MCP_EventCharge_NoShift",";#Deltat (ns);Entries/(0.04 ns)", 100, 2, 6); //Weights each event based on charge. Poor resolution.
   TH1F *histDeltaTPicoSil[7];
   TH1F *histDeltaTPicoSilAt0[7];
@@ -122,27 +122,27 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   TH1F *histDeltaTPicoSilSmearAt0[7];
   for(int i=0; i<7; i++) {
     histDeltaTPicoSil[i] = new TH1F(Form("histDeltaTPicoSil_%d",i),";#Deltat (ns);Entries/(0.06 ns)", 50, 3, 6); //DeltaT of PicoSil pixels
-    histDeltaTPicoSilAt0[i] = new TH1F(Form("histDeltaTPicoSilAt0_%d",i),";#Deltat (ns);Entries/(0.006 ns)", bins/2, -width, width); 
+    histDeltaTPicoSilAt0[i] = new TH1F(Form("histDeltaTPicoSilAt0_%d",i),";#Deltat (ns);Entries/(0.008 ns)", bins/2, -width, width); 
     histDeltaTPicoSilSmear[i] = new TH1F(Form("histDeltaTPicoSilSmear_%d",i),";#Deltat (ns);Entries/(0.06 ns)", 50, 3, 6);
     histDeltaTPicoSilSmearAt0[i] = new TH1F(Form("histDeltaTPicoSilSmearAt0_%d",i),";#Deltat (ns);Entries/(0.008 ns)", smearBins, -smearWidth, smearWidth); 
   }
   TH1F *histDeltaTCenter = new TH1F("histDeltaTCenter",";#Deltat (ns);Entries/(0.02 ns)", 50, 4, 5); //DeltaT of center picosil pixel
   TH1F *histDeltaTMCP = new TH1F("histDeltaTMCP",";#Deltat (ns);Entries/(0.02 ns)", 50, 2, 3); //DeltaT of MCP
   TH1F *histDeltaTMCPSmear = new TH1F("histDeltaTMCPSmear",";#Deltat (ns);Entries/(0.02 ns)", 50, 2, 3); //DeltaT of MCP  
-  TH1F *histDeltaTPicoSilAt0TotalCharge = new TH1F("histDeltaTPicoSilAt0TotalCharge",";#Deltat_{HGC} (ns);Entries/(0.003 ns)", bins, -width, width); //All pixels combined
-  TH1F *histDeltaTPicoSilAt0EventCharge = new TH1F("histDeltaTPicoSilAt0EventCharge",";#Deltat_{HGC} (ns);Entries/(0.003 ns)", bins, -width, width);
-  TH1F *histDeltaTPicoSilAt0LandauCharge = new TH1F("histDeltaTPicoSilAt0LandauCharge",";#Deltat_{HGC} (ns);Entries/(0.003 ns)", bins, -width, width);// uses charge MPV
+  TH1F *histDeltaTPicoSilAt0TotalCharge = new TH1F("histDeltaTPicoSilAt0TotalCharge",";#Deltat_{HGC} (ns);Entries/(0.004 ns)", bins, -width, width); //All pixels combined
+  TH1F *histDeltaTPicoSilAt0EventCharge = new TH1F("histDeltaTPicoSilAt0EventCharge",";#Deltat_{HGC} (ns);Entries/(0.004 ns)", bins, -width, width);
+  TH1F *histDeltaTPicoSilAt0LandauCharge = new TH1F("histDeltaTPicoSilAt0LandauCharge",";#Deltat_{HGC} (ns);Entries/(0.004 ns)", bins, -width, width);// uses charge MPV
   TH1F *histDeltaTPicoSilAt0LandauChargeSmear = new TH1F("histDeltaTPicoSilAt0LandauChargeSmear", ";#Deltat_{HGC} (ns);Entries/(0.008 ns)", smearBins, -smearWidth, smearWidth);//SKIROC
   TH1F *histDeltaTPicoSilAt0EqualSmear = new TH1F("histDeltaTPicoSilAt0EqualSmear", ";#Deltat_{HGC} (ns);Entries/(0.008 ns)", smearBins, -smearWidth, smearWidth);//SKIROC
   TH1F *histDeltaTPicoSilAt0EqualSmear_nEventsCombine[7];//Central pixel smear is [0], central + second highest nEvents is [1], etc...
   for(int i=0; i<7; i++) histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i] = 
       new TH1F(Form("histDeltaTPicoSilAt0EqualSmear_nEventsCombine_%dPixels",i+1), ";#Deltat (ns);Entries/(0.008 ns)", smearBins, -smearWidth, smearWidth);//SKIROC
-  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width); //shifted to be centered at zero
-  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0",";#Deltat (ns);Entries/(0.003 ns)", bins, -width, width); //shifted to be centered at zero
+  TH1F *histDeltaTCenterAt0 = new TH1F("histDeltaTCenterAt0",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width); //shifted to be centered at zero
+  TH1F *histDeltaTMCPAt0 = new TH1F("histDeltaTMCPAt0",";#Deltat (ns);Entries/(0.004 ns)", bins, -width, width); //shifted to be centered at zero
   TH1F *histDeltaTMCPAt0Smear = new TH1F("histDeltaTMCPAt0Smear",";#Deltat (ns);Entries/(0.008 ns)", smearBins, -smearWidth, smearWidth); //shifted to be centered at zero
 
-  TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_EventCharge",";#Deltat (ns);Entries/(0.003 ns)",bins,-width, width);
-  TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_TotalCharge",";#Deltat (ns);Entries/(0.003 ns)",bins,-width, width);
+  TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_EventCharge",";#Deltat (ns);Entries/(0.004 ns)",bins,-width, width);
+  TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = new TH1F("histDeltaT_PicoSil_vs_MCP_TotalCharge",";#Deltat (ns);Entries/(0.004 ns)",bins,-width, width);
   TH1F *histDeltaT_PicoSil_vs_MCP[7];
   for(int i=0; i<7; i++) histDeltaT_PicoSil_vs_MCP[i] = new TH1F(Form("histDeltaT_PicoSil_vs_MCP_%d",i),";#Deltat (ns);Entries/(0.02 ns)", 100, -3, -1); // DeltaT between PicoSil and MCP instead of Photek.
 
@@ -671,8 +671,8 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
   // Just use original X axis titles:
   //hist->GetXaxis()->SetTitle("#Deltat (ns)");
-  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.13, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
-  else tex->DrawLatex(0.13, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.6, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
@@ -708,6 +708,10 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   TH1F *histDeltaT_PicoSil_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_MCP_TotalCharge"); //Combination after shifting around 0 and weighting with total charge.
   TH1F *histDeltaT_PicoSil_vs_MCP_TotalCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_vs_MCP_TotalCharge");
   TH1F *histDeltaT_PicoSil_vs_MCP_EventCharge = (TH1F*)_file->Get("histDeltaT_PicoSil_vs_MCP_EventCharge");
+  TH1F *histPhotekAmp = (TH1F*)_file->Get("Photek Amp");
+  TH1F *histPhotekAmpCut = (TH1F*)_file->Get("Cut on Photek Amp");
+  TH1F *histPhotekCharge = (TH1F*)_file->Get("Photek Charge");
+  TH1F *histPhotekChargeCut = (TH1F*)_file->Get("Cut on Photek Charge");
   TH1F *histDeltaTPicoSil[6];
   for(int i=1; i<=6; i++) histDeltaTPicoSil[i-1] = (TH1F*)_file->Get( Form("histDeltaTPicoSil[%d]",i) ); //Already wrote center pixel
 
@@ -770,11 +774,27 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
   PlotDeltaTPDF(c, tex, histDeltaT_PicoSil_vs_MCP_EventCharge, "deltaT_PicoSil_vs_MCP_EventCharge.pdf");
   for(int i=0; i<6; i++) PlotDeltaTPDF(c, tex, histDeltaTPicoSil[i], Form("deltaTPicoSilPixel%d.pdf",i+1) );
 
+  c->SetLogy();
+  histPhotekAmp->Draw();
+  c->SaveAs( "PhotekAmp.pdf" );
+  histPhotekAmpCut->Draw();
+  c->SaveAs( "PhotekAmpCut.pdf" );
+  histPhotekCharge->Draw();
+  c->SaveAs( "PhotekCharge.pdf" );
+  histPhotekChargeCut->Draw();
+  c->SaveAs( "PhotekChargeCut.pdf" );
+
   c->Close();
 }
 
 
 void MultiDeviceStudy_PicosilMCP() {
+  gStyle->SetTitleOffset(0.8,"x");
+  gStyle->SetTitleOffset(0.85,"y");
+  gStyle->SetTitleSize(0.055,"x");
+  gStyle->SetTitleSize(0.055,"y");
+  gStyle->SetLabelSize(0.045,"x");
+  gStyle->SetLabelSize(0.045,"y");
 
   string infile = "104-116except111-114.root";
   float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS

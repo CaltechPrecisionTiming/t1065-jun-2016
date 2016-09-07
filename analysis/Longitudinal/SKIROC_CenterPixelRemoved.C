@@ -300,8 +300,8 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
 //  hist->GetXaxis()->SetTitle("Time Resolution [ns]");
-  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.13, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
-  else tex->DrawLatex(0.13, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.6, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
@@ -344,6 +344,13 @@ void makeTimeResolution( string filename, float photekAmpCut, float photekCharge
 
 
 void SKIROC_CenterPixelRemoved() {
+  gStyle->SetTitleOffset(0.8,"x");
+  gStyle->SetTitleOffset(0.85,"y");
+  gStyle->SetTitleSize(0.055,"x");
+  gStyle->SetTitleSize(0.055,"y");
+  gStyle->SetLabelSize(0.045,"x");
+  gStyle->SetLabelSize(0.045,"y");
+
 
   string infile = "104-116except111-114.root";
   float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
