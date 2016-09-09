@@ -66,24 +66,24 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   tree->SetBranchAddress("int",integral);
 
   //Create histograms
-  float smearWidth = 0.75;
+  float smearWidth = 0.6;
   float smearBins = 75;
   float pixelSmear = 0.050; // in ps
   float MCPSmear = 0.045;
 
-  TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear",";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth);
+  TH1F *histDeltaT_PicoSilEqual_MCP_Equal_BothSmear = new TH1F("histDeltaT_PicoSilEqual_MCP_Equal_BothSmear",";#Deltat (ns);Entries/(0.016 ns)", smearBins, -smearWidth, smearWidth);
   TH1F *histDeltaTPicoSilSmear[6];
   TH1F *histDeltaTPicoSilSmearAt0[6];
   for(int i=0; i<6; i++) {
     histDeltaTPicoSilSmear[i] = new TH1F(Form("histDeltaTPicoSilSmear_%d",i),";#Deltat (ns);Entries/(0.06 ns)", 50, 3, 6);
-    histDeltaTPicoSilSmearAt0[i] = new TH1F(Form("histDeltaTPicoSilSmearAt0_%d",i),";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth); 
+    histDeltaTPicoSilSmearAt0[i] = new TH1F(Form("histDeltaTPicoSilSmearAt0_%d",i),";#Deltat (ns);Entries/(0.016 ns)", smearBins, -smearWidth, smearWidth); 
   }
   TH1F *histDeltaTMCPSmear = new TH1F("histDeltaTMCPSmear",";#Deltat (ns);Entries/(0.02 ns)", 50, 2, 3); 
-  TH1F *histDeltaTMCPAt0Smear = new TH1F("histDeltaTMCPAt0Smear",";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth); //shifted to be centered at zero
-  TH1F *histDeltaTPicoSilAt0EqualSmear = new TH1F("histDeltaTPicoSilAt0EqualSmear", ";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth);
+  TH1F *histDeltaTMCPAt0Smear = new TH1F("histDeltaTMCPAt0Smear",";#Deltat (ns);Entries/(0.016 ns)", smearBins, -smearWidth, smearWidth); //shifted to be centered at zero
+  TH1F *histDeltaTPicoSilAt0EqualSmear = new TH1F("histDeltaTPicoSilAt0EqualSmear", ";#Deltat (ns);Entries/(0.016 ns)", smearBins, -smearWidth, smearWidth);
   TH1F *histDeltaTPicoSilAt0EqualSmear_nEventsCombine[6];
   for(int i=0; i<6; i++) histDeltaTPicoSilAt0EqualSmear_nEventsCombine[i] = 
-      new TH1F(Form("histDeltaTPicoSilAt0EqualSmear_nEventsCombine_%dPixels",i+1), ";#Deltat (ns);Entries/(0.02 ns)", smearBins, -smearWidth, smearWidth);
+      new TH1F(Form("histDeltaTPicoSilAt0EqualSmear_nEventsCombine_%dPixels",i+1), ";#Deltat (ns);Entries/(0.016 ns)", smearBins, -smearWidth, smearWidth);
 
   //float photekAmpCut = sqrt(10)*0.1; //THESE ARE THE CUT VALUES AFTER ADJUSTING FOR ATTENUATORS
   //float photekChargeCut = sqrt(10)*2;
@@ -300,8 +300,8 @@ void PlotDeltaTPDF(TCanvas *c, TLatex *tex, TH1F *hist, string outfile) {
   TF1 *gausfit = new TF1("gausfit","gaus", mean - 2.0*rms, mean + 2.0*rms);//1-D gaus function defined around hist peak
   hist->Fit("gausfit","QMLES","", mean - 2.0*rms, mean + 2.0*rms);// Fit the hist; Q-quiet, L-log likelihood method, E-Minos errors technique, M-improve fit results
 //  hist->GetXaxis()->SetTitle("Time Resolution [ns]");
-  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.6, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
-  else tex->DrawLatex(0.6, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  if(1000*gausfit->GetParError(2)>2) tex->DrawLatex(0.59, 0.83, Form("#sigma = %.0f #pm %.0f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
+  else tex->DrawLatex(0.59, 0.83, Form("#sigma = %.1f #pm %.1f ps", 1000*gausfit->GetParameter(2), 1000*gausfit->GetParError(2)));
   c->SaveAs(outfile.c_str()); //outfile should end in .pdf
 }
 
