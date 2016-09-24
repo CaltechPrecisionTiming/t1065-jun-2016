@@ -281,6 +281,9 @@ void DoMultiDeviceStudy( string filename, float photekAmpCut, float photekCharge
   histCharges[0]->Fit("flandau_0","QMLES","", xmin, xmax);
   gStyle->SetOptFit(0);
   MPVlandau[0] = flandau[0]->GetParameter(1);
+  cout<<"\nhistCharges[0]\nGauss Mean: "<<flandau[0]->GetParameter(1)<<
+                        "\nUncertainy: "<<flandau[0]->GetParError(1)<<
+  "\n"<<endl;
 
 
   double meanPicoSil[7];
