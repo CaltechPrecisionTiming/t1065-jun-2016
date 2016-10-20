@@ -51,7 +51,7 @@ if __name__ == '__main__':
     (options,args) = parser.parse_args()
 
     f = rt.TFile.Open(args[0])
-    #set_palette()
+    set_palette()
     tree = f.Get("pulse")
 
     empty = rt.TH2D("empty","empty",100, -6, 6, 100, -6, 6)
