@@ -80,7 +80,7 @@ int FindMinAbsolute( int n, short *a) {
   float xmin = a[5];
   int loc = 0;
   for  (int i = 5; i < n-10; i++) {
-    if (xmin > a[i] && a[i+1] < 0.5*a[i] && a[i] < -40. )  
+    if (xmin > a[i] && a[i+1] < 0.5*a[i] && a[i] < -20. )  
       {
 	//std::cout << i << " " << a[i] << std::endl;
 	xmin = a[i];
@@ -99,17 +99,10 @@ int FindRealMin( int n, short *a) {
   int loc = 0;
   
   float noise = 0;
-  
-  for ( int i = 5; i < 100; i++)
-    {
-      if( abs(a[i]) > noise ) 
-	{
-	  noise = abs(a[i]);
-	}
-    }
+  for ( int i = 5; i < 100; i++) { if( abs(a[i]) > noise ) noise = abs(a[i]); }
 
   for  (int i = 5; i < n-10; i++) {
-    if (xmin > a[i] && a[i+1] < 0.5*a[i] && a[i] < -3*noise )//&& a[i] < -50.)  
+    if (xmin > a[i] && a[i+1] < 0.5*a[i] && a[i] < -2*noise )//&& a[i] < -50.)  
       {
 	//std::cout << a[i] << std::endl;
 	xmin = a[i];
@@ -130,7 +123,7 @@ int FindRealMin( int n, short *a) {
     {
       for ( int i = 5; i < loc_new -25; i++ )
         {
-          if ( a[i] < xmin_new && a[i+1] < 0.5*a[i] && a[i] < 0.15* xmin_init )
+          if ( a[i] < xmin_new && a[i+1] < 0.5*a[i] && a[i] < 0.30* xmin_init )
             {
               xmin_new = a[i];
               loc_new = i;
@@ -141,12 +134,12 @@ int FindRealMin( int n, short *a) {
 
       if( loc_new == loc ) break;
       //std::cout << "new peak @ " << loc_new << ",\tymin: " << xmin_new <<", noise: "<<noise<< std::endl;
-      if ( xmin_new > -2*noise || xmin_new > -40 ) loc_new = 0;
+      if ( xmin_new > -2*noise ) loc_new = 0;
       xmin_new = a[5];
       loc = loc_new;
     }
 
-  //std::cout << "LOC2: " << loc << std::endl;                                                                                                                               
+  //std::cout << "LOC2: " << loc_new << std::endl;                                                                                                                               
   /*                                                                
   while ( xmin_init != xmin_new ) {
     for (int i = 5; i < loc - 50; i++) {
@@ -159,7 +152,13 @@ int FindRealMin( int n, short *a) {
     xmin_new = a[5]
   }
   */
-  return loc_new,noise;
+  return loc_new;
+}
+
+float FindNoise(int n, short *a) {
+  float noise = 0;
+  for ( int i = 5; i < 100; i++) { if( abs(a[i]) > noise ) noise = abs(a[i]); }
+  return noise;
 }
 
 int FindMinFirstPeakAboveNoise( int n, short *a) {

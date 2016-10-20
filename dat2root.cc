@@ -401,7 +401,8 @@ int main(int argc, char **argv){
 	// Find Peak Location using the improved algorithm
 	pulse = new TGraphErrors( GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] ) );
 	//	pulse = GetTGraph( channel[realGroup[group]*9 + i], time[realGroup[group]] );
-	index_min,noise[realGroup[group]*9+i] = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
+	index_min = FindRealMin (1024, channel[realGroup[group]*9 + i]); // return index of the min
+  noise[realGroup[group]*9 + i] = FindNoise(1024, channel[realGroup[group]*9 + i]);
 	//if ( index_min > 0 ) std::cout << "ch: " << totalIndex << std::endl;
 	xmin[realGroup[group]*9 + i] = index_min;
 	
@@ -413,7 +414,7 @@ int main(int argc, char **argv){
 	//Compute Amplitude : use units V
 	Double_t tmpAmp = 0.0;
 	Double_t tmpMin = 0.0;
-	pulse->GetPoint(index_min, tmpMin, tmpAmp);
+	if (index_min != 0) pulse->GetPoint(index_min, tmpMin, tmpAmp);
 	amp[realGroup[group]*9 + i] = tmpAmp* (1.0 / 4096.0); 
 
 	//Get Pulse Integral
