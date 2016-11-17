@@ -1,7 +1,3 @@
-//#ifdef __MAKECINT__
-//#pragma link C++ class vector<vector<float> >+;
-//#endif
-
 #include <iostream>
 #include <fstream> 
 #include <sstream>
@@ -22,22 +18,56 @@
 #include "TGraphErrors.h"
 #include "TLatex.h"
 #include <math.h> 
-#include "SiliconPadUtils.h"
+//#include "SiliconPadUtils.h"
 
 
 
 
 void plotPulses() {
 
-  TFile *file_100GeV = TFile::Open( "eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5/analysis_5568.root" , "READ");
+  TFile *file_100GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5_CdTe/analysis_5568.root" , "READ");
+  TFile *file_200GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5_CdTe/analysis_5570.root" , "READ");
+  TFile *file_50GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5_CdTe/analysis_5571-5576.root" , "READ");
   TTree *tree_100GeV = (TTree*)(file_100GeV->Get("t1065"));
+  TTree *tree_200GeV = (TTree*)(file_200GeV->Get("t1065"));
+  TTree *tree_50GeV = (TTree*)(file_50GeV->Get("t1065"));
 
-  TH1F *pulse_100GeV = new TH1F("pulse_100GeV", ";time;amplitude", 1024, -0.5, 1023.5);
-  tree_100GeV->Draw("t0>>pulse_100GeV", "raw[17]*(event==100)");
-  
-  TCanvas *cv = new TCanvas("cv","cv", 800, 800);
-  pulse_100GeV->Draw("hist");
+  TH1F *pulse_100GeV = new TH1F("pulse_100GeV", ";Time [ns];Amplitude [V]", 1024, -0.5*0.2, 1023.5*0.2);
+  tree_100GeV->Draw("t0*0.2>>pulse_100GeV", "-1*raw[1]*(1.0/4096.)*3.16228*(1.0/63.0957)*(event==100 && amp[0]>0.192871 && amp[0]<0.192872)");
+  TH1F *pulse_200GeV = new TH1F("pulse_200GeV", ";Time [ns];Amplitude [V]", 1024, -0.5*0.2, 1023.5*0.2);
+  tree_200GeV->Draw("t0*0.2>>pulse_200GeV", "-1*raw[1]*(1.0/4096.)*3.16228*(1.0/63.0957)*(event==1 && amp[0]>0.3505 && amp[0]<0.3506)");
+  TH1F *pulse_50GeV = new TH1F("pulse_50GeV", ";Time [ns];Amplitude [V]", 1024, -0.5*0.2, 1023.5*0.2);
+  tree_50GeV->Draw("t0*0.2>>pulse_50GeV", "-1*raw[1]*(1.0/4096.)*3.16228*(1.0/63.0957)*(event==0 && amp[0]>0.1123 && amp[0]<0.1124)");
+ 
 
+  TCanvas *cv = new TCanvas("cv","cv", 800, 600);
+  pulse_200GeV->Draw("hist");
+  pulse_200GeV->SetStats(false);
+  pulse_200GeV->GetYaxis()->SetTitleOffset(2.0);
+  pulse_200GeV->GetXaxis()->SetTitleOffset(1.2);
+  pulse_200GeV->SetLineWidth(2);
+  cv->SetLeftMargin(0.15);
+  cv->SetBottomMargin(0.12);
+
+  pulse_100GeV->SetLineWidth(2);
+  pulse_100GeV->SetLineColor(kRed);
+  pulse_100GeV->Draw("histsame");
+
+  pulse_50GeV->SetLineColor(kBlack);
+  pulse_50GeV->Draw("histsame");
+  pulse_50GeV->SetLineWidth(2);
+
+  TLegend *legend = new TLegend( 0.6,0.6,0.8,0.8);
+  legend->SetBorderSize(0);
+  legend->SetFillStyle(0);
+  legend->AddEntry(pulse_200GeV ,"200 GeV");
+  legend->AddEntry(pulse_100GeV ,"100 GeV");
+  legend->AddEntry(pulse_50GeV ,"50 GeV");
+  legend->Draw();
+  //pulse_200GeV->Draw("hist");
+ 
+  cv->SaveAs("TypicalPulses.png");
+  cv->SaveAs("TypicalPulses.pdf");
 
 
 }
