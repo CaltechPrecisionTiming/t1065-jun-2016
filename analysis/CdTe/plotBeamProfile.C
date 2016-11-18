@@ -25,18 +25,29 @@
 
 void plotBeamProfile() {
 
-  TFile *file_100GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5/analysis_5568.root" , "READ");
+  // TFile *file_100GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5/analysis_5568.root" , "READ");
+  // TFile *file_100GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5/analysis_5570.root" , "READ");
+  TFile *file_100GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5/analysis_5571-5576.root" , "READ");
   TTree *tree_100GeV = (TTree*)(file_100GeV->Get("t1065"));
 
   TH2F *beam_100GeV = new TH2F("beam_100GeV", " ; Beam X Position [mm] ; Beam Y Position [mm]; Number of Events", 35,-20,15,35,-10,25);
   TH2F *beamSensor_100GeV = new TH2F("beamSensor_100GeV", " ; Beam X Position [mm] ; Beam Y Position [mm]; Amplitude Weighted Events", 35,-20,15,35,-10,25);
-  TH2F *beamXVsAmp_100GeV = new TH2F("beamXVsAmp_100GeV", " ; Beam X Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-5,25,40,0,1.0);
-  TH2F *beamYVsAmp_100GeV = new TH2F("beamYVsAmp_100GeV", " ; Beam Y Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-15,15,40,0,1.0);
+  TH2F *beamXVsAmp_100GeV = new TH2F("beamXVsAmp_100GeV", " ; Beam X Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-5,25,4000,0,1.0);
+  TH2F *beamYVsAmp_100GeV = new TH2F("beamYVsAmp_100GeV", " ; Beam Y Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-15,15,4000,0,1.0);
   tree_100GeV->Draw("TDCx:TDCy>>beam_100GeV","","colz");
   tree_100GeV->Draw("TDCx:TDCy>>beamSensor_100GeV","amp[1]","colz");
-  tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp_100GeV","TDCy>-6.5 && TDCy < 1.5","colz");
-  tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp_100GeV","TDCx>4.5 && TDCx < 12.5","colz");
 
+  // // For 100 GeV run
+  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp_100GeV","TDCy>-6.5 && TDCy < 1.5","colz");
+  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp_100GeV","TDCx>4.5 && TDCx < 12.5","colz");
+
+  // //For 200 GeV run
+  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp_100GeV","TDCy>-8 && TDCy < 2","colz");
+  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp_100GeV","TDCx>2.5 && TDCx < 13.5","colz");
+
+  //For 50 GeV run
+  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp_100GeV","TDCy>-8 && TDCy < 2","colz");
+  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp_100GeV","TDCx>2.5 && TDCx < 13.5","colz");
 
   TCanvas *cv = new TCanvas("cv","cv", 800, 800);
   beam_100GeV->Draw("colz");
