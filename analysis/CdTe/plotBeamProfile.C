@@ -23,37 +23,51 @@
 
 
 
-void plotBeamProfile() {
+void plotBeamProfile( int option = 100 ) {
 
-  // TFile *file_100GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5/analysis_5568.root" , "READ");
-  // TFile *file_100GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5/analysis_5570.root" , "READ");
-  TFile *file_100GeV = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v5/analysis_5571-5576.root" , "READ");
-  TTree *tree_100GeV = (TTree*)(file_100GeV->Get("t1065"));
+  TFile *file = 0;
+  if (option == 100) {
+    file = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5568.root" , "READ");
+  }
+  if (option == 50) {
+    file = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5571-5576.root" , "READ");
+  }
+  if (option == 200) {
+    file = TFile::Open( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5570.root" , "READ");
+  }
 
-  TH2F *beam_100GeV = new TH2F("beam_100GeV", " ; Beam X Position [mm] ; Beam Y Position [mm]; Number of Events", 35,-20,15,35,-10,25);
-  TH2F *beamSensor_100GeV = new TH2F("beamSensor_100GeV", " ; Beam X Position [mm] ; Beam Y Position [mm]; Amplitude Weighted Events", 35,-20,15,35,-10,25);
-  TH2F *beamXVsAmp_100GeV = new TH2F("beamXVsAmp_100GeV", " ; Beam X Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-5,25,4000,0,1.0);
-  TH2F *beamYVsAmp_100GeV = new TH2F("beamYVsAmp_100GeV", " ; Beam Y Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-15,15,4000,0,1.0);
-  tree_100GeV->Draw("TDCx:TDCy>>beam_100GeV","","colz");
-  tree_100GeV->Draw("TDCx:TDCy>>beamSensor_100GeV","amp[1]","colz");
+  TTree *tree = (TTree*)(file->Get("t1065"));
 
-  // // For 100 GeV run
-  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp_100GeV","TDCy>-6.5 && TDCy < 1.5","colz");
-  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp_100GeV","TDCx>4.5 && TDCx < 12.5","colz");
+  TH2F *beam = new TH2F("beam", " ; Beam X Position [mm] ; Beam Y Position [mm]; Number of Events", 35,-20,15,35,-10,25);
+  TH2F *beamSensor = new TH2F("beamSensor", " ; Beam X Position [mm] ; Beam Y Position [mm]; Amplitude Weighted Events", 35,-20,15,35,-10,25);
+  TH2F *beamXVsAmp = new TH2F("beamXVsAmp", " ; Beam X Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-5,25,4000,0,1.0);
+  TH2F *beamYVsAmp = new TH2F("beamYVsAmp", " ; Beam Y Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-15,15,4000,0,1.0);
+  tree->Draw("TDCx:TDCy>>beam","","colz");
+  tree->Draw("TDCx:TDCy>>beamSensor","amp[1]","colz");
 
-  // //For 200 GeV run
-  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp_100GeV","TDCy>-8 && TDCy < 2","colz");
-  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp_100GeV","TDCx>2.5 && TDCx < 13.5","colz");
+  // For 100 GeV run
+  if (option == 100) {
+    tree->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp","TDCy>-8.0 && TDCy < 2.0","colz");
+    tree->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp","TDCx>2.5 && TDCx < 13.5","colz");
+  }
+
+  //For 200 GeV run
+  if (option == 200) {
+     tree->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp","TDCy>-8.0 && TDCy < 2.0","colz");
+     tree->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp","TDCx>2.5 && TDCx < 13.5","colz");
+  }
 
   //For 50 GeV run
-  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp_100GeV","TDCy>-8 && TDCy < 2","colz");
-  // tree_100GeV->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp_100GeV","TDCx>2.5 && TDCx < 13.5","colz");
+  if (option == 50) {
+    tree->Draw("amp[1]*3.16228*(1.0/63.0957):TDCx>>beamXVsAmp","TDCy>-8.0 && TDCy < 2.0","colz");
+    tree->Draw("amp[1]*3.16228*(1.0/63.0957):TDCy>>beamYVsAmp","TDCx>2.5 && TDCx < 13.5","colz");
+  }
 
   TCanvas *cv = new TCanvas("cv","cv", 800, 800);
-  beam_100GeV->Draw("colz");
-  beam_100GeV->SetStats(false);
-  beam_100GeV->GetYaxis()->SetTitleOffset(1.5);
-  beam_100GeV->GetXaxis()->SetTitleOffset(1.2);
+  beam->Draw("colz");
+  beam->SetStats(false);
+  beam->GetYaxis()->SetTitleOffset(1.5);
+  beam->GetXaxis()->SetTitleOffset(1.2);
 
   cv->SetRightMargin(0.15);
   cv->SetLeftMargin(0.12);
@@ -63,10 +77,10 @@ void plotBeamProfile() {
   cv->SaveAs("BeamProfile.pdf");
 
   cv = new TCanvas("cv","cv", 800, 800);
-  beamSensor_100GeV->Draw("colz");
-  beamSensor_100GeV->SetStats(false);
-  beamSensor_100GeV->GetYaxis()->SetTitleOffset(1.5);
-  beamSensor_100GeV->GetXaxis()->SetTitleOffset(1.2);
+  beamSensor->Draw("colz");
+  beamSensor->SetStats(false);
+  beamSensor->GetYaxis()->SetTitleOffset(1.5);
+  beamSensor->GetXaxis()->SetTitleOffset(1.2);
 
   cv->SetRightMargin(0.15);
   cv->SetLeftMargin(0.12);
@@ -76,13 +90,13 @@ void plotBeamProfile() {
   cv->SaveAs("BeamSensorProfile.pdf");
 
   cv = new TCanvas("cv","cv", 800, 800);
-  TProfile *beamXProfile_100GeV = beamXVsAmp_100GeV->ProfileX();
-  beamXProfile_100GeV->Draw();
-  beamXProfile_100GeV->SetLineWidth(2);
-  beamXProfile_100GeV->SetStats(false);
-  beamXProfile_100GeV->GetYaxis()->SetTitleOffset(2.5);
-  beamXProfile_100GeV->GetYaxis()->SetTitle("Mean Signal Amplitude [V]");
-  beamXProfile_100GeV->GetXaxis()->SetTitleOffset(1.2);
+  TProfile *beamXProfile = beamXVsAmp->ProfileX();
+  beamXProfile->Draw();
+  beamXProfile->SetLineWidth(2);
+  beamXProfile->SetStats(false);
+  beamXProfile->GetYaxis()->SetTitleOffset(2.5);
+  beamXProfile->GetYaxis()->SetTitle("Mean Signal Amplitude [V]");
+  beamXProfile->GetXaxis()->SetTitleOffset(1.2);
 
   cv->SetLeftMargin(0.2);
   cv->SetBottomMargin(0.12);
@@ -91,13 +105,13 @@ void plotBeamProfile() {
   cv->SaveAs("SensorXProfile.pdf");
 
   cv = new TCanvas("cv","cv", 800, 800);
-  TProfile *beamYProfile_100GeV = beamYVsAmp_100GeV->ProfileX();
-  beamYProfile_100GeV->Draw();
-  beamYProfile_100GeV->SetLineWidth(2);
-  beamYProfile_100GeV->SetStats(false);
-  beamYProfile_100GeV->GetYaxis()->SetTitleOffset(2.5);
-  beamYProfile_100GeV->GetYaxis()->SetTitle("Mean Signal Amplitude [V]");
-  beamYProfile_100GeV->GetXaxis()->SetTitleOffset(1.2);
+  TProfile *beamYProfile = beamYVsAmp->ProfileX();
+  beamYProfile->Draw();
+  beamYProfile->SetLineWidth(2);
+  beamYProfile->SetStats(false);
+  beamYProfile->GetYaxis()->SetTitleOffset(2.5);
+  beamYProfile->GetYaxis()->SetTitle("Mean Signal Amplitude [V]");
+  beamYProfile->GetXaxis()->SetTitleOffset(1.2);
 
   cv->SetLeftMargin(0.2);
   cv->SetBottomMargin(0.12);
