@@ -38,10 +38,10 @@ void plotBeamProfile( int option = 100 ) {
 
   TTree *tree = (TTree*)(file->Get("t1065"));
 
-  TH2F *beam = new TH2F("beam", " ; Beam X Position [mm] ; Beam Y Position [mm]; Number of Events", 35,-20,15,35,-10,25);
-  TH2F *beamSensor = new TH2F("beamSensor", " ; Beam X Position [mm] ; Beam Y Position [mm]; Amplitude Weighted Events", 35,-20,15,35,-10,25);
-  TH2F *beamXVsAmp = new TH2F("beamXVsAmp", " ; Beam X Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-5,25,4000,0,1.0);
-  TH2F *beamYVsAmp = new TH2F("beamYVsAmp", " ; Beam Y Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-15,15,4000,0,1.0);
+  TH2F *beam = new TH2F("beam", " ; Vertical Beam Position [mm] ; Horizontal Beam Position [mm]; Number of Events", 35,-20,15,35,-10,25);
+  TH2F *beamSensor = new TH2F("beamSensor", " ; Vertical Beam Position [mm] ; Horizontal Beam Position [mm]; Amplitude Weighted Events", 35,-20,15,35,-10,25);
+  TH2F *beamXVsAmp = new TH2F("beamXVsAmp", " ; Vertical Beam Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-5,25,4000,0,1.0);
+  TH2F *beamYVsAmp = new TH2F("beamYVsAmp", " ; Horizontal Beam Position [mm] ; Signal Amplitude [V]; Number of Events", 30,-15,15,4000,0,1.0);
   tree->Draw("TDCx:TDCy>>beam","","colz");
   tree->Draw("TDCx:TDCy>>beamSensor","amp[1]","colz");
 
