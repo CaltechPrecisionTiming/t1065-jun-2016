@@ -220,7 +220,7 @@ void makeChargeDistributionH2(string filename, string plotname, string plotTitle
   histIntCharge->GetXaxis()->SetTitleSize(0.045);
   histIntCharge->GetXaxis()->SetLabelSize(0.045);
   histIntCharge->GetYaxis()->SetTitle("Number of Events");
-  histIntCharge->GetYaxis()->SetTitleOffset(1.3);
+  histIntCharge->GetYaxis()->SetTitleOffset(1.2);
   histIntCharge->GetYaxis()->SetTitleSize(0.05);
   histIntCharge->GetYaxis()->SetLabelSize(0.045);
   histIntCharge->GetYaxis()->SetLabelOffset(0.015);
@@ -367,7 +367,15 @@ void makeChargeDistributionT9(string filename, string plotname, string plotTitle
 
 
 
-void plotChargeDistribution(double energy = 100) {
+void plotChargeDistribution(double energy = -1) {
+
+  if (energy == 0) {
+    makeChargeDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5568.root", 
+			    "100GeV", "100 GeV Electrons, 6 X_{0} Tungsten Absorber", 0.5,
+			    2.5,13.5,-8.0,2.0,
+			    50, 0, 12, 4, 8.5
+			    );
+  }
 
   if (energy == 100) {
     makeChargeDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5568.root", 
@@ -426,7 +434,7 @@ void plotChargeDistribution(double energy = 100) {
   }
 
 
-  if (energy == 0) {
+  if (energy == -1) {
     MakeAmplitudeVsBeamEnergyGraph();
   }
  
