@@ -28,8 +28,8 @@ void MakeTimeResolutionVsBeamEnergyGraph() {
   const int nPoints_noCorr = 7;
   float x_noCorr[nPoints_noCorr] = { 2, 3.5, 5, 7, 50.0 , 100.0, 200.0 };
   float xerr_noCorr[nPoints_noCorr] = { 0, 0, 0, 0, 0, 0, 0 };
-  float y_charge_noCorr[nPoints_noCorr] = { 113 , 99 , 92 , 86 , 73 , 43, 43 }; 
-  float yerr_charge_noCorr[nPoints_noCorr] = { 13, 7, 5 ,  7 , 8, 4, 3 };
+  float y_charge_noCorr[nPoints_noCorr] = { 113 , 99 , 92 , 86 , 56 , 44, 47 }; 
+  float yerr_charge_noCorr[nPoints_noCorr] = { 13, 7, 5 ,  7 , 8, 4, 4 };
 
 
   //We decide not to use these because the cuts made on the beam position
@@ -88,59 +88,153 @@ void MakeTimeResolutionVsBeamEnergyGraph() {
   c->SaveAs( "TimeResolutionVsEnergy.gif" );
   c->SaveAs( "TimeResolutionVsEnergy.pdf" );
 
-  return;
 
 
-  //use beam energy for xaxis
-  const int nPoints_T9 = 4;
-  float x_T9[nPoints_T9] = { 2, 3.5, 5, 7 };
-  float xerr_T9[nPoints_T9] = { 0, 0, 0, 0 };
-  float y_charge_T9[nPoints_T9] = {  0.16, 0.26, 0.26, 0.40 }; 
-  float yerr_charge_T9[nPoints_T9] = { 0.008, 0.015, 0.03, 0.026 };
-  float yResolution_charge_T9[nPoints_T9] = { 0.08, 0.15, 0.17, 0.20 };
+}
 
 
-  TGraphErrors *graphChargeVsEnergyAt2X0_Resolution = new TGraphErrors(nPoints_T9,x_T9,y_charge_T9,xerr_T9,yResolution_charge_T9);
-  TGraphErrors *graphChargeVsEnergyAt2X0 = new TGraphErrors(nPoints_T9,x_T9,y_charge_T9,xerr_T9,yerr_charge_T9);
-  graphChargeVsEnergyAt2X0_Resolution->SetMarkerStyle(20);
-  graphChargeVsEnergyAt2X0_Resolution->SetLineWidth(3);
-  graphChargeVsEnergyAt2X0_Resolution->SetLineColor(kGreen+1);
-  graphChargeVsEnergyAt2X0->SetLineColor(kBlue);
-  graphChargeVsEnergyAt2X0->SetLineWidth(2);
 
-  c = new TCanvas("c","c",800,800);
-  graphChargeVsEnergyAt2X0_Resolution->Draw("AP");
-  graphChargeVsEnergyAt2X0_Resolution->SetTitle("");
-  graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetTitle("Electron Beam Energy [GeV/c^{2}]");
-  graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetTitleSize(0.045);
-  graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetLabelSize(0.045);
-  graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetTitleOffset(1.05);
-  graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetTitle("Integrated Charge [pC]");
-  graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetTitleOffset(1.2);
-  graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetTitleSize(0.05);
-  graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetLabelSize(0.045);
-  //graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetRangeUser(0,40);
-  graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetRangeUser(0,0.75);
+void makeTimeResolutionDistributionH2(string filename, string plotname, string plotTitle,
+				      double ampCutOnMCP,
+				      double beamXMin, double beamXMax, double beamYMin, double beamYMax,
+				      int nbins, double xmin, double xmax, double fitmin, double fitmax) {
+  
 
-  graphChargeVsEnergyAt2X0->Draw("PE1same");
-  graphChargeVsEnergyAt2X0->Fit("pol1","","");
-  fitter = TVirtualFitter::GetFitter();
+  TFile *inputfile = TFile::Open(filename.c_str(),"READ");
+  
+  TTree *tree = (TTree*)inputfile->Get("TBtime");
 
-  c->SetLeftMargin(0.15);
-  c->SetBottomMargin(0.12);
+  // get the variables from the ntuple
+  float amp_ref;
+  float amp_CdTe;
+  float time_ref;
+  float time_CdTe;
+  float beamX;
+  float beamY;
 
-  tex = new TLatex();
+  tree->SetBranchStatus("*",0);
+  tree->SetBranchStatus("time_first",1);
+  tree->SetBranchStatus("time_ref2",1);
+  tree->SetBranchStatus("max_ref2",1);
+  tree->SetBranchStatus("max_first",1);
+  tree->SetBranchStatus("TDCx",1);
+  tree->SetBranchStatus("TDCy",1);
+  tree->SetBranchAddress("time_first",&time_CdTe);
+  tree->SetBranchAddress("time_ref2",&time_ref);
+  tree->SetBranchAddress("max_ref2",&amp_ref);
+  tree->SetBranchAddress("max_first",&amp_CdTe);
+  tree->SetBranchAddress("TDCx",&beamX);
+  tree->SetBranchAddress("TDCy",&beamY);
+
+  //create histograms
+  TH1F *histDeltaT;
+  histDeltaT = new TH1F("histDeltaT","; #Delta t [ns];Number of Events", nbins, xmin, xmax);
+
+  TH2F *histDeltaTVsAmplitude = new TH2F("histDeltaTVsAmplitude","test ; Amplitude [V] ; #Delta t [ns]; Number of Events", 100, 0.0, 1.0, 100, -4.6, -3.8);
+  
+  //read all entries and fill the histograms
+  Long64_t nentries = tree->GetEntries();
+
+  std::cout<<"Number of events in Sample: "<<nentries<<std::endl;  
+  for (Long64_t iEntry=0;iEntry<nentries;iEntry++) {
+    if (iEntry %1000 == 0) 
+      cout << "Processing Event " << iEntry << "\n";
+    tree->GetEntry(iEntry);    
+    float MCPTimeGauss = time_ref;
+    float CdTeTime = time_CdTe;
+    float MCPAmp = amp_ref;
+    float CdTeAmp = amp_CdTe;
+    // cout << "here2\n";
+       
+    //use MCP amplitude cut for electron ID
+    if( !(MCPAmp > ampCutOnMCP)) continue;
+    if( !(MCPAmp < 1600)) continue;
+    if(!(beamX > beamXMin && beamX < beamXMax)) continue;
+    if(!(beamY > beamYMin && beamY < beamYMax)) continue;
+
+    //don't fill overflow bins
+    histDeltaT->Fill((CdTeTime-(MCPTimeGauss)/1.0)*0.2-0.0*beamX+0.0*beamY-0.0379*(int(CdTeTime+0.5)-CdTeTime)+0.000106*CdTeAmp);
+
+    if (CdTeAmp > 0.1) {
+      histDeltaTVsAmplitude->Fill( CdTeAmp, (CdTeTime-(MCPTimeGauss)/1.0)*0.2-0.0138*beamX+0.006*beamY-0.038*(int(CdTeTime+0.5)-CdTeTime) );
+    }
+
+  }
+
+
+  TCanvas * c = 0;
+
+
+  //Energy plot
+  c = new TCanvas("c","c",600,600);  
+  c->SetRightMargin(0.05);
+  c->SetLeftMargin(0.17);
+  histDeltaT->SetAxisRange(xmin,xmax,"X");
+  histDeltaT->SetTitle("");
+  histDeltaT->GetXaxis()->SetTitle("#Delta t [ns]");
+  histDeltaT->GetXaxis()->SetTitleSize(0.045);
+  histDeltaT->GetXaxis()->SetLabelSize(0.045);
+  histDeltaT->GetYaxis()->SetTitle("Number of Events");
+  histDeltaT->GetYaxis()->SetTitleOffset(1.3);
+  histDeltaT->GetYaxis()->SetTitleSize(0.05);
+  histDeltaT->GetYaxis()->SetLabelSize(0.045);
+  histDeltaT->GetYaxis()->SetLabelOffset(0.015);
+  histDeltaT->GetYaxis()->SetTitleOffset(1.7);
+  histDeltaT->SetMaximum(1.2*histDeltaT->GetMaximum());
+  histDeltaT->Draw();
+  histDeltaT->SetStats(0);
+  histDeltaT->Fit("gaus","","",fitmin,fitmax);
+  histDeltaT->SetLineWidth(2);
+  histDeltaT->SetLineColor(kBlack);
+ TVirtualFitter * fitter = TVirtualFitter::GetFitter();
+  
+  TLatex *tex = new TLatex();
   tex->SetNDC();
   tex->SetTextSize(0.050);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
-  tex->DrawLatex(0.35, 0.93, "Absorber : 2 X_{0} Lead");
+  tex->DrawLatex(0.60, 0.80, Form("#sigma = %.0f %s",1000*fitter->GetParameter(2),"ps"));
 
-  c->SaveAs( "ChargeVsEnergyAt2X0.gif" );
-  c->SaveAs( "ChargeVsEnergyAt2X0.pdf" );
+  tex->DrawLatex(0.08, 0.93, Form("%s", plotTitle.c_str()));
 
+  c->SaveAs( Form("%s_deltaT.gif", plotname.c_str()) );
+  c->SaveAs( Form("%s_deltaT.pdf", plotname.c_str()) );
+ 
+
+
+  // //Energy plot
+  // c = new TCanvas("c","c",600,600);  
+  // c->SetRightMargin(0.19);
+  // c->SetLeftMargin(0.18);
+  // c->SetBottomMargin(0.12);
+  // histDeltaTVsAmplitude->SetTitle("");
+  // histDeltaTVsAmplitude->GetXaxis()->SetTitleSize(0.045);
+  // histDeltaTVsAmplitude->GetXaxis()->SetLabelSize(0.045);
+  // histDeltaTVsAmplitude->GetXaxis()->SetRangeUser(0,0.75);
+  // histDeltaTVsAmplitude->GetYaxis()->SetTitleOffset(1.3);
+  // histDeltaTVsAmplitude->GetYaxis()->SetTitleSize(0.05);
+  // histDeltaTVsAmplitude->GetYaxis()->SetLabelSize(0.045);
+  // histDeltaTVsAmplitude->GetYaxis()->SetLabelOffset(0.015);
+  // histDeltaTVsAmplitude->GetYaxis()->SetTitleOffset(1.7);
+  // histDeltaTVsAmplitude->GetZaxis()->SetTitleSize(0.05);
+  // histDeltaTVsAmplitude->GetZaxis()->SetLabelSize(0.045);
+  // histDeltaTVsAmplitude->GetZaxis()->SetTitleOffset(1.2);
+  // histDeltaTVsAmplitude->Draw("colz");
+  // histDeltaTVsAmplitude->SetStats(0);
+
+
+  // TProfile *profileDeltaTVsAmplitude = histDeltaTVsAmplitude->ProfileX();
+  // profileDeltaTVsAmplitude->Draw("same");
+  // profileDeltaTVsAmplitude->SetMarkerStyle(20);
+  // profileDeltaTVsAmplitude->SetMarkerSize(0.7);
+  // c->SaveAs( Form("%s_deltaTVsAmp.gif", plotname.c_str()) );
+  // c->SaveAs( Form("%s_deltaTVsAmp.pdf", plotname.c_str()) );
+ 
 
 }
+
+
+
 
 
 
@@ -195,33 +289,22 @@ void makeTimeResolutionDistributionT9(string filename, string plotname, string p
     if (iEntry %1000 == 0) 
       cout << "Processing Event " << iEntry << "\n";
     tree->GetEntry(iEntry);    
-    // cout << "here1\n";
     float MCPTimeGauss = time_ref;
     float CdTeTime = time_CdTe;
     float MCPAmp = amp_ref;
     float LYSOAmp = amp_LYSO;
     float TriggerAmp = amp_Trigger;
-    float CdTeAmp = amp_CdTe*(1.0/63.0957);
-    // cout << "here2\n";
+    float CdTeAmp = amp_CdTe;
        
     //use MCP amplitude cut for electron ID
-    //cout << "test: " << MCPAmp << " " << TriggerAmp << " " << LYSOAmp  << "\n";
     if( !(MCPAmp > ampCutOnMCP)) continue;
     if( !(TriggerAmp > ampCutOnTrigger)) continue;
     if( !(LYSOAmp > ampCutOnLYSO)) continue;
     if(!(beamX > beamXMin && beamX < beamXMax)) continue;
     if(!(beamY > beamYMin && beamY < beamYMax)) continue;
-     // cout << "here3\n";
 
     //don't fill overflow bins
-    //if (1000* siliconIntegral * attenuationFactor / amplificationFactor > xmax) continue;
-    
-    // cout << "time:" << CdTeTime << " " << MCPTimeGauss << "\n";
     histDeltaT->Fill( 0.2*(CdTeTime - MCPTimeGauss) );
-
-    //cout << CdTeCharge << " " << beamX << " " << beamY << " " << CdTeAmp << "\n";
-
-    //cout << 1000* amp[21] << " : " << amplificationFactor << " : " << siliconIntegral * attenuationFactor / amplificationFactor << "\n";
  
   }
 
@@ -307,6 +390,36 @@ void plotTimeResolution(double energy = -1) {
 				      60, 3, 4.5, 3.6, 3.9
 				      );
   }
+
+
+  if (energy == 100) {
+    makeTimeResolutionDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/treeBaseFall/treeBaseFall_5568.root", 
+			    "100GeV", "100 GeV Electrons, 6 X_{0} Tungsten Absorber", 
+			      70,
+			      4,13,-7.0,2.0,
+			      50,-4.4,-3.5, -4.15, -3.95
+			      );
+  }
+
+  if (energy == 200) {
+    makeTimeResolutionDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/treeBaseFall/treeBaseFall_5570.root", 
+				      "200GeV", "200 GeV Electrons, 6 X_{0} Tungsten Absorber", 
+				      70,
+				      4,13,-7.0,2.0,
+				      200,-4.4,-3.5, -4.18, -4.0
+				      );
+  }
+  
+  if (energy == 50) {
+    makeTimeResolutionDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/treeBaseFall/treeBaseFall_55XX_50GeV.root", 
+				      "50GeV", "50 GeV Electrons, 6 X_{0} Tungsten Absorber" , 
+				      70,
+				      4,13,-7.0,2.0,
+				      200,-4.4,-3.5, -4.18, -4.0 
+				      );
+  }
+
+
 
  
   if (energy == -1) {
