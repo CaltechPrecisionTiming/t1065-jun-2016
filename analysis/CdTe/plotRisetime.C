@@ -28,9 +28,9 @@ void MakeRisetimeVsBeamEnergyGraph() {
   const int nPoints_H2 = 7;
   float x_H2[nPoints_H2] = { 2, 3.5, 5, 7, 50.0 , 100.0, 200.0 };
   float xerr_H2[nPoints_H2] = { 0, 0, 0, 0, 0, 0, 0 };
-  float y_charge_H2[nPoints_H2] = { 1.36 , 1.36 , 1.36 ,1.36 , 1.36 , 1.34, 1.30 }; 
-  float yerr_charge_H2[nPoints_H2] = { 0.04, 0.04, 0.04, 0.04, 0.04, 0.03, 0.04 };
-  float yResolution_charge_H2[nPoints_H2] = {0.04, 0.04, 0.04, 0.04,  0.04, 0.03, 0.04 };
+  float y_charge_H2[nPoints_H2] = { 1.34 , 1.35 , 1.29 ,1.33 , 1.36 , 1.34, 1.30 }; 
+  float yerr_charge_H2[nPoints_H2] = { 0.11, 0.09, 0.09, 0.08, 0.04, 0.03, 0.04 };
+  float yResolution_charge_H2[nPoints_H2] = {0.11, 0.09, 0.09, 0.08, 0.04, 0.03, 0.04 };
 
 
   TGraphErrors *graphChargeVsEnergyAt6X0_Resolution = new TGraphErrors(nPoints_H2,x_H2,y_charge_H2,xerr_H2,yResolution_charge_H2);
@@ -218,7 +218,7 @@ void makeRisetimeDistributionH2(string filename, string plotname, string plotTit
   c->SetLeftMargin(0.17);
   histRisetime->SetAxisRange(xmin,xmax,"X");
   histRisetime->SetTitle("");
-  histRisetime->GetXaxis()->SetTitle("Integrated Charge [pC]");
+  histRisetime->GetXaxis()->SetTitle("Risetime [ns]");
   histRisetime->GetXaxis()->SetTitleSize(0.045);
   histRisetime->GetXaxis()->SetLabelSize(0.045);
   histRisetime->GetYaxis()->SetTitle("Number of Events");
@@ -238,8 +238,8 @@ void makeRisetimeDistributionH2(string filename, string plotname, string plotTit
   tex->SetTextSize(0.050);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
-  tex->DrawLatex(0.45, 0.85, Form("Mean = %.2f %s",fitter->GetParameter(1),"pC"));
-  tex->DrawLatex(0.45, 0.80, Form("#sigma = %.2f %s",fitter->GetParameter(2),"pC"));
+  tex->DrawLatex(0.45, 0.85, Form("Mean = %.2f %s",fitter->GetParameter(1),"ns"));
+  tex->DrawLatex(0.45, 0.80, Form("#sigma = %.2f %s",fitter->GetParameter(2),"ns"));
 
   tex->DrawLatex(0.06, 0.93, Form("%s", plotTitle.c_str()));
     
@@ -261,7 +261,7 @@ void makeRisetimeDistributionT9(string filename, string plotname, string plotTit
 
   // get the variables from the ntuple
   float amp[36];
-  float integral[36];
+  float risetime[36];
   float gauspeak[36];
   float linearTime30[36];
   float beamX;
@@ -270,13 +270,13 @@ void makeRisetimeDistributionT9(string filename, string plotname, string plotTit
   tree->SetBranchStatus("*",0);
   tree->SetBranchStatus("gauspeak",1);
   tree->SetBranchStatus("amp",1);
-  tree->SetBranchStatus("intfull",1);
+  tree->SetBranchStatus("risetime",1);
   tree->SetBranchStatus("linearTime30",1);
   tree->SetBranchStatus("TDCx",1);
   tree->SetBranchStatus("TDCy",1);
   tree->SetBranchAddress("gauspeak",gauspeak);
   tree->SetBranchAddress("amp",amp);
-  tree->SetBranchAddress("intfull",integral);
+  tree->SetBranchAddress("risetime",risetime);
   tree->SetBranchAddress("linearTime30",linearTime30);
   tree->SetBranchAddress("TDCx",&beamX);
   tree->SetBranchAddress("TDCy",&beamY);
@@ -302,8 +302,7 @@ void makeRisetimeDistributionT9(string filename, string plotname, string plotTit
     float TriggerAmp = amp[3];
     float CherenkovAmp = amp[7];
     float CdTeAmp = amp[1]*(1.0/63.0957);
-    float MCPCharge = integral[0];
-    float CdTeCharge = integral[1]*(1.0/63.0957);
+    float CdTeRisetime = risetime[1];
     // cout << "here2\n";
        
     //use MCP amplitude cut for electron ID
@@ -318,9 +317,9 @@ void makeRisetimeDistributionT9(string filename, string plotname, string plotTit
     //don't fill overflow bins
     //if (1000* siliconIntegral * attenuationFactor / amplificationFactor > xmax) continue;
     
-    histRisetime->Fill( CdTeCharge );
+    histRisetime->Fill( CdTeRisetime );
 
-    //cout << CdTeCharge << " " << beamX << " " << beamY << " " << CdTeAmp << "\n";
+    //cout << CdTeRisetime << " " << beamX << " " << beamY << " " << CdTeAmp << "\n";
 
     //cout << 1000* amp[21] << " : " << amplificationFactor << " : " << siliconIntegral * attenuationFactor / amplificationFactor << "\n";
  
@@ -336,7 +335,7 @@ void makeRisetimeDistributionT9(string filename, string plotname, string plotTit
   c->SetLeftMargin(0.17);
   histRisetime->SetAxisRange(xmin,xmax,"X");
   histRisetime->SetTitle("");
-  histRisetime->GetXaxis()->SetTitle("Integrated Charge [pC]");
+  histRisetime->GetXaxis()->SetTitle("Risetime [ns]");
   histRisetime->GetXaxis()->SetTitleSize(0.045);
   histRisetime->GetXaxis()->SetLabelSize(0.045);
   histRisetime->GetYaxis()->SetTitle("Number of Events");
@@ -361,8 +360,8 @@ void makeRisetimeDistributionT9(string filename, string plotname, string plotTit
 
   tex->DrawLatex(0.18, 0.93, Form("%s", plotTitle.c_str()));
 
-  c->SaveAs( Form("%s_charge.gif", plotname.c_str()) );
-  c->SaveAs( Form("%s_charge.pdf", plotname.c_str()) );
+  c->SaveAs( Form("%s_risetime.gif", plotname.c_str()) );
+  c->SaveAs( Form("%s_risetime.pdf", plotname.c_str()) );
  
 
 }
@@ -396,34 +395,34 @@ void plotRisetime(double energy = -1) {
   }
 
   if (energy == 2) {
-    makeRisetimeDistributionT9( "/afs/cern.ch/work/s/sixie/public/releases/run2/Timing/CMSSW_7_4_14/src/H4Analysis/ntuples/analysis_4627.root", 
-			      "2GeV", "2 GeV Electrons, 2 X_{0} Lead Absorber", 0.025, 0.85, 0.15,
+    makeRisetimeDistributionT9( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_4627.root", 
+				"2GeV", "2 GeV Electrons, 2 X_{0} Lead Absorber", 0.025, 0.70, 0.15,
 				-20,20, -10,10,
-				50, 1.0, 1.5, 1.2, 1.45
+				50, 1.0, 2.0, 1.1, 1.6
 				);
   }
 
   if (energy == 3.5) {
     makeRisetimeDistributionT9( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_4626.root", 
-			      "3p5GeV", "3.5 GeV Electrons, 2 X_{0} Lead Absorber", 0.025, 0.85, 0.15,
+			      "3p5GeV", "3.5 GeV Electrons, 2 X_{0} Lead Absorber", 0.025, 0.65, 0.15,
 			      -20,20, -10,10,
-			      20, 0,1.0,0.05,0.5
+			      20, 1.0,2.0,1.1,1.6
 			      );
   }
 
   if (energy == 5) {
     makeRisetimeDistributionT9( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_4629.root", 
-			      "5GeV", "5 GeV Electrons, 2 X_{0} Lead Absorber", 0.025, 0.80, 0.15,
+			      "5GeV", "5 GeV Electrons, 2 X_{0} Lead Absorber", 0.025, 0.65, 0.15,
 			      -20,20, -10,10,
-			      20, 0,1.0,0.05,0.55
+			      20, 1.0,2.0,1.1,1.6
 			      );
   }
 
   if (energy == 7) {
     makeRisetimeDistributionT9( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_4632.root", 
-			      "7GeV", "7 GeV Electrons, 2 X_{0} Lead Absorber", 0.025, 0.87, 0.15,
+			      "7GeV", "7 GeV Electrons, 2 X_{0} Lead Absorber", 0.025, 0.65, 0.15,
 			      -20,20, -10,10,
-			      20, 0,2.0,0.15,0.75
+			      20, 1.0,2.0,1.1,1.6
 			      );
   }
 
