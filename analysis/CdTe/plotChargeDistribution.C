@@ -49,7 +49,7 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   c = new TCanvas("c","c",800,800);
   graphChargeVsEnergyAt6X0_Resolution->Draw("AP");
   graphChargeVsEnergyAt6X0_Resolution->SetTitle("");
-  graphChargeVsEnergyAt6X0_Resolution->GetXaxis()->SetTitle("Electron Beam Energy [GeV/c^{2}]");
+  graphChargeVsEnergyAt6X0_Resolution->GetXaxis()->SetTitle("Electron Beam Energy [GeV]");
   graphChargeVsEnergyAt6X0_Resolution->GetXaxis()->SetTitleSize(0.045);
   graphChargeVsEnergyAt6X0_Resolution->GetXaxis()->SetLabelSize(0.045);
   graphChargeVsEnergyAt6X0_Resolution->GetXaxis()->SetTitleOffset(1.05);
@@ -72,12 +72,14 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   tex->SetTextSize(0.050);
   tex->SetTextFont(42);
   tex->SetTextColor(kBlack);
-  tex->DrawLatex(0.35, 0.93, "Absorber : 6 X_{0} Tungsten");
+  tex->DrawLatex(0.30, 0.93, "Absorber : 6 X_{0} W-Pb");
 
 
+  c->SaveAs( "ChargeVsEnergyAt6X0.C" );
   c->SaveAs( "ChargeVsEnergyAt6X0.gif" );
   c->SaveAs( "ChargeVsEnergyAt6X0.pdf" );
 
+  return;
 
   //use beam energy for xaxis
   const int nPoints_T9 = 4;
@@ -99,7 +101,7 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   c = new TCanvas("c","c",800,800);
   graphChargeVsEnergyAt2X0_Resolution->Draw("AP");
   graphChargeVsEnergyAt2X0_Resolution->SetTitle("");
-  graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetTitle("Electron Beam Energy [GeV/c^{2}]");
+  graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetTitle("Electron Beam Energy [GeV]");
   graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetTitleSize(0.045);
   graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetLabelSize(0.045);
   graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetTitleOffset(1.05);
@@ -124,6 +126,7 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   tex->SetTextColor(kBlack);
   tex->DrawLatex(0.35, 0.93, "Absorber : 2 X_{0} Lead");
 
+  c->SaveAs( "ChargeVsEnergyAt2X0.C" );
   c->SaveAs( "ChargeVsEnergyAt2X0.gif" );
   c->SaveAs( "ChargeVsEnergyAt2X0.pdf" );
 
@@ -239,8 +242,9 @@ void makeChargeDistributionH2(string filename, string plotname, string plotTitle
   tex->DrawLatex(0.45, 0.85, Form("Mean = %.1f %s",fitter->GetParameter(1),"pC"));
   tex->DrawLatex(0.45, 0.80, Form("#sigma = %.1f %s",fitter->GetParameter(2),"pC"));
 
-  tex->DrawLatex(0.06, 0.93, Form("%s", plotTitle.c_str()));
+  tex->DrawLatex(0.13, 0.93, Form("%s", plotTitle.c_str()));
     
+  c->SaveAs( Form("%s_charge.C", plotname.c_str()) );
   c->SaveAs( Form("%s_charge.gif", plotname.c_str()) );
   c->SaveAs( Form("%s_charge.pdf", plotname.c_str()) );
  
@@ -371,7 +375,7 @@ void plotChargeDistribution(double energy = -1) {
 
   if (energy == 0) {
     makeChargeDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5568.root", 
-			    "100GeV", "100 GeV Electrons, 6 X_{0} Tungsten Absorber", 0.5,
+			    "100GeV", "100 GeV Electrons, 6 X_{0} W-Pb Absorber", 0.5,
 			    2.5,13.5,-8.0,2.0,
 			    50, 0, 12, 4, 8.5
 			    );
@@ -379,7 +383,7 @@ void plotChargeDistribution(double energy = -1) {
 
   if (energy == 100) {
     makeChargeDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5568.root", 
-			    "100GeV", "100 GeV Electrons, 6 X_{0} Tungsten Absorber", 0.5,
+			    "100GeV", "100 GeV Electrons, 6 X_{0} W-Pb Absorber", 0.5,
 			    2.5,13.5,-8.0,2.0,
 			    50, 0, 12, 4, 8.5
 			    );
@@ -387,7 +391,7 @@ void plotChargeDistribution(double energy = -1) {
 
   if (energy == 200) {
     makeChargeDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5570.root", 
-			    "200GeV", "200 GeV Electrons, 6 X_{0} Tungsten Absorber", 0.5,
+			    "200GeV", "200 GeV Electrons, 6 X_{0} W-Pb Absorber", 0.5,
 			    2.5,13.5,-8,2,
 			    50, 0, 20, 6.0, 14.0
 			    );

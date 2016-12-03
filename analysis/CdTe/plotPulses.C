@@ -43,14 +43,19 @@ void plotPulses() {
   TCanvas *cv = new TCanvas("cv","cv", 800, 600);
   pulse_200GeV->Draw("hist");
   pulse_200GeV->SetStats(false);
-  pulse_200GeV->GetYaxis()->SetTitleOffset(2.0);
-  pulse_200GeV->GetXaxis()->SetTitleOffset(1.2);
+  pulse_200GeV->GetYaxis()->SetTitleOffset(1.5);
+  pulse_200GeV->GetXaxis()->SetTitleOffset(1.1);
+  pulse_200GeV->GetXaxis()->SetTitleSize(0.05);
+  pulse_200GeV->GetXaxis()->SetLabelSize(0.04);
+  pulse_200GeV->GetYaxis()->SetTitleSize(0.05);
+  pulse_200GeV->GetYaxis()->SetLabelSize(0.04);
   pulse_200GeV->SetLineWidth(2);
   cv->SetLeftMargin(0.15);
   cv->SetBottomMargin(0.12);
 
   pulse_100GeV->SetLineWidth(2);
   pulse_100GeV->SetLineColor(kRed);
+
   pulse_100GeV->Draw("histsame");
 
   pulse_50GeV->SetLineColor(kBlack);
@@ -60,15 +65,18 @@ void plotPulses() {
   TLegend *legend = new TLegend( 0.6,0.6,0.8,0.8);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
+  legend->SetTextSize(0.05);
   legend->AddEntry(pulse_200GeV ,"200 GeV");
   legend->AddEntry(pulse_100GeV ,"100 GeV");
   legend->AddEntry(pulse_50GeV ,"50 GeV");
   legend->Draw();
  
+  cv->SaveAs("TypicalPulses.C");
   cv->SaveAs("TypicalPulses.png");
   cv->SaveAs("TypicalPulses.pdf");
 
   pulse_200GeV->GetXaxis()->SetRangeUser(30,60);
+  cv->SaveAs("TypicalPulses_Zoom.C");
   cv->SaveAs("TypicalPulses_Zoom.png");
   cv->SaveAs("TypicalPulses_Zoom.pdf");
   

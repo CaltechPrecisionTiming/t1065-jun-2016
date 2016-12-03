@@ -28,7 +28,7 @@ void MakeTimeResolutionVsBeamEnergyGraph() {
   const int nPoints_noCorr = 7;
   float x_noCorr[nPoints_noCorr] = { 2, 3.5, 5, 7, 50.0 , 100.0, 200.0 };
   float xerr_noCorr[nPoints_noCorr] = { 0, 0, 0, 0, 0, 0, 0 };
-  float y_charge_noCorr[nPoints_noCorr] = { 113 , 99 , 92 , 86 , 56 , 44, 47 }; 
+  float y_charge_noCorr[nPoints_noCorr] = { 113 , 99 , 92 , 86 , 56 , 45, 47 }; 
   float yerr_charge_noCorr[nPoints_noCorr] = { 13, 7, 5 ,  7 , 8, 4, 4 };
 
 
@@ -85,6 +85,7 @@ void MakeTimeResolutionVsBeamEnergyGraph() {
   // tex->DrawLatex(0.35, 0.93, "Absorber : 6 X_{0} Tungsten");
 
 
+  c->SaveAs( "TimeResolutionVsEnergy.C" );
   c->SaveAs( "TimeResolutionVsEnergy.gif" );
   c->SaveAs( "TimeResolutionVsEnergy.pdf" );
 
@@ -97,7 +98,7 @@ void MakeTimeResolutionVsBeamEnergyGraph() {
 void makeTimeResolutionDistributionH2(string filename, string plotname, string plotTitle,
 				      double ampCutOnMCP,
 				      double beamXMin, double beamXMax, double beamYMin, double beamYMax,
-				      int nbins, double xmin, double xmax, double fitmin, double fitmax) {
+				      int nbins, double xmin, double xmax, double fitmin, double fitmax, double zoomXmin, double zoomXmax) {
   
 
   TFile *inputfile = TFile::Open(filename.c_str(),"READ");
@@ -128,7 +129,8 @@ void makeTimeResolutionDistributionH2(string filename, string plotname, string p
 
   //create histograms
   TH1F *histDeltaT;
-  histDeltaT = new TH1F("histDeltaT","; #Delta t [ns];Number of Events", nbins, xmin, xmax);
+  double binWidth = 1000*(xmax - xmin) / nbins;
+  histDeltaT = new TH1F("histDeltaT",Form("; #Delta t [ns];Number of Events / %.0f ps",binWidth), nbins, xmin, xmax);
 
   TH2F *histDeltaTVsAmplitude = new TH2F("histDeltaTVsAmplitude","test ; Amplitude [V] ; #Delta t [ns]; Number of Events", 100, 0.0, 1.0, 100, -4.6, -3.8);
   
@@ -155,8 +157,8 @@ void makeTimeResolutionDistributionH2(string filename, string plotname, string p
     //don't fill overflow bins
     histDeltaT->Fill((CdTeTime-(MCPTimeGauss)/1.0)*0.2-0.0*beamX+0.0*beamY-0.0379*(int(CdTeTime+0.5)-CdTeTime)+0.000106*CdTeAmp);
 
-    if (CdTeAmp > 0.1) {
-      histDeltaTVsAmplitude->Fill( CdTeAmp, (CdTeTime-(MCPTimeGauss)/1.0)*0.2-0.0138*beamX+0.006*beamY-0.038*(int(CdTeTime+0.5)-CdTeTime) );
+    if (CdTeAmp > 100) {
+      histDeltaTVsAmplitude->Fill( CdTeAmp / 1000, (CdTeTime-(MCPTimeGauss)/1.0)*0.2-0.0138*beamX+0.006*beamY-0.038*(int(CdTeTime+0.5)-CdTeTime) );
     }
 
   }
@@ -165,7 +167,7 @@ void makeTimeResolutionDistributionH2(string filename, string plotname, string p
   TCanvas * c = 0;
 
 
-  //Energy plot
+  //deltaT plot
   c = new TCanvas("c","c",600,600);  
   c->SetRightMargin(0.05);
   c->SetLeftMargin(0.17);
@@ -174,7 +176,7 @@ void makeTimeResolutionDistributionH2(string filename, string plotname, string p
   histDeltaT->GetXaxis()->SetTitle("#Delta t [ns]");
   histDeltaT->GetXaxis()->SetTitleSize(0.045);
   histDeltaT->GetXaxis()->SetLabelSize(0.045);
-  histDeltaT->GetYaxis()->SetTitle("Number of Events");
+  histDeltaT->GetYaxis()->SetTitle(Form("Number of Events / %.0f ps",binWidth));
   histDeltaT->GetYaxis()->SetTitleOffset(1.3);
   histDeltaT->GetYaxis()->SetTitleSize(0.05);
   histDeltaT->GetYaxis()->SetLabelSize(0.045);
@@ -186,7 +188,9 @@ void makeTimeResolutionDistributionH2(string filename, string plotname, string p
   histDeltaT->Fit("gaus","","",fitmin,fitmax);
   histDeltaT->SetLineWidth(2);
   histDeltaT->SetLineColor(kBlack);
- TVirtualFitter * fitter = TVirtualFitter::GetFitter();
+  histDeltaT->GetXaxis()->SetRangeUser(zoomXmin, zoomXmax);
+
+  TVirtualFitter * fitter = TVirtualFitter::GetFitter();
   
   TLatex *tex = new TLatex();
   tex->SetNDC();
@@ -195,40 +199,43 @@ void makeTimeResolutionDistributionH2(string filename, string plotname, string p
   tex->SetTextColor(kBlack);
   tex->DrawLatex(0.60, 0.80, Form("#sigma = %.0f %s",1000*fitter->GetParameter(2),"ps"));
 
-  tex->DrawLatex(0.08, 0.93, Form("%s", plotTitle.c_str()));
+  tex->DrawLatex(0.12, 0.93, Form("%s", plotTitle.c_str()));
 
+  c->SaveAs( Form("%s_deltaT.C", plotname.c_str()) );
   c->SaveAs( Form("%s_deltaT.gif", plotname.c_str()) );
   c->SaveAs( Form("%s_deltaT.pdf", plotname.c_str()) );
  
 
+  //2D  plot
+  c = new TCanvas("c","c",600,600);  
+  c->SetRightMargin(0.19);
+  c->SetLeftMargin(0.18);
+  c->SetBottomMargin(0.12);
+  histDeltaTVsAmplitude->SetTitle("");
+  histDeltaTVsAmplitude->GetXaxis()->SetTitleSize(0.045);
+  histDeltaTVsAmplitude->GetXaxis()->SetLabelSize(0.045);
+  histDeltaTVsAmplitude->GetXaxis()->SetRangeUser(0,0.75);
+  histDeltaTVsAmplitude->GetXaxis()->SetTitleOffset(1.2);
+  histDeltaTVsAmplitude->GetYaxis()->SetTitleSize(0.04);
+  histDeltaTVsAmplitude->GetYaxis()->SetLabelSize(0.04);
+  histDeltaTVsAmplitude->GetYaxis()->SetLabelOffset(0.015);
+  histDeltaTVsAmplitude->GetYaxis()->SetTitleOffset(2.0);
+  histDeltaTVsAmplitude->GetZaxis()->SetTitleSize(0.04);
+  histDeltaTVsAmplitude->GetZaxis()->SetLabelSize(0.04);
+  histDeltaTVsAmplitude->GetZaxis()->SetTitleOffset(1.3);
+  //histDeltaTVsAmplitude->SetMinimum(0);
+  //histDeltaTVsAmplitude->SetMaximum(1000);
+  histDeltaTVsAmplitude->Draw("colz");
+  histDeltaTVsAmplitude->SetStats(0);
 
-  // //Energy plot
-  // c = new TCanvas("c","c",600,600);  
-  // c->SetRightMargin(0.19);
-  // c->SetLeftMargin(0.18);
-  // c->SetBottomMargin(0.12);
-  // histDeltaTVsAmplitude->SetTitle("");
-  // histDeltaTVsAmplitude->GetXaxis()->SetTitleSize(0.045);
-  // histDeltaTVsAmplitude->GetXaxis()->SetLabelSize(0.045);
-  // histDeltaTVsAmplitude->GetXaxis()->SetRangeUser(0,0.75);
-  // histDeltaTVsAmplitude->GetYaxis()->SetTitleOffset(1.3);
-  // histDeltaTVsAmplitude->GetYaxis()->SetTitleSize(0.05);
-  // histDeltaTVsAmplitude->GetYaxis()->SetLabelSize(0.045);
-  // histDeltaTVsAmplitude->GetYaxis()->SetLabelOffset(0.015);
-  // histDeltaTVsAmplitude->GetYaxis()->SetTitleOffset(1.7);
-  // histDeltaTVsAmplitude->GetZaxis()->SetTitleSize(0.05);
-  // histDeltaTVsAmplitude->GetZaxis()->SetLabelSize(0.045);
-  // histDeltaTVsAmplitude->GetZaxis()->SetTitleOffset(1.2);
-  // histDeltaTVsAmplitude->Draw("colz");
-  // histDeltaTVsAmplitude->SetStats(0);
 
-
-  // TProfile *profileDeltaTVsAmplitude = histDeltaTVsAmplitude->ProfileX();
-  // profileDeltaTVsAmplitude->Draw("same");
-  // profileDeltaTVsAmplitude->SetMarkerStyle(20);
-  // profileDeltaTVsAmplitude->SetMarkerSize(0.7);
-  // c->SaveAs( Form("%s_deltaTVsAmp.gif", plotname.c_str()) );
-  // c->SaveAs( Form("%s_deltaTVsAmp.pdf", plotname.c_str()) );
+  TProfile *profileDeltaTVsAmplitude = histDeltaTVsAmplitude->ProfileX();
+  profileDeltaTVsAmplitude->Draw("same");
+  profileDeltaTVsAmplitude->SetMarkerStyle(20);
+  profileDeltaTVsAmplitude->SetMarkerSize(0.7);
+  c->SaveAs( Form("%s_deltaTVsAmp.C", plotname.c_str()) );
+  c->SaveAs( Form("%s_deltaTVsAmp.gif", plotname.c_str()) );
+  c->SaveAs( Form("%s_deltaTVsAmp.pdf", plotname.c_str()) );
  
 
 }
@@ -394,28 +401,28 @@ void plotTimeResolution(double energy = -1) {
 
   if (energy == 100) {
     makeTimeResolutionDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/treeBaseFall/treeBaseFall_5568.root", 
-			    "100GeV", "100 GeV Electrons, 6 X_{0} Tungsten Absorber", 
+			    "100GeV", "100 GeV Electrons, 6 X_{0} W-Pb Absorber", 
 			      70,
 			      4,13,-7.0,2.0,
-			      50,-4.4,-3.5, -4.15, -3.95
+			      50,-4.4,-3.4, -4.15, -3.95, -4.3, -3.8
 			      );
   }
 
   if (energy == 200) {
     makeTimeResolutionDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/treeBaseFall/treeBaseFall_5570.root", 
-				      "200GeV", "200 GeV Electrons, 6 X_{0} Tungsten Absorber", 
+				      "200GeV", "200 GeV Electrons, 6 X_{0} W-Pb Absorber", 
 				      70,
 				      4,13,-7.0,2.0,
-				      200,-4.4,-3.5, -4.18, -4.0
+				      200,-4.4,-3.5, -4.18, -4.0,-4.4,-3.5
 				      );
   }
   
   if (energy == 50) {
     makeTimeResolutionDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/treeBaseFall/treeBaseFall_55XX_50GeV.root", 
-				      "50GeV", "50 GeV Electrons, 6 X_{0} Tungsten Absorber" , 
+				      "50GeV", "50 GeV Electrons, 6 X_{0} W-Pb Absorber" , 
 				      70,
 				      4,13,-7.0,2.0,
-				      200,-4.4,-3.5, -4.18, -4.0 
+				      200,-4.4,-3.5, -4.18, -4.0 ,-4.4,-3.5
 				      );
   }
 
