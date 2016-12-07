@@ -28,9 +28,9 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   const int nPoints_H2 = 3;
   float x_H2[nPoints_H2] = { 50.0 , 100.0, 200.0 };
   float xerr_H2[nPoints_H2] = { 0, 0, 0 };
-  float y_charge_H2[nPoints_H2] = {  3.1 , 5.8, 9.6 }; 
-  float yerr_charge_H2[nPoints_H2] = { 0.06, 0.02, 0.06 };
-  float yResolution_charge_H2[nPoints_H2] = { 1.0, 1.6, 3.1 };
+  float y_charge_H2[nPoints_H2] = {  3.6 , 6.8, 11.5 }; 
+  float yerr_charge_H2[nPoints_H2] = { 0.09, 0.05, 0.12 };
+  float yResolution_charge_H2[nPoints_H2] = { 0.6, 1.2, 2.2 };
 
 
   TGraphErrors *graphChargeVsEnergyAt6X0_Resolution = new TGraphErrors(nPoints_H2,x_H2,y_charge_H2,xerr_H2,yResolution_charge_H2);
@@ -62,8 +62,8 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   graphChargeVsEnergyAt6X0_Resolution->SetMarkerSize(1);
   graphChargeVsEnergyAt6X0_Resolution->GetYaxis()->SetRangeUser(0,15);
 
-  graphChargeVsEnergyAt6X0_Resolution->Fit("pol1","","");
-  fitter = TVirtualFitter::GetFitter();
+  // graphChargeVsEnergyAt6X0_Resolution->Fit("pol1","","");
+  // fitter = TVirtualFitter::GetFitter();
   c->SetLeftMargin(0.15);
   c->SetBottomMargin(0.12);
 
@@ -79,7 +79,6 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   c->SaveAs( "ChargeVsEnergyAt6X0.gif" );
   c->SaveAs( "ChargeVsEnergyAt6X0.pdf" );
 
-  return;
 
   //use beam energy for xaxis
   const int nPoints_T9 = 4;
@@ -113,8 +112,8 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetRangeUser(0,0.75);
 
   graphChargeVsEnergyAt2X0->Draw("PE1same");
-  graphChargeVsEnergyAt2X0->Fit("pol1","","");
-  fitter = TVirtualFitter::GetFitter();
+  // graphChargeVsEnergyAt2X0->Fit("pol1","","");
+  // fitter = TVirtualFitter::GetFitter();
 
   c->SetLeftMargin(0.15);
   c->SetBottomMargin(0.12);
@@ -170,6 +169,8 @@ void makeChargeDistributionH2(string filename, string plotname, string plotTitle
   //create histograms
   TH1F *histIntCharge;
   histIntCharge = new TH1F("histIntCharge","; Integrated Charge [pC];Number of Events", nbins, xmin, xmax);
+  TH1F *histAmp;
+  histAmp = new TH1F("histAmp","; Amplitude [mV];Number of Events", 100, 0, 1.0);
 
   
   //read all entries and fill the histograms
@@ -202,6 +203,7 @@ void makeChargeDistributionH2(string filename, string plotname, string plotTitle
     //if (1000* siliconIntegral * attenuationFactor / amplificationFactor > xmax) continue;
     
     histIntCharge->Fill( CdTeCharge );
+    histAmp->Fill( amp[1] );
 
     //cout << CdTeCharge << " " << beamX << " " << beamY << " " << CdTeAmp << "\n";
 
@@ -248,6 +250,8 @@ void makeChargeDistributionH2(string filename, string plotname, string plotTitle
   c->SaveAs( Form("%s_charge.gif", plotname.c_str()) );
   c->SaveAs( Form("%s_charge.pdf", plotname.c_str()) );
  
+  // c = new TCanvas("c","c",600,600);  
+  // histAmp->Draw();
 
 }
 
@@ -384,24 +388,27 @@ void plotChargeDistribution(double energy = -1) {
   if (energy == 100) {
     makeChargeDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5568.root", 
 			    "100GeV", "100 GeV Electrons, 6 X_{0} W-Pb Absorber", 0.5,
-			    2.5,13.5,-8.0,2.0,
-			    50, 0, 12, 4, 8.5
+			    // 2.5,13.5,-8.0,2.0,
+			    6.5,9.5,-3.5,-0.5,
+			    50, 0, 12, 5, 11.0
 			    );
   }
 
   if (energy == 200) {
     makeChargeDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5570.root", 
 			    "200GeV", "200 GeV Electrons, 6 X_{0} W-Pb Absorber", 0.5,
-			    2.5,13.5,-8,2,
-			    50, 0, 20, 6.0, 14.0
+			    // 2.5,13.5,-8,2,
+			    6.5,9.5,-3.5,-0.5,
+			    50, 0, 25, 8.0, 20.0
 			    );
   }
   
   if (energy == 50) {
     makeChargeDistributionH2( "/afs/cern.ch/user/s/sixie/eos/cms/store/group/phys_susy/razor/Timing/Nov2016CERN/ntuples_v6/analysis_5571-5576.root", 
 			    "50GeV", "50 GeV Electrons, 6 X_{0} Tungsten Absorber" , 0.5,
-			    2.5,13.5,-8.0,2.0,
-			    25, 0,7,2.0,4.5
+			    // 2.5,13.5,-8.0,2.0,
+			    6.5,9.5,-3.5,-0.5,
+			    25, 0,7,2.5,6.0
 			    );
   }
 
