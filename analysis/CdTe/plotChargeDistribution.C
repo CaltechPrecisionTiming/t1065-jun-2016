@@ -35,7 +35,8 @@ void MakeAmplitudeVsBeamEnergyGraph() {
 
   TGraphErrors *graphChargeVsEnergyAt6X0_Resolution = new TGraphErrors(nPoints_H2,x_H2,y_charge_H2,xerr_H2,yResolution_charge_H2);
   TGraphErrors *graphChargeVsEnergyAt6X0 = new TGraphErrors(nPoints_H2,x_H2,y_charge_H2,xerr_H2,yerr_charge_H2);
-  graphChargeVsEnergyAt6X0_Resolution->SetMarkerStyle(0);
+  graphChargeVsEnergyAt6X0_Resolution->SetMarkerStyle(20);
+  graphChargeVsEnergyAt6X0_Resolution->SetMarkerSize(1.25);
   graphChargeVsEnergyAt6X0_Resolution->SetLineColor(kGreen+1);
   graphChargeVsEnergyAt6X0_Resolution->SetLineWidth(2);
   graphChargeVsEnergyAt6X0->SetLineColor(kBlue);
@@ -58,8 +59,8 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   graphChargeVsEnergyAt6X0_Resolution->GetYaxis()->SetTitleSize(0.05);
   graphChargeVsEnergyAt6X0_Resolution->GetYaxis()->SetLabelSize(0.045);
   //graphChargeVsEnergyAt6X0_Resolution->GetXaxis()->SetRangeUser(0,40);
-  graphChargeVsEnergyAt6X0_Resolution->SetMarkerStyle(20);
-  graphChargeVsEnergyAt6X0_Resolution->SetMarkerSize(1);
+  // graphChargeVsEnergyAt6X0_Resolution->SetMarkerStyle(20);
+  // graphChargeVsEnergyAt6X0_Resolution->SetMarkerSize(1.5);
   graphChargeVsEnergyAt6X0_Resolution->GetYaxis()->SetRangeUser(0,15);
 
   // graphChargeVsEnergyAt6X0_Resolution->Fit("pol1","","");
@@ -81,19 +82,24 @@ void MakeAmplitudeVsBeamEnergyGraph() {
 
 
   //use beam energy for xaxis
-  const int nPoints_T9 = 4;
-  float x_T9[nPoints_T9] = { 2, 3.5, 5, 7 };
-  float xerr_T9[nPoints_T9] = { 0, 0, 0, 0 };
+  const int nPoints_T9 = 5;
+  float x_T9[nPoints_T9] = {0, 2, 3.5, 5, 7 };
+  float xerr_T9[nPoints_T9] = {0, 0, 0, 0, 0 };
+
+  //Computed from charge integral
   //float y_charge_T9[nPoints_T9] = {  0.16, 0.26, 0.26, 0.40 }; 
   //float yerr_charge_T9[nPoints_T9] = { 0.008, 0.015, 0.03, 0.026 };
   //float yResolution_charge_T9[nPoints_T9] = { 0.08, 0.15, 0.17, 0.20 };
-  float y_charge_T9[nPoints_T9] = {  0.076, 0.104, 0.161, 0.243 }; 
-  float yerr_charge_T9[nPoints_T9] = { 0.006, 0.003, 0.005, 0.008 };
-  float yResolution_charge_T9[nPoints_T9] = { 0.062, 0.070, 0.094, 0.118 };
+
+  //Computed from 
+  float y_charge_T9[nPoints_T9] = {-100,  0.076, 0.104, 0.161, 0.243 }; 
+  float yerr_charge_T9[nPoints_T9] = { 0, 0.006, 0.003, 0.005, 0.008 };
+  float yResolution_charge_T9[nPoints_T9] = {0, 0.062, 0.070, 0.094, 0.118 };
 
   TGraphErrors *graphChargeVsEnergyAt2X0_Resolution = new TGraphErrors(nPoints_T9,x_T9,y_charge_T9,xerr_T9,yResolution_charge_T9);
   TGraphErrors *graphChargeVsEnergyAt2X0 = new TGraphErrors(nPoints_T9,x_T9,y_charge_T9,xerr_T9,yerr_charge_T9);
   graphChargeVsEnergyAt2X0_Resolution->SetMarkerStyle(20);
+  graphChargeVsEnergyAt2X0_Resolution->SetMarkerSize(1.25);
   graphChargeVsEnergyAt2X0_Resolution->SetLineWidth(3);
   graphChargeVsEnergyAt2X0_Resolution->SetLineColor(kGreen+1);
   graphChargeVsEnergyAt2X0->SetLineColor(kBlue);
@@ -107,17 +113,17 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetLabelSize(0.045);
   graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetTitleOffset(1.05);
   graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetTitle("Integrated Charge [pC]");
-  graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetTitleOffset(1.2);
+  graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetTitleOffset(1.5);
   graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetTitleSize(0.05);
   graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetLabelSize(0.045);
   //graphChargeVsEnergyAt2X0_Resolution->GetXaxis()->SetRangeUser(0,40);
-  graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetRangeUser(0,0.75);
+  graphChargeVsEnergyAt2X0_Resolution->GetYaxis()->SetRangeUser(0,0.4);
 
   graphChargeVsEnergyAt2X0->Draw("PE1same");
   // graphChargeVsEnergyAt2X0->Fit("pol1","","");
   // fitter = TVirtualFitter::GetFitter();
 
-  c->SetLeftMargin(0.15);
+  c->SetLeftMargin(0.17);
   c->SetBottomMargin(0.12);
 
   tex = new TLatex();
