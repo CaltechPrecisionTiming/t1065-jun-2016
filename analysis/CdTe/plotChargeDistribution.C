@@ -84,10 +84,12 @@ void MakeAmplitudeVsBeamEnergyGraph() {
   const int nPoints_T9 = 4;
   float x_T9[nPoints_T9] = { 2, 3.5, 5, 7 };
   float xerr_T9[nPoints_T9] = { 0, 0, 0, 0 };
-  float y_charge_T9[nPoints_T9] = {  0.16, 0.26, 0.26, 0.40 }; 
-  float yerr_charge_T9[nPoints_T9] = { 0.008, 0.015, 0.03, 0.026 };
-  float yResolution_charge_T9[nPoints_T9] = { 0.08, 0.15, 0.17, 0.20 };
-
+  //float y_charge_T9[nPoints_T9] = {  0.16, 0.26, 0.26, 0.40 }; 
+  //float yerr_charge_T9[nPoints_T9] = { 0.008, 0.015, 0.03, 0.026 };
+  //float yResolution_charge_T9[nPoints_T9] = { 0.08, 0.15, 0.17, 0.20 };
+  float y_charge_T9[nPoints_T9] = {  0.076, 0.104, 0.161, 0.243 }; 
+  float yerr_charge_T9[nPoints_T9] = { 0.006, 0.003, 0.005, 0.008 };
+  float yResolution_charge_T9[nPoints_T9] = { 0.062, 0.070, 0.094, 0.118 };
 
   TGraphErrors *graphChargeVsEnergyAt2X0_Resolution = new TGraphErrors(nPoints_T9,x_T9,y_charge_T9,xerr_T9,yResolution_charge_T9);
   TGraphErrors *graphChargeVsEnergyAt2X0 = new TGraphErrors(nPoints_T9,x_T9,y_charge_T9,xerr_T9,yerr_charge_T9);
